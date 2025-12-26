@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SmartLearn AI - 学习行为与积分仪表盘</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2563eb", // Professional Blue (Royal Blue)
+                        "primary-dark": "#1e40af", // Darker Blue
+                        "primary-light": "#dbeafe", // Light Blue for backgrounds
+                        "background-light": "#f0f5fa", // Very light cool blue background
+                        "surface-light": "#ffffff",
+                        "text-main": "#1e3a8a", // Deep Blue for Headings
+                        "text-body": "#475569", // Slate 600 for body
+                        "accent-green": "#059669", // Emerald 600
+                        "border-blue": "#bfdbfe" // Blue 200
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "2xl": "1.5rem", "full": "9999px"},
+                    boxShadow: {
+                        "soft": "0 4px 6px -1px rgba(59, 130, 246, 0.05), 0 2px 4px -1px rgba(59, 130, 246, 0.03)"
+                    }
+                },
+            },
+        }
+    </script>
+<style>::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f0f5fa; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #93c5fd; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #60a5fa; 
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(219, 234, 254, 0.5);
+        }
+    </style>
+</head>
+<body class="relative flex h-full min-h-screen w-full flex-col bg-background-light font-display text-text-body overflow-x-hidden transition-colors duration-200">
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-solid border-blue-100 bg-surface-light/90 backdrop-blur px-6 py-3 lg:px-10 shadow-sm shadow-blue-100/50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="size-8 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M47.2426 24L24 47.2426L0.757355 24L24 0.757355L47.2426 24ZM12.2426 21H35.7574L24 9.24264L12.2426 21Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-text-main text-xl font-bold leading-tight tracking-tight">SmartLearn AI</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-primary font-bold text-sm leading-normal bg-blue-50 px-3 py-1.5 rounded-lg" href="#">仪表盘</a>
+<a class="text-slate-600 hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">课程资源</a>
+<a class="text-slate-600 hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">编程实验</a>
+<a class="text-slate-600 hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">讨论区</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4 md:gap-6">
+<div class="hidden sm:flex w-full max-w-xs items-center rounded-lg bg-blue-50/80 px-3 h-10 border border-transparent focus-within:border-blue-200 focus-within:bg-white transition-all">
+<span class="material-symbols-outlined text-primary/60">search</span>
+<input class="w-full bg-transparent border-none text-sm text-text-main placeholder-slate-400 focus:ring-0 ml-2" placeholder="搜索课程、知识点..."/>
+</div>
+<button class="flex items-center justify-center rounded-full size-10 bg-white border border-blue-100 hover:bg-blue-50 text-slate-600 hover:text-primary transition-colors relative shadow-sm">
+<span class="material-symbols-outlined" style="font-size: 20px;">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white"></span>
+</button>
+<div class="flex items-center gap-3 pl-2 border-l border-blue-100">
+<div class="text-right hidden sm:block">
+<p class="text-xs font-bold text-text-main">张明轩</p>
+<p class="text-[10px] text-slate-500">计算机科学与技术</p>
+</div>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 ring-2 ring-primary/20" data-alt="微笑的学生头像" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCd23L5_qn0W2KnAsLLjX3QGldjfDfapXKoQ5_8pTg5cSbFxz9-P57EQkDI9HDOfokPo4R8-7X1nXxwXtRlFohuvzDtl7FZ995jI7MMQN3K4nVL0ntLVYoMJI6RR1PcTJDxdpBHBjr_nZjG1s6_yM9UX3uPypwpTgZe6JXLbzPL7pKt4V7eFlytXewD98NFd0t8Zmvu9m6NXOO5ZQAwySkGM2NUZUtJEGPP6Q6rA7psn-uZKG-w3qgP_gWwKXm141WuER1_9YycL-g");'>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 px-4 py-8 md:px-10 lg:px-20 max-w-[1440px] mx-auto w-full">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+<div class="flex flex-col gap-2">
+<h1 class="text-text-main text-3xl md:text-4xl font-black tracking-tight">学习全景仪表盘</h1>
+<p class="text-slate-500 text-base max-w-2xl">
+                    欢迎回来，明轩。这是您的实时学习轨迹。您的随堂测验、编程实验与讨论互动数据已更新。
+                </p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 bg-white border border-blue-200 hover:bg-blue-50 text-text-main px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+<span class="material-symbols-outlined text-lg">download</span>
+                    导出报告
+                </button>
+<button class="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-primary/30 transition-all">
+<span class="material-symbols-outlined text-lg">smart_toy</span>
+                    AI 诊断
+                </button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<div class="group relative overflow-hidden rounded-xl bg-white p-6 shadow-soft border border-blue-100 transition-all hover:shadow-lg hover:border-primary/30">
+<div class="absolute right-0 top-0 h-24 w-24 translate-x-8 translate-y--8 rounded-full bg-blue-100/50 blur-2xl transition-all group-hover:bg-blue-200/50"></div>
+<div class="flex flex-col gap-1 z-10 relative">
+<div class="flex items-center gap-2 mb-2">
+<div class="p-1.5 rounded-md bg-blue-50 text-primary">
+<span class="material-symbols-outlined text-xl">trophy</span>
+</div>
+<p class="text-slate-500 text-sm font-medium uppercase tracking-wider">总积分</p>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-text-main text-3xl font-bold tracking-tight">1,250</p>
+<span class="text-sm font-medium text-slate-400">/ 1500</span>
+</div>
+<p class="text-accent-green text-sm font-medium mt-1 flex items-center">
+<span class="material-symbols-outlined text-sm mr-1">trending_up</span>
+                        本周 +15 分
+                    </p>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-white p-6 shadow-soft border border-blue-100 transition-all hover:shadow-lg hover:border-primary/30">
+<div class="absolute right-0 top-0 h-24 w-24 translate-x-8 translate-y--8 rounded-full bg-purple-100/50 blur-2xl transition-all group-hover:bg-purple-200/50"></div>
+<div class="flex flex-col gap-1 z-10 relative">
+<div class="flex items-center gap-2 mb-2">
+<div class="p-1.5 rounded-md bg-purple-50 text-purple-600">
+<span class="material-symbols-outlined text-xl">leaderboard</span>
+</div>
+<p class="text-slate-500 text-sm font-medium uppercase tracking-wider">班级排名</p>
+</div>
+<p class="text-text-main text-3xl font-bold tracking-tight">前 5%</p>
+<p class="text-accent-green text-sm font-medium mt-1 flex items-center">
+<span class="material-symbols-outlined text-sm mr-1">arrow_upward</span>
+                        上升 2 名
+                    </p>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-white p-6 shadow-soft border border-blue-100 transition-all hover:shadow-lg hover:border-primary/30">
+<div class="absolute right-0 top-0 h-24 w-24 translate-x-8 translate-y--8 rounded-full bg-sky-100/50 blur-2xl transition-all group-hover:bg-sky-200/50"></div>
+<div class="flex flex-col gap-1 z-10 relative">
+<div class="flex items-center gap-2 mb-2">
+<div class="p-1.5 rounded-md bg-sky-50 text-sky-500">
+<span class="material-symbols-outlined text-xl">timelapse</span>
+</div>
+<p class="text-slate-500 text-sm font-medium uppercase tracking-wider">课程进度</p>
+</div>
+<p class="text-text-main text-3xl font-bold tracking-tight">78%</p>
+<div class="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+<div class="bg-sky-500 h-1.5 rounded-full shadow-sm" style="width: 78%"></div>
+</div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-white p-6 shadow-soft border border-blue-100 transition-all hover:shadow-lg hover:border-primary/30">
+<div class="absolute right-0 top-0 h-24 w-24 translate-x-8 translate-y--8 rounded-full bg-orange-100/50 blur-2xl transition-all group-hover:bg-orange-200/50"></div>
+<div class="flex flex-col gap-1 z-10 relative">
+<div class="flex items-center gap-2 mb-2">
+<div class="p-1.5 rounded-md bg-orange-50 text-orange-500">
+<span class="material-symbols-outlined text-xl">psychology</span>
+</div>
+<p class="text-slate-500 text-sm font-medium uppercase tracking-wider">AI 互动指数</p>
+</div>
+<div class="flex items-baseline gap-2">
+<p class="text-text-main text-3xl font-bold tracking-tight">92</p>
+<span class="text-sm font-medium text-slate-400">/ 100</span>
+</div>
+<p class="text-accent-green text-sm font-medium mt-1 flex items-center">
+<span class="material-symbols-outlined text-sm mr-1">add</span>
+                        活跃度极高
+                    </p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+<div class="xl:col-span-2 flex flex-col gap-6">
+<div class="rounded-xl bg-white p-6 border border-blue-100 shadow-soft">
+<div class="flex justify-between items-center mb-6">
+<div>
+<h3 class="text-text-main text-lg font-bold">学习行为趋势</h3>
+<p class="text-slate-500 text-sm">近7天活跃度与积分获取情况</p>
+</div>
+<select class="bg-blue-50 text-text-main text-sm border-none rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-primary cursor-pointer hover:bg-blue-100 transition-colors">
+<option>最近 7 天</option>
+<option>最近 30 天</option>
+<option>本学期</option>
+</select>
+</div>
+<div class="w-full h-[250px] relative">
+<svg class="w-full h-full overflow-visible" viewBox="0 0 800 250">
+<line stroke="#cbd5e1" stroke-dasharray="4 4" stroke-opacity="0.5" stroke-width="1" x1="0" x2="800" y1="200" y2="200"></line>
+<line stroke="#cbd5e1" stroke-dasharray="4 4" stroke-opacity="0.5" stroke-width="1" x1="0" x2="800" y1="150" y2="150"></line>
+<line stroke="#cbd5e1" stroke-dasharray="4 4" stroke-opacity="0.5" stroke-width="1" x1="0" x2="800" y1="100" y2="100"></line>
+<line stroke="#cbd5e1" stroke-dasharray="4 4" stroke-opacity="0.5" stroke-width="1" x1="0" x2="800" y1="50" y2="50"></line>
+<defs>
+<linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#2563eb" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#2563eb" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+<path d="M0 200 L0 120 L133 140 L266 80 L400 110 L533 50 L666 90 L800 40 L800 200 Z" fill="url(#chartGradient)"></path>
+<path d="M0 120 L133 140 L266 80 L400 110 L533 50 L666 90 L800 40" fill="none" stroke="#2563eb" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+<circle cx="0" cy="120" fill="#2563eb" r="4"></circle>
+<circle cx="133" cy="140" fill="#2563eb" r="4"></circle>
+<circle cx="266" cy="80" fill="#2563eb" r="4"></circle>
+<circle cx="400" cy="110" fill="#2563eb" r="4"></circle>
+<circle cx="533" cy="50" fill="#ffffff" r="5" stroke="#2563eb" stroke-width="2"></circle>
+<circle cx="666" cy="90" fill="#2563eb" r="4"></circle>
+<circle cx="800" cy="40" fill="#fff" r="6" stroke="#2563eb" stroke-width="3"></circle>
+</svg>
+</div>
+<div class="flex justify-between mt-2 px-2 text-xs text-slate-400 font-medium">
+<span>周一</span>
+<span>周二</span>
+<span>周三</span>
+<span>周四</span>
+<span>周五</span>
+<span>周六</span>
+<span>周日</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="rounded-xl bg-white p-5 border border-blue-100 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<div class="p-2 rounded-lg bg-indigo-50 text-indigo-600">
+<span class="material-symbols-outlined">quiz</span>
+</div>
+<h4 class="font-bold text-text-main">随堂测验</h4>
+</div>
+<span class="text-xs font-bold bg-green-50 text-green-600 px-2 py-1 rounded border border-green-100">优秀</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative size-16 flex items-center justify-center">
+<svg class="size-full -rotate-90" viewBox="0 0 36 36">
+<path class="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+<path class="text-indigo-500" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="88, 100" stroke-width="3"></path>
+</svg>
+<span class="absolute text-sm font-bold text-text-main">88%</span>
+</div>
+<div class="flex flex-col">
+<p class="text-sm text-slate-500">平均正确率</p>
+<p class="text-sm font-medium text-text-main mt-1">已完成 15/18 个测验</p>
+</div>
+</div>
+</div>
+<div class="rounded-xl bg-white p-5 border border-blue-100 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<div class="p-2 rounded-lg bg-pink-50 text-pink-500">
+<span class="material-symbols-outlined">code</span>
+</div>
+<h4 class="font-bold text-text-main">编程实验</h4>
+</div>
+<span class="text-xs font-bold bg-pink-50 text-pink-500 px-2 py-1 rounded border border-pink-100">进行中</span>
+</div>
+<div>
+<div class="flex justify-between text-sm mb-2">
+<span class="text-slate-500">实验 5: 数据结构基础</span>
+<span class="font-bold text-text-main">12/15 通过</span>
+</div>
+<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+<div class="bg-pink-500 h-2 rounded-full shadow-sm" style="width: 80%"></div>
+</div>
+<p class="text-xs text-slate-400 mt-2">代码质量评分: A-</p>
+</div>
+</div>
+<div class="rounded-xl bg-white p-5 border border-blue-100 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<div class="p-2 rounded-lg bg-cyan-50 text-cyan-600">
+<span class="material-symbols-outlined">forum</span>
+</div>
+<h4 class="font-bold text-text-main">在线讨论</h4>
+</div>
+<span class="text-xs font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-100">+5 分</span>
+</div>
+<div class="flex gap-4 items-end h-16 pb-1 border-b border-blue-50">
+<div class="flex-1 bg-cyan-200 rounded-t h-[40%]"></div>
+<div class="flex-1 bg-cyan-400 rounded-t h-[70%]"></div>
+<div class="flex-1 bg-cyan-600 rounded-t h-[100%]"></div>
+<div class="flex-1 bg-cyan-300 rounded-t h-[50%]"></div>
+</div>
+<p class="text-sm text-slate-500">本周发帖 4 次，获赞 12 次</p>
+</div>
+<div class="rounded-xl bg-white p-5 border border-blue-100 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<div class="p-2 rounded-lg bg-orange-50 text-orange-500">
+<span class="material-symbols-outlined">group_work</span>
+</div>
+<h4 class="font-bold text-text-main">小组项目</h4>
+</div>
+</div>
+<div class="flex items-center -space-x-2 overflow-hidden py-1">
+<img alt="小组成员" class="inline-block h-8 w-8 rounded-full ring-2 ring-white" data-alt="小组成员 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBI9TltvbhSqxGEK1RDIAOtO74X-itxpElmffhF43VbZb5WNourosE9ClTm1HYQIUxCOhDbO61rYF2hsPkOXUiq17UcRc4VDIGFZysCR_OEuc74mVyKy3KPg65121Z9OGzGkIIGlALD5VdJWRixkpNXRJxyHgCqT-o6sMA5slopOQkOcDBYN8reMS9NEfUBP1a-PJSN3gwelPoc_fYQDw2Ecbxb7ztXNHyantNBfiW2XfVjCIbctfTmJbO8XNKpnoQOgIUg3N83Z4"/>
+<img alt="小组成员" class="inline-block h-8 w-8 rounded-full ring-2 ring-white" data-alt="小组成员 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_hUHywCnmvr54MWSmBMOB8L5sAfKN8tLC9pgFglaNC9C3i6mpK4XEdg3cbdQY3ZYFMo_cxkdcU2Q3TT6hvD72Af4i0C4SFa869O8baAX2uJuwRW9LIlgQOhlYrj74ucz5Sjv5gahCRGDfGzCRHwGZSUa8nm1OJowADUGuS1pYPADVjimEnVirz9Nf4p5n0nwiGQbXBNHM2aw1mqFrhOJVlOjf_jGwqOv7jfRfUiEGdZ8FscxoBsjG1b61YswsE6YmVQTLx51stac"/>
+<img alt="小组成员" class="inline-block h-8 w-8 rounded-full ring-2 ring-white" data-alt="小组成员 3" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGxzFv4krHpqkuqXPbHzSupP2ckz865wa09dnRyw8vsn0fGNqmbpExJi4NBY4ZSIVkPPHY636gd74D4VDy3diKAE6hzheuJ30cTUs4uRxVuDYwTWQGgJDpOCNA-y5blv0h24mdROxUFmEOiqy-Pt-e--rVmZusn5dOhm415dBMlupec1eTPk74eYsGsree0p9tUpOvnsfxH8e9v5h1c5Lo6CZK1UnYsbZOm_EV_wbKMbdFUimSXTnVlWs6dbfb0xUfZfURRsqfxvw"/>
+<div class="flex h-8 w-8 items-center justify-center rounded-full ring-2 ring-white bg-blue-100 text-xs font-bold text-blue-600">+2</div>
+</div>
+<p class="text-sm text-slate-500">项目："AI 聊天机器人开发" <br/> <span class="text-orange-500 font-medium">截止日期: 3天后</span></p>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-6">
+<div class="rounded-xl bg-white p-6 border border-blue-100 shadow-soft flex flex-col items-center">
+<h3 class="text-text-main text-lg font-bold self-start mb-4">五维能力雷达</h3>
+<div class="relative size-64">
+<svg class="w-full h-full" viewBox="0 0 200 200">
+<g fill="none" stroke="#cbd5e1" stroke-opacity="0.5" stroke-width="1">
+<polygon points="100,20 180,80 150,180 50,180 20,80"></polygon>
+<polygon points="100,60 140,90 125,140 75,140 60,90"></polygon>
+<polygon points="100,100 100,100 100,100 100,100 100,100"></polygon>
+</g>
+<g stroke="#cbd5e1" stroke-opacity="0.5" stroke-width="1">
+<line x1="100" x2="100" y1="100" y2="20"></line>
+<line x1="100" x2="180" y1="100" y2="80"></line>
+<line x1="100" x2="150" y1="100" y2="180"></line>
+<line x1="100" x2="50" y1="100" y2="180"></line>
+<line x1="100" x2="20" y1="100" y2="80"></line>
+</g>
+<polygon fill="rgba(37, 99, 235, 0.2)" points="100,30 165,85 130,160 70,140 40,90" stroke="#2563eb" stroke-width="2"></polygon>
+<text class="text-slate-600 font-bold" fill="currentColor" font-size="10" text-anchor="middle" x="100" y="15">知识</text>
+<text class="text-slate-600 font-bold" fill="currentColor" font-size="10" text-anchor="middle" x="190" y="80">创新</text>
+<text class="text-slate-600 font-bold" fill="currentColor" font-size="10" text-anchor="middle" x="155" y="195">协作</text>
+<text class="text-slate-600 font-bold" fill="currentColor" font-size="10" text-anchor="middle" x="45" y="195">实践</text>
+<text class="text-slate-600 font-bold" fill="currentColor" font-size="10" text-anchor="middle" x="10" y="80">沟通</text>
+</svg>
+</div>
+<p class="text-center text-sm text-slate-500 mt-2">您的 <span class="text-primary font-bold">创新能力</span> 表现突出，超过 90% 的同学。</p>
+</div>
+<div class="relative rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 p-[1px] shadow-lg shadow-blue-200">
+<div class="relative rounded-xl bg-white p-5 h-full flex flex-col gap-3">
+<div class="flex items-center gap-2 mb-1">
+<div class="p-1 rounded bg-blue-50">
+<span class="material-symbols-outlined text-blue-600 animate-pulse">auto_awesome</span>
+</div>
+<h3 class="text-text-main text-base font-bold">AI 学习诊断与建议</h3>
+</div>
+<p class="text-slate-600 text-sm leading-relaxed">
+                            明轩，你的编程实践能力很强（前 5%），但在"在线讨论"板块的参与度略低。
+                        </p>
+<div class="bg-indigo-50 rounded-lg p-3 border border-indigo-100">
+<p class="text-indigo-800 text-xs font-medium">💡 建议：尝试在"算法复杂度"话题下回复 2 条同学的提问，这有助于提升你的"沟通"与"协作"维度积分。</p>
+</div>
+<button class="w-full mt-1 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-primary text-xs font-bold transition-colors">
+                            查看详细分析
+                        </button>
+</div>
+</div>
+<div class="rounded-xl bg-white p-6 border border-blue-100 shadow-soft flex-1">
+<h3 class="text-text-main text-lg font-bold mb-4">最近动态</h3>
+<div class="flex flex-col gap-4">
+<div class="flex gap-3">
+<div class="flex flex-col items-center gap-1">
+<div class="size-2 rounded-full bg-green-500 mt-2"></div>
+<div class="w-px h-full bg-slate-100"></div>
+</div>
+<div class="pb-2">
+<p class="text-sm font-medium text-text-main">随堂测验：第3章满分</p>
+<p class="text-xs text-slate-400">2 小时前</p>
+<span class="inline-block mt-1 text-xs font-bold text-green-600">+20 积分</span>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="flex flex-col items-center gap-1">
+<div class="size-2 rounded-full bg-primary mt-2"></div>
+<div class="w-px h-full bg-slate-100"></div>
+</div>
+<div class="pb-2">
+<p class="text-sm font-medium text-text-main">提交编程实验 5</p>
+<p class="text-xs text-slate-400">昨天 14:30</p>
+<span class="inline-block mt-1 text-xs font-bold text-primary">+50 积分</span>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="flex flex-col items-center gap-1">
+<div class="size-2 rounded-full bg-slate-400 mt-2"></div>
+</div>
+<div>
+<p class="text-sm font-medium text-text-main">论坛回复被标记为"最佳答案"</p>
+<p class="text-xs text-slate-400">2 天前</p>
+<span class="inline-block mt-1 text-xs font-bold text-purple-600">+15 积分</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

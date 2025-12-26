@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>智教 AI - 数据挖掘课程</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2563eb", // Professional bright blue
+                        "primary-dark": "#1d4ed8",
+                        "page-bg": "#f0f6ff", // Very light blue background
+                        "surface-light": "#ffffff",
+                        "surface-hover": "#f8fafc",
+                        "text-main": "#1e293b", // Slate 800
+                        "text-secondary": "#64748b", // Slate 500
+                        "border-light": "#e2e8f0", // Slate 200
+                        "accent-blue": "#eff6ff" // Blue 50
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-page-bg text-text-main font-display overflow-x-hidden min-h-screen flex flex-col">
+<header class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-blue-100 bg-white/90 backdrop-blur-md px-4 sm:px-10 py-3 shadow-sm">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8 flex items-center justify-center rounded-lg bg-primary text-white">
+<span class="material-symbols-outlined text-2xl">school</span>
+</div>
+<h2 class="text-text-main text-lg font-bold leading-tight tracking-[-0.015em]">智教 AI</h2>
+</div>
+<div class="hidden md:flex items-center gap-9">
+<a class="text-text-main text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">我的课程</a>
+<a class="text-text-secondary text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">资源库</a>
+<a class="text-text-secondary text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">社区</a>
+</div>
+</div>
+<div class="flex flex-1 justify-end gap-4 sm:gap-8">
+<label class="hidden md:flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full border border-border-light bg-slate-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+<div class="text-text-secondary flex border-none items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-main focus:outline-0 focus:ring-0 border-none bg-transparent focus:border-none h-full placeholder:text-text-secondary px-4 rounded-l-none border-l-0 pl-2 text-sm font-normal leading-normal" placeholder="搜索资源..." value=""/>
+</div>
+</label>
+<div class="flex gap-2">
+<button class="flex items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-slate-100 hover:bg-blue-50 text-text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="flex items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-slate-100 hover:bg-blue-50 text-text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-xs font-bold text-text-main">陈艾力</p>
+<p class="text-xs text-primary">4级学者</p>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-white shadow-sm" data-alt="User profile avatar showing a smiling student" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAkkX1Ny82Y5W-IYwZdCceWwL5GIT0nueeEpJN9Khk6AKfYBQ2eZ6D_uaSz71BLhPsZVlayT9_Mbyqq6BQC_wqKUc68zD8SIPIriF_3hcU_MI_1L3nCn5O7ooL9gsFPoqTXqJlrOG7p1slI1ztcMWRg5xyqtEqnxKJdHAoZ9Na4rhGybkOhsLFLxq7jet_EI2dBfdLo2pofpqM5dmYtu60TYhbKOtXII8jFjHxUw8pzEK1bkzJY4kPWocKdKFxNB781-gxe8efa0dY");'></div>
+</div>
+</div>
+</header>
+<main class="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
+<div class="flex flex-wrap gap-2 items-center text-sm">
+<a class="text-text-secondary hover:text-primary transition-colors" href="#">首页</a>
+<span class="text-text-secondary material-symbols-outlined text-sm">chevron_right</span>
+<a class="text-text-secondary hover:text-primary transition-colors" href="#">我的课程</a>
+<span class="text-text-secondary material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-text-main font-medium">数据挖掘导论</span>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-gradient-to-br from-blue-700 to-blue-600 rounded-xl p-6 lg:p-8 relative overflow-hidden group shadow-lg shadow-blue-900/10">
+<div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-white/10 to-transparent pointer-events-none"></div>
+<div class="absolute -bottom-24 -right-24 w-64 h-64 bg-blue-500/30 rounded-full blur-3xl pointer-events-none"></div>
+<div class="lg:col-span-8 flex flex-col justify-between gap-6 z-10">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2 mb-1">
+<span class="px-2 py-1 rounded bg-white/20 text-white text-xs font-bold uppercase tracking-wider backdrop-blur-sm">CS-401</span>
+<span class="px-2 py-1 rounded bg-green-400/20 text-green-300 text-xs font-bold uppercase tracking-wider backdrop-blur-sm">2024 秋季</span>
+</div>
+<h1 class="text-white text-3xl sm:text-4xl font-black leading-tight tracking-tight">数据挖掘导论</h1>
+<p class="text-blue-100 text-base sm:text-lg">掌握从数据中提炼知识的艺术。<br class="hidden sm:block"/>讲师：<span class="text-white font-medium">张教授</span></p>
+</div>
+<div class="flex flex-col gap-2 max-w-xl">
+<div class="flex justify-between items-end">
+<p class="text-white text-sm font-medium">课程进度</p>
+<p class="text-white text-sm font-bold">已完成 35%</p>
+</div>
+<div class="h-2.5 w-full bg-black/20 rounded-full overflow-hidden backdrop-blur-sm">
+<div class="h-full bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)]" style="width: 35%"></div>
+</div>
+<p class="text-blue-100 text-xs mt-1">下一节：<span class="text-white font-medium">决策树与熵</span></p>
+</div>
+</div>
+<div class="lg:col-span-4 flex flex-col justify-end items-start lg:items-end gap-4 z-10">
+<button class="w-full sm:w-auto flex items-center justify-center gap-3 rounded-xl h-14 px-8 bg-white hover:bg-blue-50 text-primary text-lg font-bold shadow-lg transition-all transform hover:scale-[1.02]">
+<span class="material-symbols-outlined text-[28px]">play_circle</span>
+<span>继续学习</span>
+</button>
+<div class="flex gap-3 w-full sm:w-auto">
+<button class="flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-blue-800/40 border border-white/20 hover:bg-blue-800/60 text-white text-sm font-medium transition-colors backdrop-blur-md">
+<span class="material-symbols-outlined text-[20px]">download</span>
+                        课程大纲
+                    </button>
+<button class="flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-blue-800/40 border border-white/20 hover:bg-blue-800/60 text-white text-sm font-medium transition-colors backdrop-blur-md">
+<span class="material-symbols-outlined text-[20px]">share</span>
+                        分享
+                    </button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<div class="lg:col-span-8 flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h3 class="text-text-main text-xl font-bold">课程模块</h3>
+<div class="flex gap-2">
+<button class="p-2 rounded-lg bg-white border border-border-light text-text-secondary hover:text-primary transition-colors shadow-sm">
+<span class="material-symbols-outlined">grid_view</span>
+</button>
+<button class="p-2 rounded-lg bg-primary text-white shadow-md shadow-blue-500/20">
+<span class="material-symbols-outlined">list</span>
+</button>
+</div>
+</div>
+<div class="bg-surface-light rounded-xl p-0 overflow-hidden border border-border-light hover:border-blue-300 transition-colors shadow-sm hover:shadow-md">
+<div class="flex flex-col md:flex-row">
+<div class="w-full md:w-48 h-32 md:h-auto bg-slate-50 relative shrink-0 border-r border-border-light">
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-green-500 text-5xl">check_circle</span>
+</div>
+<div class="absolute bottom-2 right-2 px-2 py-0.5 bg-white/80 backdrop-blur rounded text-xs font-mono text-slate-600 shadow-sm">第 1-2 周</div>
+</div>
+<div class="p-5 flex flex-col justify-center flex-1 gap-2">
+<div class="flex justify-between items-start">
+<h4 class="text-text-main font-bold text-lg">模块一：数据预处理</h4>
+<span class="text-green-600 text-xs font-bold uppercase border border-green-200 bg-green-50 px-2 py-1 rounded">已完成</span>
+</div>
+<p class="text-text-secondary text-sm line-clamp-2">理解数据类型、数据质量、数据清洗（处理缺失值、噪声数据）以及数据集成。</p>
+<div class="flex items-center gap-4 mt-2">
+<div class="flex items-center gap-1.5 text-xs text-text-secondary">
+<span class="material-symbols-outlined text-sm">movie</span>
+                                    5 个视频
+                                </div>
+<div class="flex items-center gap-1.5 text-xs text-text-secondary">
+<span class="material-symbols-outlined text-sm">quiz</span>
+                                    1 次测验
+                                </div>
+<div class="flex items-center gap-1.5 text-xs text-text-secondary">
+<span class="material-symbols-outlined text-sm">folder_open</span>
+                                    学习资料
+                                </div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-light rounded-xl p-0 overflow-hidden border-2 border-primary shadow-lg shadow-blue-500/10">
+<div class="flex flex-col md:flex-row">
+<div class="w-full md:w-48 h-32 md:h-auto bg-slate-100 relative shrink-0" data-alt="Abstract visualization of classification algorithms" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBGtREGRX_HMDwtnWGP3NEbqt3p2h-W72t33LQgLq36iDJuepqaz70gq4yJmYW04k0p-PMlJCbahJIDlqJi8GaJ3yLuApnsFZ4V0_dqjLDwXEw9I3mqBbhK0PzQZXtiKY86trrn9ImeDqWcOdlAACdUrUqRgIVSLdRavcVd59ZR40RFCZg1nsOv-9LoBCWFZ3HwLmFiDt23gnKc3QqrohNL01f0CYdZT_c0zGWZE0K51je2YV4iaV0v-HTugtb35eA_HyDnU1kBG0M'); background-size: cover; background-position: center;">
+<div class="absolute inset-0 bg-primary/20 flex items-center justify-center">
+<button class="h-12 w-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-transform shadow-lg">
+<span class="material-symbols-outlined text-primary text-3xl">play_arrow</span>
+</button>
+</div>
+<div class="absolute bottom-2 right-2 px-2 py-0.5 bg-black/60 rounded text-xs font-mono text-white">第 3-4 周</div>
+</div>
+<div class="p-5 flex flex-col justify-center flex-1 gap-2">
+<div class="flex justify-between items-start">
+<h4 class="text-text-main font-bold text-lg">模块二：分类算法</h4>
+<span class="text-primary text-xs font-bold uppercase border border-primary/20 bg-blue-50 px-2 py-1 rounded">进行中</span>
+</div>
+<p class="text-text-secondary text-sm line-clamp-2">决策树归纳、贝叶斯分类方法、基于规则的分类。</p>
+<div class="w-full bg-slate-100 rounded-full h-1.5 mt-2">
+<div class="bg-primary h-1.5 rounded-full" style="width: 45%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white/60 rounded-xl p-0 overflow-hidden border border-border-light opacity-80">
+<div class="flex flex-col md:flex-row">
+<div class="w-full md:w-48 h-32 md:h-auto bg-slate-50 relative shrink-0 flex items-center justify-center border-r border-border-light">
+<span class="material-symbols-outlined text-slate-300 text-4xl">lock</span>
+</div>
+<div class="p-5 flex flex-col justify-center flex-1 gap-2">
+<div class="flex justify-between items-start">
+<h4 class="text-slate-400 font-bold text-lg">模块三：关联分析</h4>
+<span class="text-slate-400 text-xs font-bold uppercase border border-slate-200 bg-slate-50 px-2 py-1 rounded">未解锁</span>
+</div>
+<p class="text-slate-400 text-sm line-clamp-2">频繁项集挖掘方法、Apriori 算法、生成关联规则。</p>
+<p class="text-xs text-slate-400 mt-1">完成模块二后解锁</p>
+</div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-4 flex flex-col gap-6">
+<div class="bg-gradient-to-b from-blue-400 to-indigo-500 rounded-2xl p-[1px] shadow-lg shadow-blue-500/15">
+<div class="bg-white rounded-[15px] p-5 h-full flex flex-col gap-4">
+<div class="flex items-center justify-between border-b border-slate-100 pb-3">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-gradient-to-br from-indigo-500 to-primary flex items-center justify-center animate-pulse shadow-md">
+<span class="material-symbols-outlined text-white text-sm">smart_toy</span>
+</div>
+<div>
+<h4 class="text-text-main font-bold text-sm">AI 助教</h4>
+<p class="text-xs text-text-secondary">在线 • 随时提供帮助</p>
+</div>
+</div>
+</div>
+<div class="bg-slate-50 rounded-lg p-3 min-h-[100px] flex items-center justify-center text-center border border-slate-100">
+<p class="text-text-secondary text-sm italic">“被熵的计算难住了？我可以为你生成一道练习题。”</p>
+</div>
+<div class="flex gap-2">
+<input class="flex-1 bg-white border border-border-light rounded-lg text-sm text-text-main px-3 focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-slate-400" placeholder="输入问题..." type="text"/>
+<button class="bg-primary hover:bg-blue-600 text-white rounded-lg p-2 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-lg">send</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-surface-light rounded-xl p-5 border border-border-light shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<h4 class="text-text-main font-bold">积分评价</h4>
+<button class="text-primary text-xs font-bold hover:underline">查看详情</button>
+</div>
+<div class="flex items-center gap-4 mb-6">
+<div class="relative size-16">
+<svg class="size-full -rotate-90" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+<path class="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="4"></path>
+<path class="text-yellow-500" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="85, 100" stroke-linecap="round" stroke-width="4"></path>
+</svg>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+<span class="text-text-main text-xs font-bold block">850</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="text-text-secondary text-xs">总积分</span>
+<span class="text-text-main font-bold text-lg">前 10%</span>
+<span class="text-green-600 text-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">trending_up</span> 本周 +50
+                            </span>
+</div>
+</div>
+<div class="space-y-3">
+<div>
+<div class="flex justify-between text-xs mb-1">
+<span class="text-text-secondary">视频互动</span>
+<span class="text-text-main font-medium">高</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 rounded-full">
+<div class="bg-blue-500 h-1.5 rounded-full" style="width: 80%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-1">
+<span class="text-text-secondary">测验正确率</span>
+<span class="text-text-main font-medium">92%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 rounded-full">
+<div class="bg-purple-500 h-1.5 rounded-full" style="width: 92%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<a class="bg-surface-light p-4 rounded-xl border border-border-light hover:bg-blue-50 hover:border-blue-200 transition-all group shadow-sm" href="#">
+<div class="bg-orange-100 w-10 h-10 rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-orange-500">library_books</span>
+</div>
+<p class="text-text-main font-bold text-sm">案例资源库</p>
+<p class="text-text-secondary text-xs">案例研究与数据集</p>
+</a>
+<a class="bg-surface-light p-4 rounded-xl border border-border-light hover:bg-blue-50 hover:border-blue-200 transition-all group shadow-sm" href="#">
+<div class="bg-cyan-100 w-10 h-10 rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-cyan-600">analytics</span>
+</div>
+<p class="text-text-main font-bold text-sm">行为数据</p>
+<p class="text-text-secondary text-xs">行为模式分析</p>
+</a>
+</div>
+<div class="bg-surface-light rounded-xl border border-border-light p-5 shadow-sm">
+<h4 class="text-text-main font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-500">campaign</span>
+                        公告通知
+                    </h4>
+<div class="space-y-4">
+<div class="border-l-2 border-primary pl-3">
+<p class="text-text-main text-sm font-medium">作业 1 截止</p>
+<p class="text-text-secondary text-xs mt-1">明天, 23:59</p>
+</div>
+<div class="border-l-2 border-slate-300 pl-3">
+<p class="text-text-main text-sm font-medium">新增案例研究</p>
+<p class="text-text-secondary text-xs mt-1">零售购物篮分析</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+</body></html>

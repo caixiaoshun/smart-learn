@@ -69,7 +69,7 @@
 <p class="text-slate-500 text-sm font-medium uppercase tracking-wider">总积分</p>
 </div>
 <div class="flex items-baseline gap-2">
-<p class="text-text-main text-3xl font-bold tracking-tight">1,250</p>
+<p class="text-text-main text-3xl font-bold tracking-tight">{{ points }}</p>
 <span class="text-sm font-medium text-slate-400">/ 1500</span>
 </div>
 <p class="text-accent-green text-sm font-medium mt-1 flex items-center">
@@ -87,10 +87,10 @@
 </div>
 <p class="text-slate-500 text-sm font-medium uppercase tracking-wider">班级排名</p>
 </div>
-<p class="text-text-main text-3xl font-bold tracking-tight">前 5%</p>
+<p class="text-text-main text-3xl font-bold tracking-tight">{{ rank }} <span class="text-sm text-slate-400 font-normal">/ {{ total_students }}</span></p>
 <p class="text-accent-green text-sm font-medium mt-1 flex items-center">
-<span class="material-symbols-outlined text-sm mr-1">arrow_upward</span>
-                        上升 2 名
+<span class="material-symbols-outlined text-sm mr-1">leaderboard</span>
+                        实时更新
                     </p>
 </div>
 </div>

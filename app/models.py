@@ -35,3 +35,31 @@ class Resource(db.Model):
     title = db.Column(db.String(140))
     type = db.Column(db.String(50)) # 'video', 'pdf', etc.
     url = db.Column(db.String(200))
+    description = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+class Assignment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(140))
+    description = db.Column(db.String(500))
+    deadline = db.Column(db.DateTime)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+class Submission(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    assignment_id = db.Column(db.Integer, db.ForeignKey('assignment.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    score = db.Column(db.Float)
+    feedback = db.Column(db.String(500))
+    submitted_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+class ForumPost(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(140))
+    content = db.Column(db.Text)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    likes = db.Column(db.Integer, default=0)
+
+    author = db.relationship('User', backref='posts')

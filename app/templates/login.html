@@ -57,6 +57,7 @@
 <p class="text-slate-500 text-sm font-normal">请输入您的账号信息以登录混合式教学平台</p>
 </div>
 <form class="flex flex-col gap-5" method="POST" action="{{ url_for('auth.login') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 <div class="flex flex-col gap-2">
 <label class="text-slate-700 text-base font-medium leading-normal">用户名</label>
 <div class="flex w-full flex-1 items-stretch rounded-lg group focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all shadow-sm">

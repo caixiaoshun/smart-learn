@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% block title %}混合式教学平台{% endblock %}</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+            extend: {
+                colors: {
+                "primary": "#2563eb",
+                "primary-dark": "#1d4ed8",
+                "background-light": "#f8fafc",
+                "background-card": "#ffffff",
+                "text-main": "#0f172a",
+                "text-secondary": "#64748b",
+                "border-color": "#e2e8f0",
+                "input-bg": "#f1f5f9",
+                },
+                fontFamily: {
+                "display": ["Inter", "Noto Sans", "sans-serif"],
+                "body": ["Inter", "Noto Sans", "sans-serif"]
+                },
+                borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+            },
+        }
+    </script>
+    <style>.custom-checkbox:checked {
+        background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDYnjutHZwKpJNnMcl7QJRia8JElIn1fV0uRZ1a22re_URtSkmGwPOHtsF62ZdICoGSaZ5Yyt16aedS_wsOygf_cNKkZFC7VgQvCyJZ55TRW6UtN5SLfjuWYVQCzFX1COOBvKAQeHD2P8pJUZs86bvDwMSULO0e_DlJ37u54qEWTi0kCARh8X3nGDJXgG5-vn_nXwLQKbdb3KdwNZQo2QGP_UafuundvMBnecYukKkv8IyiBJZGoqVJZLAjR9lmqZ3S98C9iNv2zz0)
+        }
+    </style>
+</head>
+<body class="bg-background-light font-display text-text-main antialiased min-h-screen flex flex-col overflow-x-hidden selection:bg-primary/20 selection:text-primary">
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="fixed top-4 right-4 z-50 flex flex-col gap-2">
+            {% for message in messages %}
+                <div class="bg-white border-l-4 border-primary p-4 shadow-md rounded-r">
+                    <p class="text-sm text-slate-700">{{ message }}</p>
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}
+    {% endblock %}
+
+</body>
+</html>

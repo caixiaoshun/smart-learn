@@ -24,13 +24,13 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_login_page_loads(self):
-        response = self.client.get('/login')
+        response = self.client.get('/auth/login')
         self.assertEqual(response.status_code, 200)
         # Check for Chinese title "用户登录" encoded in utf-8
         self.assertIn('用户登录'.encode('utf-8'), response.data)
 
     def test_register_page_loads(self):
-        response = self.client.get('/register')
+        response = self.client.get('/auth/register')
         self.assertEqual(response.status_code, 200)
         # Check for Chinese title "用户注册"
         self.assertIn('用户注册'.encode('utf-8'), response.data)

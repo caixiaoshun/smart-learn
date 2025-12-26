@@ -14,18 +14,37 @@ def seed_data():
         print("Seeding Users...")
         # Admin/Teacher
         teacher = User(username="teacher_li", email="li@edu.com", role="teacher")
-        teacher.set_password("password")
+        teacher.set_password("123456")
         db.session.add(teacher)
 
-        # Students
-        students = []
-        for i in range(1, 11):
+        # Specific Students for Demo Scenarios
+        # 1. High Risk Student (Points < 300)
+        s1 = User(username="张伟", email="zhangwei@edu.com", role="student")
+        s1.set_password("123456")
+        db.session.add(s1)
+
+        # 2. Medium Risk Student (300 <= Points < 600)
+        s2 = User(username="李娜", email="lina@edu.com", role="student")
+        s2.set_password("123456")
+        db.session.add(s2)
+
+        # 3. Low Risk / High Performance Student (Points >= 600)
+        s3 = User(username="王强", email="wangqiang@edu.com", role="student")
+        s3.set_password("123456")
+        db.session.add(s3)
+
+        # General Students
+        general_students = []
+        for i in range(1, 6):
             s = User(username=f"student_{i}", email=f"student{i}@edu.com", role="student")
-            s.set_password("password")
-            students.append(s)
+            s.set_password("123456")
+            general_students.append(s)
             db.session.add(s)
 
         db.session.commit()
+
+        # Group all students for easier iteration
+        all_students = [s1, s2, s3] + general_students
 
         print("Seeding Courses & Resources...")
         course = Course(title="数据挖掘导论", description="深入理解数据挖掘算法与应用", image_url="")
@@ -51,8 +70,21 @@ def seed_data():
         db.session.commit()
 
         print("Seeding Student Data...")
-        for s in students:
-            # Behaviors
+
+        # 1. Zhang Wei (High Risk)
+        b1 = StudentBehavior(user_id=s1.id, study_time=200, points=250, interaction_count=5)
+        db.session.add(b1)
+
+        # 2. Li Na (Medium Risk)
+        b2 = StudentBehavior(user_id=s2.id, study_time=600, points=550, interaction_count=15)
+        db.session.add(b2)
+
+        # 3. Wang Qiang (High Performance)
+        b3 = StudentBehavior(user_id=s3.id, study_time=1500, points=1200, interaction_count=40)
+        db.session.add(b3)
+
+        # Random data for others
+        for s in general_students:
             behavior = StudentBehavior(
                 user_id=s.id,
                 study_time=random.randint(10, 1200),
@@ -61,7 +93,6 @@ def seed_data():
             )
             db.session.add(behavior)
 
-            # Forum Posts
             if random.random() > 0.7:
                 post = ForumPost(
                     title=f"关于作业 {random.randint(1,2)} 的问题",
@@ -72,7 +103,7 @@ def seed_data():
                 db.session.add(post)
 
         db.session.commit()
-        print("Database seeded successfully!")
+        print("Database seeded successfully with Demo Accounts!")
 
 if __name__ == "__main__":
     seed_data()

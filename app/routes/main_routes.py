@@ -18,27 +18,116 @@ def course_home():
 @bp.route('/resources')
 @login_required
 def resources():
-    return render_template('resources.html')
+    query = request.args.get('q')
+    if query:
+        resources = Resource.query.filter(Resource.title.contains(query)).all()
+    else:
+        resources = Resource.query.all()
+    return render_template('resources.html', resources=resources)
 
-@bp.route('/settings')
+@bp.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
+    if request.method == 'POST':
+        # Update user profile
+        current_user.email = request.form.get('email')
+        # Handle password change if provided (simplified)
+        new_password = request.form.get('new_password')
+        if new_password:
+            current_user.set_password(new_password)
+
+        db.session.commit()
+        # Flash message could be added here
+        return redirect(url_for('main.settings'))
+
     return render_template('settings.html')
+
+from app.models import StudentBehavior, User, Resource, Assignment
 
 @bp.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('dashboard.html')
+    behavior = StudentBehavior.query.filter_by(user_id=current_user.id).first()
 
-@bp.route('/teacher/assignments')
-@login_required
-def teacher_assignments():
-    return render_template('teacher_assignments.html')
+    # Defaults if no data exists
+    points = behavior.points if behavior else 0
+    study_time = behavior.study_time if behavior else 0
+
+    # Calculate rank (mock logic: count users with more points)
+    rank = StudentBehavior.query.filter(StudentBehavior.points > points).count() + 1
+    total_students = User.query.filter_by(role='student').count()
+
+    return render_template('dashboard.html',
+                           points=points,
+                           rank=rank,
+                           total_students=total_students,
+                           study_time=study_time)
 
 @bp.route('/teacher/behavior')
 @login_required
 def teacher_behavior():
-    return render_template('teacher_behavior.html')
+    students = User.query.filter_by(role='student').all()
+    # Mock aggregation for risk assessment
+    student_data = []
+    for s in students:
+        behavior = s.behaviors[0] if s.behaviors else None
+        risk = "Low"
+        if behavior and behavior.points < 300:
+            risk = "High"
+        elif behavior and behavior.points < 600:
+            risk = "Medium"
+
+        student_data.append({
+            'user': s,
+            'behavior': behavior,
+            'risk': risk
+        })
+
+    return render_template('teacher_behavior.html', students=student_data)
+
+@bp.route('/teacher/assignments', methods=['GET', 'POST'])
+@login_required
+def teacher_assignments():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        # In a real app, handle layer/group selection
+        assignment = Assignment(title=title, created_by=current_user.id)
+        db.session.add(assignment)
+        db.session.commit()
+        return redirect(url_for('main.teacher_assignments'))
+
+    # Retrieve real student data for the assignment list
+    # Reusing the risk logic from teacher_behavior
+    students = User.query.filter_by(role='student').all()
+    student_data = []
+    for s in students:
+        behavior = s.behaviors[0] if s.behaviors else None
+        risk = "Low"
+        risk_label = "高"
+        risk_color = "emerald"
+        if behavior and behavior.points < 300:
+            risk = "High"
+            risk_label = "低"
+            risk_color = "red"
+        elif behavior and behavior.points < 600:
+            risk = "Medium"
+            risk_label = "中"
+            risk_color = "orange"
+
+        student_data.append({
+            'user': s,
+            'behavior': behavior,
+            'risk': risk,
+            'risk_label': risk_label,
+            'risk_color': risk_color,
+            'points': behavior.points if behavior else 0,
+            'study_time': behavior.study_time if behavior else 0,
+            # Mock AI recommendation based on risk
+            'recommendation': '基础巩固作业' if risk == 'High' else ('知识点回看' if risk == 'Medium' else '竞赛级挑战'),
+            'rec_icon': 'school' if risk == 'High' else ('videocam' if risk == 'Medium' else 'military_tech')
+        })
+
+    return render_template('teacher_assignments.html', students=student_data)
 
 @bp.route('/ai-assistant')
 @login_required

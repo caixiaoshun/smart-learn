@@ -11,14 +11,14 @@
 </div>
 <h2 class="text-text-main text-lg font-bold leading-tight tracking-[-0.015em]">数据挖掘导论</h2>
 </div>
-<label class="hidden md:flex flex-col min-w-40 !h-10 max-w-64">
+<form action="{{ url_for('main.resources') }}" method="GET" class="hidden md:flex flex-col min-w-40 !h-10 max-w-64">
 <div class="flex w-full flex-1 items-stretch rounded-lg h-full border border-border-color bg-surface-hover focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
 <div class="text-text-secondary flex items-center justify-center pl-4 rounded-l-lg border-r-0">
 <span class="material-symbols-outlined text-[20px]">search</span>
 </div>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg bg-transparent border-none focus:outline-0 focus:ring-0 focus:border-none h-full placeholder:text-text-secondary px-4 rounded-l-none border-l-0 pl-2 text-sm font-normal leading-normal text-text-main" placeholder="全站搜索..." value=""/>
+<input name="q" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg bg-transparent border-none focus:outline-0 focus:ring-0 focus:border-none h-full placeholder:text-text-secondary px-4 rounded-l-none border-l-0 pl-2 text-sm font-normal leading-normal text-text-main" placeholder="全站搜索..." value="{{ request.args.get('q', '') }}"/>
 </div>
-</label>
+</form>
 </div>
 <div class="flex flex-1 justify-end gap-8">
 <div class="hidden lg:flex items-center gap-9">
@@ -160,15 +160,15 @@
 <h2 class="text-text-main text-xl font-bold">资源检索</h2>
 <p class="text-text-secondary text-sm mt-1">支持关键词、标签及类型组合筛选</p>
 </div>
-<div class="flex w-full lg:w-2/5 gap-2">
+<form action="{{ url_for('main.resources') }}" method="GET" class="flex w-full lg:w-2/5 gap-2">
 <div class="flex flex-1 items-center bg-gray-50 rounded-lg px-3 py-2.5 border border-border-color focus-within:border-primary focus-within:ring-1 focus-within:ring-primary focus-within:bg-white transition-all">
 <span class="material-symbols-outlined text-text-secondary mr-2">search</span>
-<input class="bg-transparent border-none text-text-main text-sm focus:ring-0 w-full placeholder:text-text-secondary/70 p-0 leading-normal" placeholder="搜索知识点、算法或案例..." type="text"/>
+<input name="q" class="bg-transparent border-none text-text-main text-sm focus:ring-0 w-full placeholder:text-text-secondary/70 p-0 leading-normal" placeholder="搜索知识点、算法或案例..." type="text" value="{{ request.args.get('q', '') }}"/>
 </div>
-<button class="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap shadow-md shadow-primary/20">
+<button type="submit" class="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap shadow-md shadow-primary/20">
                                 搜索
                             </button>
-</div>
+</form>
 </div>
 <div class="h-px bg-gray-100 w-full"></div>
 <div class="flex flex-col gap-4">
@@ -200,152 +200,31 @@
 </div>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-<div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-border-color hover:border-primary/40 hover:shadow-hover transition-all duration-300">
-<div class="relative aspect-video w-full overflow-hidden">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="数据预处理视频讲座截图，显示图表" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC49yDO81gm9ogNWo3CgUQyb74HzWXZ00Lz2UZ7X11ZBhaR4mu7_SzTHxWlkWDj7avjxMt3L3OAm8ACre4TopALFkmCoOID739ZNV3oVUypgubXXoYK5N0F2tATGUH_tyva2yb0I3Izl9imJC__CHA6Q097CS5APViLJPY7qjA8G_1nZvpMtRyHVz7LWlQLVzN203Ab43joOWUdztK_pIWlfB4uKt98j7Go0_jCSzmxvRBF34kmjtg5B6PuXQyEaRpFe6QJpBr_jrw');"></div>
-<div class="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
-<div class="absolute top-3 left-3 bg-blue-500/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide flex items-center gap-1 shadow-sm">
-<span class="material-symbols-outlined text-[12px]">videocam</span> 微课
-                            </div>
-<div class="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-0.5 rounded font-mono backdrop-blur-sm">
-                                12:45
-                            </div>
-<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-<div class="bg-primary text-white rounded-full p-2 shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
-<span class="material-symbols-outlined text-3xl fill">play_arrow</span>
-</div>
-</div>
-</div>
-<div class="p-4 flex flex-col flex-1">
-<div class="flex justify-between items-start mb-2">
-<span class="text-xs font-semibold text-primary bg-primary-light px-2 py-0.5 rounded border border-primary/10">预习必备</span>
-<span class="text-xs text-yellow-600 font-medium flex items-center gap-0.5" title="积分奖励">+10 积分</span>
-</div>
-<h3 class="text-text-main text-base font-bold mb-2 line-clamp-2 group-hover:text-primary transition-colors">1.2 数据预处理：清洗与集成</h3>
-<p class="text-text-secondary text-xs line-clamp-2 mb-4">讲解缺失值处理、噪声过滤以及数据集成的主要方法和策略。</p>
-<div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-text-secondary text-sm">visibility</span>
-<span class="text-xs text-text-secondary">1.2k</span>
-</div>
-<span class="text-xs text-text-secondary">王博士</span>
-</div>
-</div>
-</div>
-<div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-border-color hover:border-purple-500/40 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300">
-<div class="relative aspect-video w-full overflow-hidden bg-gray-50">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="代表算法逻辑的抽象3D网络可视化" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBE9_9w6SqXM_Txo_UO_ClQELD8RNFFWvCguuVRuo--q7Ck7O1_DpXOzHNBf5-81LMT_feNvo72skzYLkEVDQYPSXEJbWlbUNRPFBeLe8rXMdcR_9N-gXiMTVCYz7auj7T3UeWfxKzhPjtp28uS2l04iJmxoVIGUazKkDd2V-db-7hS0Ydj8585rJle5EK0qhMHQV8CpB_fSaEL3VyXTy51FTTXW1f5UKopRmIHsBJuAXkh6R8WxZqDubIdk-1w4wppJYdHD3MJo3o');"></div>
-<div class="absolute top-3 left-3 bg-purple-500/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide flex items-center gap-1 shadow-sm">
-<span class="material-symbols-outlined text-[12px]">code</span> 演示
-                            </div>
-</div>
-<div class="p-4 flex flex-col flex-1">
-<div class="flex justify-between items-start mb-2">
-<span class="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-0.5 rounded border border-purple-100">复盘重点</span>
-<span class="text-xs text-yellow-600 font-medium flex items-center gap-0.5">+15 积分</span>
-</div>
-<h3 class="text-text-main text-base font-bold mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">K-Means 聚类算法可视化演示</h3>
-<p class="text-text-secondary text-xs line-clamp-2 mb-4">通过动态交互演示，直观理解 K-Means 算法的迭代收敛过程。</p>
-<div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
-<button class="text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded w-full transition-colors shadow-sm">开始演示</button>
-</div>
-</div>
-</div>
-<div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-border-color hover:border-orange-500/40 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300">
-<div class="relative aspect-video w-full overflow-hidden">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="屏幕上显示数据科学的Python代码" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBtrHa3D4UOP5isqsUI8MD88k7z69Nhe9JQvX0tIoRmLcLZgk9SQtGQkOb5j8BVEknf2itU7UMC108nV-wfiKAV37sGwCelzUInKzM8b4FTxn8OQTCypay6YEEHtDdvmvhnNbK-fgiMjSzJBjCgbQWWfFjJOkbCNZakw-PLKSgbcBfLsOzjBl9das__o_tM-kh7H7EJ3w0gDfnDtGiUxSYX8_rHOqO9h0UHYkkziz6RhOrtS28NGNKNF3aVCde-8bZKO1j5O7QxKb0');"></div>
-<div class="absolute top-3 left-3 bg-orange-500/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide flex items-center gap-1 shadow-sm">
-<span class="material-symbols-outlined text-[12px]">terminal</span> 实验
-                            </div>
-</div>
-<div class="p-4 flex flex-col flex-1">
-<div class="flex justify-between items-start mb-2">
-<span class="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-100">高难度</span>
-<span class="text-xs text-yellow-600 font-medium flex items-center gap-0.5">+50 积分</span>
-</div>
-<h3 class="text-text-main text-base font-bold mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">实验三：基于决策树的信贷风险评估</h3>
-<p class="text-text-secondary text-xs line-clamp-2 mb-4">使用 Python sklearn 库构建决策树模型，并在真实信贷数据集上进行验证。</p>
-<div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
-<button class="text-xs font-bold text-white bg-orange-600 hover:bg-orange-700 px-3 py-1.5 rounded w-full transition-colors shadow-sm">打开 Jupyter Notebook</button>
-</div>
-</div>
-</div>
-<div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-border-color hover:border-green-500/40 hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300">
-<div class="relative aspect-video w-full overflow-hidden">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="代表购物篮分析的零售店过道模糊背景" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAFQrYIZSJO3097P2sL8kWjfGBJ6cO8CAQflv7ZXC2ucdyxTduZGYkHC_wytBHK8TCGqi0eUtsYYl0hI2f1WvGnjHSVPWmAeOBFF2jlAvD4_L47Y_RxtuI1hkS6kcftDzKY9BCv2J9soKiFuY8HNp87QZLCL0qPJ2du_I6drQbwRjNv526CjHr0vhaygl4TtjGjggKYVeXkQTDdXeqcepob6wTMpHJDeI9neKCfD2hOPZy-Om6-ZnGhMk1-sfbmJE9S9VvOGKJNJJQ');"></div>
-<div class="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
-<div class="absolute top-3 left-3 bg-green-500/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide flex items-center gap-1 shadow-sm">
-<span class="material-symbols-outlined text-[12px]">menu_book</span> 案例
-                            </div>
-</div>
-<div class="p-4 flex flex-col flex-1">
-<div class="flex justify-between items-start mb-2">
-<span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-100">典型案例</span>
-<span class="text-xs text-yellow-600 font-medium flex items-center gap-0.5">+30 积分</span>
-</div>
-<h3 class="text-text-main text-base font-bold mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">购物篮分析：关联规则挖掘实战</h3>
-<p class="text-text-secondary text-xs line-clamp-2 mb-4">深入剖析超市零售数据，发现商品间的关联购买模式（Apriori算法应用）。</p>
-<div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-text-secondary text-sm">visibility</span>
-<span class="text-xs text-text-secondary">856</span>
-</div>
-<span class="text-xs text-text-secondary">陈博士</span>
-</div>
-</div>
-</div>
-<div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-border-color hover:border-primary/40 hover:shadow-hover transition-all duration-300">
-<div class="relative aspect-video w-full overflow-hidden">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="显示神经网络架构图的屏幕" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAWcCk0NqNS7uUVUD4irP3Q_dINgw_Q6yWpVeti7_AWXQ2BflVRhMLPhHeHeLPofJZYN2F80ZO7zcvUjilDt3TQn-1XhDO8eV3418GQB-e42Bc24vYAYITxP3PrqDinhC0EnhkDIPRSCnteuahJf4WBn7t0wuR5wOaWhEo3Ge1L5jdoVLtY53wh7qTys75nFCuXYnAX1SQ5NjDsDeZCZn86btdh8dbJcoUKZfYYjFoC3p7exMMVQ3oRVUJmptGeRsaFS7WGfZR9AR4');"></div>
-<div class="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
-<div class="absolute top-3 left-3 bg-blue-500/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide flex items-center gap-1 shadow-sm">
-<span class="material-symbols-outlined text-[12px]">videocam</span> 微课
-                            </div>
-<div class="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-0.5 rounded font-mono backdrop-blur-sm">
-                                08:30
-                            </div>
-<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-<div class="bg-primary text-white rounded-full p-2 shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
-<span class="material-symbols-outlined text-3xl fill">play_arrow</span>
-</div>
-</div>
-</div>
-<div class="p-4 flex flex-col flex-1">
-<div class="flex justify-between items-start mb-2">
-<span class="text-xs font-semibold text-text-secondary bg-gray-100 border border-border-color px-2 py-0.5 rounded">拓展知识</span>
-<span class="text-xs text-yellow-600 font-medium flex items-center gap-0.5">+10 积分</span>
-</div>
-<h3 class="text-text-main text-base font-bold mb-2 line-clamp-2 group-hover:text-primary transition-colors">神经网络基础与感知机</h3>
-<p class="text-text-secondary text-xs line-clamp-2 mb-4">介绍深度学习的基础单元——感知机的工作原理与数学推导。</p>
-<div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-text-secondary text-sm">visibility</span>
-<span class="text-xs text-text-secondary">432</span>
-</div>
-<span class="text-xs text-text-secondary">王博士</span>
-</div>
-</div>
-</div>
-<div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-border-color hover:border-orange-500/40 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300">
-<div class="relative aspect-video w-full overflow-hidden">
-<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="显示数据图表的电脑屏幕特写" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCPqf7B5ggiBWMcndLHzYlUT16I8xTuiNPmiPALxMX2Td0jmf5W5BoSiCpFh6kfb8RGIqTuBf8R3EWGjRL39FPZqBO22noqNwuzKOK740EwJueSDlob4NOwhb5g5e2mLD9St86TOYpT_P2ExtQmNxpm6VtKhgL4S6DaA6vk0KgRnM56nU3lnCSVbrbqotYILcoEnLuJ9Jc5CLrA9xTzvAFRs63gfPBZOKETS6l_SNwLxDPG_FeUfF4yMdKnhN9Oadx8NaMBI9eZvpQ');"></div>
-<div class="absolute top-3 left-3 bg-orange-500/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide flex items-center gap-1 shadow-sm">
-<span class="material-symbols-outlined text-[12px]">terminal</span> 实验
-                            </div>
-</div>
-<div class="p-4 flex flex-col flex-1">
-<div class="flex justify-between items-start mb-2">
-<span class="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-100">高难度</span>
-<span class="text-xs text-yellow-600 font-medium flex items-center gap-0.5">+45 积分</span>
-</div>
-<h3 class="text-text-main text-base font-bold mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">实验四：SVM 分类器参数调优</h3>
-<p class="text-text-secondary text-xs line-clamp-2 mb-4">探究核函数选择对 SVM 性能的影响，并使用网格搜索进行参数调优。</p>
-<div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
-<button class="text-xs font-bold text-white bg-orange-600 hover:bg-orange-700 px-3 py-1.5 rounded w-full transition-colors shadow-sm">打开 Jupyter Notebook</button>
-</div>
-</div>
-</div>
-</div>
+    {% for resource in resources %}
+    <div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-border-color hover:border-primary/40 hover:shadow-hover transition-all duration-300">
+    <div class="relative aspect-video w-full overflow-hidden bg-gray-50">
+    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="{{ resource.title }}" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC49yDO81gm9ogNWo3CgUQyb74HzWXZ00Lz2UZ7X11ZBhaR4mu7_SzTHxWlkWDj7avjxMt3L3OAm8ACre4TopALFkmCoOID739ZNV3oVUypgubXXoYK5N0F2tATGUH_tyva2yb0I3Izl9imJC__CHA6Q097CS5APViLJPY7qjA8G_1nZvpMtRyHVz7LWlQLVzN203Ab43joOWUdztK_pIWlfB4uKt98j7Go0_jCSzmxvRBF34kmjtg5B6PuXQyEaRpFe6QJpBr_jrw');"></div>
+    <div class="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
+    <div class="absolute top-3 left-3 bg-blue-500/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide flex items-center gap-1 shadow-sm">
+    <span class="material-symbols-outlined text-[12px]">
+        {% if resource.type == 'video' %}videocam{% elif resource.type == 'pdf' %}menu_book{% else %}terminal{% endif %}
+    </span> {{ resource.type|capitalize }}
+                                </div>
+    </div>
+    <div class="p-4 flex flex-col flex-1">
+    <div class="flex justify-between items-start mb-2">
+    <span class="text-xs font-semibold text-primary bg-primary-light px-2 py-0.5 rounded border border-primary/10">推荐</span>
+    <span class="text-xs text-yellow-600 font-medium flex items-center gap-0.5" title="积分奖励">+10 积分</span>
+    </div>
+    <h3 class="text-text-main text-base font-bold mb-2 line-clamp-2 group-hover:text-primary transition-colors">{{ resource.title }}</h3>
+    <p class="text-text-secondary text-xs line-clamp-2 mb-4">{{ resource.description }}</p>
+    <div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
+    <span class="text-xs text-text-secondary">EduGen AI</span>
+    </div>
+    </div>
+    </div>
+    {% endfor %}
+    </div>
 <div class="flex justify-center pb-10">
 <button class="flex items-center gap-2 px-6 py-2.5 bg-white border border-border-color hover:bg-gray-50 text-text-secondary hover:text-text-main rounded-lg transition-colors font-medium text-sm shadow-sm">
 <span>加载更多资源</span>

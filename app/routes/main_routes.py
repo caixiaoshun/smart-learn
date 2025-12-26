@@ -91,7 +91,22 @@ def teacher_assignments():
     if request.method == 'POST':
         title = request.form.get('title')
         # In a real app, handle layer/group selection
-        assignment = Assignment(title=title, created_by=current_user.id)
+        from datetime import datetime, timedelta
+        from app.models import Course
+
+        # Link to the first available course for now
+        course = Course.query.first()
+        course_id = course.id if course else None
+
+        # Default deadline: 7 days from now
+        deadline = datetime.now() + timedelta(days=7)
+
+        assignment = Assignment(
+            title=title,
+            created_by=current_user.id,
+            course_id=course_id,
+            deadline=deadline
+        )
         db.session.add(assignment)
         db.session.commit()
         return redirect(url_for('main.teacher_assignments'))

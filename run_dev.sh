@@ -15,8 +15,8 @@ pip install -r requirements.txt
 
 # Initialize DB if not exists
 if [ ! -f "app.db" ]; then
-    echo "Initializing database..."
-    python3 -c "from app import create_app, db; app=create_app(); ctx=app.app_context(); ctx.push(); db.create_all()"
+    echo "Initializing database and seeding data..."
+    python3 seed.py
 fi
 
 # Run Flask in Development Mode

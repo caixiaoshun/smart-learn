@@ -154,6 +154,13 @@ def ai_assistant():
 def case_studies():
     return render_template('case_studies.html')
 
+@bp.route('/case-studies/<int:id>')
+@login_required
+def case_detail(id):
+    # In a real app, query the case by id.
+    # For now, we mock it by rendering the static detail template regardless of ID.
+    return render_template('case_detail.html')
+
 @bp.route('/api/chat', methods=['POST'])
 @login_required
 def chat():

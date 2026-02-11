@@ -91,6 +91,38 @@ router.get('/teacher', authenticate, requireTeacher, async (req, res) => {
   }
 });
 
+// 获取学生已加入的班级列表
+router.get('/student', authenticate, requireStudent, async (req, res) => {
+  try {
+    const memberships = await prisma.classStudent.findMany({
+      where: { studentId: req.user!.userId },
+      include: {
+        class: {
+          include: {
+            teacher: {
+              select: { id: true, name: true, email: true },
+            },
+            _count: {
+              select: { students: true, homeworks: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const classes = memberships.map(m => ({
+      ...m.class,
+      joinedAt: m.createdAt,
+    }));
+
+    res.json({ classes });
+  } catch (error) {
+    console.error('获取学生班级列表失败:', error);
+    res.status(500).json({ error: '获取学生班级列表失败' });
+  }
+});
+
 // 获取班级详情
 router.get('/:id', authenticate, async (req, res) => {
   try {

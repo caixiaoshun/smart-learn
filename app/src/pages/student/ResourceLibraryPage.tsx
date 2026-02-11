@@ -37,7 +37,7 @@ export function ResourceLibraryPage() {
   const { resources, fetchResources, loadMoreResources, createResource, pagination: resourcesPagination, isLoading: resourcesLoading, bookmarkResource, unbookmarkResource } = useResourceStore();
   const { cases, fetchCases, bookmarkCase, unbookmarkCase, isLoading: casesLoading } = useCaseStore();
   const isLoading = resourcesLoading || casesLoading;
-  const { token, isAuthenticated } = useAuthStore();
+  const { token, isAuthenticated, user } = useAuthStore();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const resourceGridRef = useRef<HTMLDivElement>(null);
@@ -511,6 +511,7 @@ export function ResourceLibraryPage() {
             融合现代技术与思政教育，提供 150+ 个精选教学案例与学习资源。
           </p>
         </div>
+        {user?.role === 'TEACHER' && (
         <div className="flex gap-3">
           <Button variant="outline" className="gap-2 border-slate-200 text-slate-600 hover:bg-slate-50" onClick={() => setIsUploadDialogOpen(true)}>
             <Upload className="w-4 h-4" />
@@ -521,6 +522,7 @@ export function ResourceLibraryPage() {
             AI 生成案例
           </Button>
         </div>
+        )}
       </div>
 
       <div className="flex gap-6">

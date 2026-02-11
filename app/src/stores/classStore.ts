@@ -33,8 +33,28 @@ export interface Homework {
   };
 }
 
+export interface StudentClass {
+  id: string;
+  name: string;
+  description: string | null;
+  inviteCode: string;
+  teacherId: string;
+  createdAt: string;
+  joinedAt: string;
+  teacher?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  _count?: {
+    students: number;
+    homeworks: number;
+  };
+}
+
 interface ClassState {
   classes: Class[];
+  studentClasses: StudentClass[];
   currentClass: Class | null;
   isLoading: boolean;
   
@@ -47,12 +67,14 @@ interface ClassState {
   removeStudent: (classId: string, studentId: string) => Promise<void>;
   
   // 学生方法
+  fetchStudentClasses: () => Promise<void>;
   joinClass: (inviteCode: string) => Promise<void>;
   leaveClass: (classId?: string) => Promise<void>;
 }
 
 export const useClassStore = create<ClassState>((set, get) => ({
   classes: [],
+  studentClasses: [],
   currentClass: null,
   isLoading: false,
 
@@ -118,6 +140,17 @@ export const useClassStore = create<ClassState>((set, get) => ({
           students: get().currentClass!.students?.filter((s) => s.id !== studentId),
         },
       });
+    }
+  },
+
+  // 获取学生已加入的班级列表
+  fetchStudentClasses: async () => {
+    set({ isLoading: true });
+    try {
+      const { data } = await api.get('/classes/student');
+      set({ studentClasses: data.classes });
+    } finally {
+      set({ isLoading: false });
     }
   },
 

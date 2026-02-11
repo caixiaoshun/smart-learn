@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCaseStore } from '@/stores/caseStore';
 import { useChatStore } from '@/stores/chatStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +39,7 @@ type SortOption = 'relevance' | 'newest' | 'rating';
 export function CaseLibraryPage() {
   const { cases, pagination, fetchCases, createCase, bookmarkCase, unbookmarkCase, fetchMyBookmarkIds } = useCaseStore();
   const { selectedModel, fetchModels } = useChatStore();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -449,6 +451,7 @@ export function CaseLibraryPage() {
             一体化教学。
           </p>
         </div>
+        {user?.role === 'TEACHER' && (
         <div className="flex items-start gap-3 flex-shrink-0">
           <Button variant="outline" className="gap-2 border-blue-100 text-blue-600 hover:bg-blue-50 hover:border-blue-300 shadow-sm" onClick={() => setUploadOpen(true)}>
             <Upload className="w-4 h-4" />
@@ -459,6 +462,7 @@ export function CaseLibraryPage() {
             AI 生成案例
           </Button>
         </div>
+        )}
       </div>
 
       {/* 搜索栏 */}

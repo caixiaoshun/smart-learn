@@ -280,8 +280,25 @@ export function HomeworkManagementPage() {
     fetchTeacherClasses();
   }, []);
 
+  useEffect(() => {
+    if (classes.length === 1 && !classId) {
+      setClassId(classes[0].id);
+    }
+  }, [classes]);
+
   const handleCreateHomework = async () => {
-    if (!title.trim() || !classId || !deadline) return;
+    if (!title.trim()) {
+      toast.error('请输入作业标题');
+      return;
+    }
+    if (!classId) {
+      toast.error('请选择班级');
+      return;
+    }
+    if (!deadline) {
+      toast.error('请设置截止时间');
+      return;
+    }
     
     try {
       const data: CreateHomeworkData = {
@@ -694,7 +711,6 @@ export function HomeworkManagementPage() {
               <Button 
                 className="w-full bg-blue-600 hover:bg-blue-700"
                 onClick={handleCreateHomework}
-                disabled={!title.trim() || !classId || !deadline}
               >
                 发布作业
               </Button>

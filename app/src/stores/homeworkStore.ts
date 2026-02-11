@@ -39,6 +39,42 @@ export interface Homework {
   submissions?: Submission[];
 }
 
+export interface ScoreAdjustment {
+  id: string;
+  submissionId: string;
+  studentId: string;
+  baseScore: number;
+  adjustScore: number;
+  finalScore: number;
+  reason?: string | null;
+}
+
+export interface GroupMember {
+  id: string;
+  groupId: string;
+  studentId: string;
+  role: string;
+  student: {
+    id: string;
+    name: string;
+    email: string;
+    avatar: string | null;
+  };
+}
+
+export interface SubmissionGroup {
+  id: string;
+  name: string;
+  leaderId: string;
+  leader: {
+    id: string;
+    name: string;
+    email: string;
+    avatar: string | null;
+  };
+  members: GroupMember[];
+}
+
 export interface Submission {
   id: string;
   studentId: string;
@@ -56,6 +92,8 @@ export interface Submission {
     email: string;
     avatar: string | null;
   };
+  group?: SubmissionGroup | null;
+  scoreAdjustments?: ScoreAdjustment[];
 }
 
 export interface StudentHomework extends Homework {
@@ -77,6 +115,7 @@ interface HomeworkState {
   deleteHomework: (id: string) => Promise<void>;
   fetchHomeworkDetail: (id: string) => Promise<void>;
   gradeSubmission: (homeworkId: string, submissionId: string, data: { score: number; feedback?: string }) => Promise<void>;
+  gradeGroupSubmission: (homeworkId: string, submissionId: string, memberScores: { studentId: string; score: number; feedback?: string }[]) => Promise<void>;
   exportGrades: (homeworkId: string, format: 'csv' | 'json') => Promise<void>;
   generateAIReview: (payload: { homeworkTitle: string; submissionSummary: string; maxScore: number }) => Promise<string>;
   
@@ -159,6 +198,36 @@ export const useHomeworkStore = create<HomeworkState>((set, get) => ({
     const { data: result } = await api.post(`/homeworks/${homeworkId}/grade/${submissionId}`, data);
     
     // 更新当前作业的提交列表
+    if (get().currentHomework?.id === homeworkId) {
+      set({
+        currentHomework: {
+          ...get().currentHomework!,
+          submissions: get().currentHomework!.submissions?.map((s) =>
+            s.id === submissionId ? result.submission : s
+          ),
+        },
+      });
+    }
+  },
+
+  // 小组作业批改 - 给每个成员单独打分
+  gradeGroupSubmission: async (homeworkId, submissionId, memberScores) => {
+    const { data: result } = await api.post(`/homeworks/${homeworkId}/grade-group/${submissionId}`, { memberScores });
+
+    // 更新 homeworks 列表中对应的 submission
+    set({
+      homeworks: get().homeworks.map((h) => {
+        if (h.id !== homeworkId) return h;
+        return {
+          ...h,
+          submissions: h.submissions?.map((s) =>
+            s.id === submissionId ? result.submission : s
+          ),
+        };
+      }),
+    });
+
+    // 更新 currentHomework
     if (get().currentHomework?.id === homeworkId) {
       set({
         currentHomework: {

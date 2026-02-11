@@ -125,6 +125,18 @@ router.get('/teacher', authenticate, requireTeacher, async (req, res) => {
             student: {
               select: { id: true, name: true, email: true, avatar: true },
             },
+            group: {
+              include: {
+                leader: { select: { id: true, name: true, email: true, avatar: true } },
+                members: {
+                  include: {
+                    student: { select: { id: true, name: true, email: true, avatar: true } },
+                  },
+                  orderBy: { joinedAt: 'asc' },
+                },
+              },
+            },
+            scoreAdjustments: true,
           },
           orderBy: { submittedAt: 'desc' },
         },
@@ -591,6 +603,153 @@ router.post('/:id/grade/:submissionId', authenticate, requireTeacher, async (req
     }
     console.error('批改失败:', error);
     res.status(500).json({ error: '批改失败' });
+  }
+});
+
+// 小组作业批改 - 给每个成员单独打分
+router.post('/:id/grade-group/:submissionId', authenticate, requireTeacher, async (req, res) => {
+  try {
+    const { id, submissionId } = req.params;
+    const schema = z.object({
+      memberScores: z.array(z.object({
+        studentId: z.string(),
+        score: z.number().int().min(0, '分数不能为负数'),
+        feedback: z.string().max(2000, '评语最多2000字').optional(),
+      })).min(1, '至少需要一个成员的分数'),
+    });
+
+    const { memberScores } = schema.parse(req.body);
+
+    // 验证作业归属
+    const homework = await prisma.homework.findUnique({
+      where: { id },
+      include: { class: true },
+    });
+
+    if (!homework) {
+      return res.status(404).json({ error: '作业不存在' });
+    }
+
+    if (homework.class.teacherId !== req.user!.userId) {
+      return res.status(403).json({ error: '无权批改此作业' });
+    }
+
+    if (homework.type !== 'GROUP_PROJECT') {
+      return res.status(400).json({ error: '此接口仅用于小组作业批改' });
+    }
+
+    // 验证提交存在且关联小组
+    const submission = await prisma.submission.findUnique({
+      where: { id: submissionId },
+      include: {
+        group: {
+          include: {
+            members: { select: { studentId: true } },
+          },
+        },
+      },
+    });
+
+    if (!submission) {
+      return res.status(404).json({ error: '提交不存在' });
+    }
+
+    if (!submission.groupId || !submission.group) {
+      return res.status(400).json({ error: '该提交不是小组提交' });
+    }
+
+    // 验证所有 studentId 都属于该小组
+    const groupMemberIds = new Set(submission.group.members.map(m => m.studentId));
+    for (const ms of memberScores) {
+      if (!groupMemberIds.has(ms.studentId)) {
+        return res.status(400).json({ error: `学生 ${ms.studentId} 不属于该小组` });
+      }
+      if (ms.score > homework.maxScore) {
+        return res.status(400).json({ error: `分数不能超过满分 ${homework.maxScore}` });
+      }
+    }
+
+    // 为每个成员创建/更新 ScoreAdjustment 记录
+    const adjustments = [];
+    for (const ms of memberScores) {
+      const adjustment = await prisma.scoreAdjustment.upsert({
+        where: {
+          submissionId_studentId: {
+            submissionId,
+            studentId: ms.studentId,
+          },
+        },
+        update: {
+          baseScore: 0,
+          adjustScore: 0,
+          finalScore: ms.score,
+          reason: ms.feedback || null,
+        },
+        create: {
+          submissionId,
+          studentId: ms.studentId,
+          baseScore: 0,
+          adjustScore: 0,
+          finalScore: ms.score,
+          reason: ms.feedback || null,
+        },
+      });
+      adjustments.push(adjustment);
+
+      // 创建评分审计日志
+      await prisma.scoreAuditLog.create({
+        data: {
+          submissionId,
+          studentId: ms.studentId,
+          oldScore: null,
+          newScore: ms.score,
+          reason: ms.feedback || '教师小组成员评分',
+          operatorId: req.user!.userId,
+        },
+      });
+    }
+
+    // 更新主提交的分数为组员平均分
+    const avgScore = Math.round(memberScores.reduce((sum, ms) => sum + ms.score, 0) / memberScores.length);
+    const updatedSubmission = await prisma.submission.update({
+      where: { id: submissionId },
+      data: {
+        score: avgScore,
+        feedback: '小组成员已单独评分',
+        gradedAt: new Date(),
+      },
+      include: {
+        student: {
+          select: { id: true, name: true, email: true, avatar: true },
+        },
+        group: {
+          include: {
+            leader: { select: { id: true, name: true, email: true, avatar: true } },
+            members: {
+              include: {
+                student: { select: { id: true, name: true, email: true, avatar: true } },
+              },
+              orderBy: { joinedAt: 'asc' },
+            },
+          },
+        },
+        scoreAdjustments: true,
+      },
+    });
+
+    res.json({
+      message: '小组批改成功',
+      submission: {
+        ...updatedSubmission,
+        files: parseFiles(updatedSubmission.files),
+      },
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors[0].message });
+    }
+    console.error('小组批改失败:', error);
+    res.status(500).json({ error: '小组批改失败' });
   }
 });
 

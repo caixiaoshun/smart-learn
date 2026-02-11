@@ -9,10 +9,15 @@ const router = Router();
 // 生成小组邀请码 (格式: SL-XXXX)
 function generateInviteCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const charsLen = chars.length; // 32
+  // Use rejection sampling to avoid modulo bias
+  const maxValid = 256 - (256 % charsLen); // 256 since 256 % 32 == 0
   let code = '';
-  const bytes = crypto.randomBytes(4);
-  for (let i = 0; i < 4; i++) {
-    code += chars[bytes[i] % chars.length];
+  while (code.length < 4) {
+    const byte = crypto.randomBytes(1)[0];
+    if (byte < maxValid) {
+      code += chars[byte % charsLen];
+    }
   }
   return `SL-${code}`;
 }

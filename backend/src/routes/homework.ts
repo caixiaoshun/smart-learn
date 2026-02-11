@@ -672,6 +672,17 @@ router.post('/:id/grade-group/:submissionId', authenticate, requireTeacher, asyn
     // 为每个成员创建/更新 ScoreAdjustment 记录
     const adjustments = [];
     for (const ms of memberScores) {
+      // 获取旧的评分记录用于审计日志
+      const existingAdjustment = await prisma.scoreAdjustment.findUnique({
+        where: {
+          submissionId_studentId: {
+            submissionId,
+            studentId: ms.studentId,
+          },
+        },
+        select: { finalScore: true },
+      });
+
       const adjustment = await prisma.scoreAdjustment.upsert({
         where: {
           submissionId_studentId: {
@@ -680,15 +691,13 @@ router.post('/:id/grade-group/:submissionId', authenticate, requireTeacher, asyn
           },
         },
         update: {
-          baseScore: 0,
-          adjustScore: 0,
           finalScore: ms.score,
           reason: ms.feedback || null,
         },
         create: {
           submissionId,
           studentId: ms.studentId,
-          baseScore: 0,
+          baseScore: ms.score,
           adjustScore: 0,
           finalScore: ms.score,
           reason: ms.feedback || null,
@@ -701,7 +710,7 @@ router.post('/:id/grade-group/:submissionId', authenticate, requireTeacher, asyn
         data: {
           submissionId,
           studentId: ms.studentId,
-          oldScore: null,
+          oldScore: existingAdjustment?.finalScore ?? null,
           newScore: ms.score,
           reason: ms.feedback || '教师小组成员评分',
           operatorId: req.user!.userId,

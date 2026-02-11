@@ -1075,7 +1075,7 @@ export function HomeworkManagementPage() {
                           <div className="flex items-center gap-2">
                             {submission.score !== null ? (
                               <Badge className="bg-green-100 text-green-700">
-                                {submission.groupId && submission.scoreAdjustments?.length ? '已评分' : `${submission.score}分`}
+                                {submission.groupId && submission.scoreAdjustments?.length ? `平均 ${submission.score}分` : `${submission.score}分`}
                               </Badge>
                             ) : (
                               <Badge variant="secondary">待批改</Badge>
@@ -1482,7 +1482,7 @@ export function HomeworkManagementPage() {
                       <Button
                         className="w-full bg-blue-600 hover:bg-blue-700 gap-2"
                         onClick={handleGroupGrade}
-                        disabled={!selectedSubmission?.group?.members?.some(m => groupMemberScores[m.studentId])}
+                        disabled={!selectedSubmission?.group?.members?.every(m => groupMemberScores[m.studentId])}
                       >
                         <Save className="w-4 h-4" />
                         保存小组评分

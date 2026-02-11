@@ -284,7 +284,7 @@ export function HomeworkManagementPage() {
     if (classes.length === 1 && !classId) {
       setClassId(classes[0].id);
     }
-  }, [classes, classId]);
+  }, [classes]);
 
   const handleCreateHomework = async () => {
     if (!title.trim()) {

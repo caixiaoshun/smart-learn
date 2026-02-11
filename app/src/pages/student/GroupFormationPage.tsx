@@ -65,10 +65,10 @@ export function GroupFormationPage() {
   useEffect(() => {
     if (myGroupStatus?.myGroup) {
       fetchMessages(myGroupStatus.myGroup.id);
-      // Poll for new messages every 5 seconds
+      // Poll for new messages every 10 seconds
       pollRef.current = setInterval(() => {
         fetchMessages(myGroupStatus.myGroup!.id);
-      }, 5000);
+      }, 10000);
     }
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
@@ -98,7 +98,7 @@ export function GroupFormationPage() {
     };
 
     updateCountdown();
-    const interval = setInterval(updateCountdown, 60000);
+    const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
   }, [myGroupStatus?.groupConfig?.groupDeadline]);
 

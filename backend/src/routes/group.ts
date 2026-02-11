@@ -274,7 +274,7 @@ router.post('/homework/:homeworkId', authenticate, requireStudent, async (req, r
       data: {
         groupId: group.id,
         senderId: req.user!.userId,
-        content: `${req.user!.userId} 创建了小组 "${name}"`,
+        content: `${group.leader.name} 创建了小组 "${name}"`,
         type: 'SYSTEM',
       },
     });

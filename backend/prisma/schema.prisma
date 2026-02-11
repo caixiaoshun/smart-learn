@@ -251,7 +251,7 @@ model AssignmentGroup {
   name        String   // 小组名称
   
   // 小组邀请码（学生通过邀请码加入小组）
-  inviteCode  String   @unique @default(cuid())
+  inviteCode  String   @unique
   
   // 组长
   leaderId    String

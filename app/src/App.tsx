@@ -18,6 +18,7 @@ import { CourseDetailPage } from '@/pages/student/CourseDetailPage';
 import { CaseLibraryPage } from '@/pages/student/CaseLibraryPage';
 import { CaseDetailPage } from '@/pages/student/CaseDetailPage';
 import { PeerReviewPage } from '@/pages/student/PeerReviewPage';
+import { GroupFormationPage } from '@/pages/student/GroupFormationPage';
 import { TeacherDashboard } from '@/pages/teacher/TeacherDashboard';
 import { ClassManagementPage } from '@/pages/teacher/ClassManagementPage';
 import { HomeworkManagementPage } from '@/pages/teacher/HomeworkManagementPage';
@@ -83,6 +84,7 @@ function App() {
           <Route path="/" element={<DashboardRedirect />} />
           <Route path="/dashboard" element={<DashboardRedirect />} />
           <Route path="/homeworks" element={<StudentHomeworkPage />} />
+          <Route path="/homeworks/:homeworkId/group" element={<GroupFormationPage />} />
           <Route path="/resources" element={<ResourceLibraryPage />} />
           <Route path="/resources/:id" element={<CaseDetailPage />} />
           <Route path="/ai-assistant" element={<AIAssistantPage />} />

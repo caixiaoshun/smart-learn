@@ -79,6 +79,8 @@ model User {
   performanceRecordings ClassPerformanceRecord[] @relation("PerformanceRecorder")
   // 知识点自评
   knowledgeAssessments KnowledgePointAssessment[] @relation("KnowledgeAssessments")
+  // 小组讨论消息
+  groupMessages     GroupMessage[] @relation("GroupMessages")
   
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
@@ -248,6 +250,9 @@ model AssignmentGroup {
   
   name        String   // 小组名称
   
+  // 小组邀请码（学生通过邀请码加入小组）
+  inviteCode  String   @unique @default(cuid())
+  
   // 组长
   leaderId    String
   leader      User     @relation("GroupLeader", fields: [leaderId], references: [id])
@@ -261,11 +266,15 @@ model AssignmentGroup {
   // 小组提交
   submissions Submission[]
   
+  // 小组讨论消息
+  messages    GroupMessage[]
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([homeworkId])
   @@index([leaderId])
+  @@index([inviteCode])
 }
 
 // 小组成员表
@@ -286,6 +295,28 @@ model AssignmentGroupMember {
   @@unique([groupId, studentId])
   @@index([groupId])
   @@index([studentId])
+}
+
+// 小组讨论消息表
+model GroupMessage {
+  id        String   @id @default(cuid())
+  
+  groupId   String
+  group     AssignmentGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  senderId  String
+  sender    User     @relation("GroupMessages", fields: [senderId], references: [id])
+  
+  content   String
+  
+  // 消息类型: TEXT(文本), SYSTEM(系统消息，如成员加入/退出)
+  type      String   @default("TEXT")
+  
+  createdAt DateTime @default(now())
+
+  @@index([groupId])
+  @@index([senderId])
+  @@index([createdAt])
 }
 
 // ========== 成绩调整与审计 ==========

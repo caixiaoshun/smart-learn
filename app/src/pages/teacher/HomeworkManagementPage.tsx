@@ -32,8 +32,19 @@ import {
   Loader2,
   WandSparkles,
   GripVertical,
+  BookOpen,
+  CalendarClock,
+  Star,
+  Bell,
+  Settings2,
+  UserCheck,
+  Target,
 } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { NotebookPreview } from '@/components/NotebookPreview';
 
 function getFileName(filePath: string): string {
@@ -636,158 +647,217 @@ export function HomeworkManagementPage() {
               发布作业
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>发布新作业</DialogTitle>
+              <DialogTitle className="flex items-center gap-2 text-lg">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100">
+                  <BookOpen className="w-4 h-4 text-blue-600" />
+                </div>
+                发布新作业
+              </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 pt-4 max-h-[70vh] overflow-y-auto">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">作业标题</label>
-                <Input
-                  placeholder="例如：第三章练习题"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">作业描述</label>
-                <Textarea
-                  placeholder="详细描述作业要求..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">作业形态</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg"
-                  value={homeworkType}
-                  onChange={(e) => setHomeworkType(e.target.value as any)}
-                >
-                  <option value="STANDARD">普通作业</option>
-                  <option value="GROUP_PROJECT">项目小组作业</option>
-                  <option value="SELF_PRACTICE">自主实践作业</option>
-                </select>
+            <div className="space-y-5 pt-2 max-h-[70vh] overflow-y-auto pr-1">
+              {/* 基本信息区 */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                  <FileText className="w-4 h-4 text-blue-500" />
+                  基本信息
+                </div>
+                <div className="grid gap-4 pl-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="hw-title">作业标题 <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="hw-title"
+                      placeholder="例如：第三章练习题"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="hw-desc">作业描述</Label>
+                    <Textarea
+                      id="hw-desc"
+                      placeholder="详细描述作业要求、提交规范等..."
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      rows={3}
+                      className="resize-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>作业形态</Label>
+                      <Select value={homeworkType} onValueChange={(val) => setHomeworkType(val as 'STANDARD' | 'GROUP_PROJECT' | 'SELF_PRACTICE')}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="STANDARD">📝 普通作业</SelectItem>
+                          <SelectItem value="GROUP_PROJECT">👥 项目小组作业</SelectItem>
+                          <SelectItem value="SELF_PRACTICE">🎯 自主实践作业</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>选择班级 <span className="text-red-500">*</span></Label>
+                      <Select value={classId} onValueChange={setClassId}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="请选择班级" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {classes.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
               </div>
 
+              {/* 项目小组配置 */}
               {homeworkType === 'GROUP_PROJECT' && (
-                <div className="p-3 bg-blue-50 rounded-lg space-y-3">
-                  <p className="text-sm font-medium text-blue-700">项目小组配置</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs text-gray-600">最小人数</label>
-                      <Input type="number" value={groupMinSize} onChange={(e) => setGroupMinSize(e.target.value)} />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs text-gray-600">最大人数</label>
-                      <Input type="number" value={groupMaxSize} onChange={(e) => setGroupMaxSize(e.target.value)} />
-                    </div>
+                <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50/80 to-indigo-50/50 overflow-hidden">
+                  <div className="flex items-center gap-2 px-4 py-3 bg-blue-100/60 border-b border-blue-200">
+                    <Users className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-semibold text-blue-700">项目小组配置</span>
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-600">组队截止时间</label>
-                    <Input type="datetime-local" value={groupDeadline} onChange={(e) => setGroupDeadline(e.target.value)} />
-                  </div>
-                  <p className="text-sm font-medium text-blue-700 mt-2">互评配置</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs text-gray-600">每份作业评审人数</label>
-                      <Input type="number" value={reviewersCount} onChange={(e) => setReviewersCount(e.target.value)} />
+                  <div className="p-4 space-y-4">
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-gray-600">最小人数</Label>
+                        <Input type="number" value={groupMinSize} onChange={(e) => setGroupMinSize(e.target.value)} className="h-9" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-gray-600">最大人数</Label>
+                        <Input type="number" value={groupMaxSize} onChange={(e) => setGroupMaxSize(e.target.value)} className="h-9" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-gray-600">组队截止</Label>
+                        <Input type="datetime-local" value={groupDeadline} onChange={(e) => setGroupDeadline(e.target.value)} className="h-9 text-xs" />
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-xs text-gray-600">互评截止时间</label>
-                      <Input type="datetime-local" value={reviewDeadline} onChange={(e) => setReviewDeadline(e.target.value)} />
+                    <Separator className="bg-blue-100" />
+                    <div className="flex items-center gap-2 text-sm font-medium text-blue-700">
+                      <UserCheck className="w-3.5 h-3.5" />
+                      互评配置
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-gray-600">每份评审人数</Label>
+                        <Input type="number" value={reviewersCount} onChange={(e) => setReviewersCount(e.target.value)} className="h-9" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-gray-600">互评截止时间</Label>
+                        <Input type="datetime-local" value={reviewDeadline} onChange={(e) => setReviewDeadline(e.target.value)} className="h-9 text-xs" />
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
 
+              {/* 自主实践配置 */}
               {homeworkType === 'SELF_PRACTICE' && (
-                <div className="p-3 bg-green-50 rounded-lg space-y-3">
-                  <p className="text-sm font-medium text-green-700">自主实践配置</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs text-gray-600">加分上限</label>
-                      <Input type="number" value={bonusCap} onChange={(e) => setBonusCap(e.target.value)} />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs text-gray-600">提交次数上限</label>
-                      <Input type="number" value={countLimit} onChange={(e) => setCountLimit(e.target.value)} />
+                <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-green-50/50 overflow-hidden">
+                  <div className="flex items-center gap-2 px-4 py-3 bg-emerald-100/60 border-b border-emerald-200">
+                    <Target className="w-4 h-4 text-emerald-600" />
+                    <span className="text-sm font-semibold text-emerald-700">自主实践配置</span>
+                  </div>
+                  <div className="p-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-gray-600">加分上限</Label>
+                        <Input type="number" value={bonusCap} onChange={(e) => setBonusCap(e.target.value)} className="h-9" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-gray-600">提交次数上限</Label>
+                        <Input type="number" value={countLimit} onChange={(e) => setCountLimit(e.target.value)} className="h-9" />
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">选择班级</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg"
-                  value={classId}
-                  onChange={(e) => setClassId(e.target.value)}
-                >
-                  <option value="">请选择班级</option>
-                  {classes.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">开始时间</label>
-                  <Input
-                    type="datetime-local"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                  />
+
+              <Separator />
+
+              {/* 时间与评分区 */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                  <CalendarClock className="w-4 h-4 text-orange-500" />
+                  时间与评分
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">截止时间</label>
-                  <Input
-                    type="datetime-local"
-                    value={deadline}
-                    onChange={(e) => setDeadline(e.target.value)}
-                  />
+                <div className="grid gap-4 pl-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="hw-start">开始时间</Label>
+                      <Input
+                        id="hw-start"
+                        type="datetime-local"
+                        value={startTime}
+                        onChange={(e) => setStartTime(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="hw-deadline">截止时间 <span className="text-red-500">*</span></Label>
+                      <Input
+                        id="hw-deadline"
+                        type="datetime-local"
+                        value={deadline}
+                        onChange={(e) => setDeadline(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="hw-score" className="flex items-center gap-1.5">
+                        <Star className="w-3.5 h-3.5 text-yellow-500" />
+                        满分
+                      </Label>
+                      <Input
+                        id="hw-score"
+                        type="number"
+                        value={maxScore}
+                        onChange={(e) => setMaxScore(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="hw-reminder" className="flex items-center gap-1.5">
+                        <Bell className="w-3.5 h-3.5 text-orange-400" />
+                        提前提醒（小时）
+                      </Label>
+                      <Input
+                        id="hw-reminder"
+                        type="number"
+                        value={reminderHours}
+                        onChange={(e) => setReminderHours(e.target.value)}
+                        placeholder="截止前X小时"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-1.5">
+                        <Settings2 className="w-3.5 h-3.5 text-gray-400" />
+                        迟交设置
+                      </Label>
+                      <div className="flex items-center gap-2.5 h-9 px-3 rounded-md border border-input bg-background">
+                        <Switch
+                          id="allowLate"
+                          checked={allowLate}
+                          onCheckedChange={setAllowLate}
+                        />
+                        <Label htmlFor="allowLate" className="text-sm font-normal cursor-pointer">
+                          允许迟交
+                        </Label>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">满分</label>
-                  <Input
-                    type="number"
-                    value={maxScore}
-                    onChange={(e) => setMaxScore(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">提前提醒（小时）</label>
-                  <Input
-                    type="number"
-                    value={reminderHours}
-                    onChange={(e) => setReminderHours(e.target.value)}
-                    placeholder="截止前X小时"
-                  />
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="allowLate"
-                  checked={allowLate}
-                  onChange={(e) => setAllowLate(e.target.checked)}
-                  className="rounded border-gray-300"
-                />
-                <label htmlFor="allowLate" className="text-sm">允许迟交</label>
-              </div>
-              
+
               <Button 
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className="w-full bg-blue-600 hover:bg-blue-700 h-10 text-base font-medium mt-2"
                 onClick={handleCreateHomework}
               >
+                <Plus className="w-4 h-4 mr-1.5" />
                 发布作业
               </Button>
             </div>
@@ -1244,129 +1314,184 @@ export function HomeworkManagementPage() {
 
       {/* 编辑作业对话框 */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>编辑作业</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-100">
+                <Pencil className="w-4 h-4 text-amber-600" />
+              </div>
+              编辑作业
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 pt-4 max-h-[70vh] overflow-y-auto">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">作业标题</label>
-              <Input
-                placeholder="例如：第三章练习题"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">作业描述</label>
-              <Textarea
-                placeholder="详细描述作业要求..."
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-                rows={3}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">开始时间</label>
-                <Input
-                  type="datetime-local"
-                  value={editStartTime}
-                  onChange={(e) => setEditStartTime(e.target.value)}
-                />
+          <div className="space-y-5 pt-2 max-h-[70vh] overflow-y-auto pr-1">
+            {/* 基本信息区 */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <FileText className="w-4 h-4 text-blue-500" />
+                基本信息
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">截止时间</label>
-                <Input
-                  type="datetime-local"
-                  value={editDeadline}
-                  onChange={(e) => setEditDeadline(e.target.value)}
-                />
+              <div className="grid gap-4 pl-6">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-hw-title">作业标题 <span className="text-red-500">*</span></Label>
+                  <Input
+                    id="edit-hw-title"
+                    placeholder="例如：第三章练习题"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-hw-desc">作业描述</Label>
+                  <Textarea
+                    id="edit-hw-desc"
+                    placeholder="详细描述作业要求、提交规范等..."
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    rows={3}
+                    className="resize-none"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">满分</label>
-                <Input
-                  type="number"
-                  value={editMaxScore}
-                  onChange={(e) => setEditMaxScore(e.target.value)}
-                />
+            <Separator />
+
+            {/* 时间与评分区 */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <CalendarClock className="w-4 h-4 text-orange-500" />
+                时间与评分
+              </div>
+              <div className="grid gap-4 pl-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-hw-start">开始时间</Label>
+                    <Input
+                      id="edit-hw-start"
+                      type="datetime-local"
+                      value={editStartTime}
+                      onChange={(e) => setEditStartTime(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-hw-deadline">截止时间 <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="edit-hw-deadline"
+                      type="datetime-local"
+                      value={editDeadline}
+                      onChange={(e) => setEditDeadline(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-hw-score" className="flex items-center gap-1.5">
+                      <Star className="w-3.5 h-3.5 text-yellow-500" />
+                      满分
+                    </Label>
+                    <Input
+                      id="edit-hw-score"
+                      type="number"
+                      value={editMaxScore}
+                      onChange={(e) => setEditMaxScore(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1.5">
+                      <Settings2 className="w-3.5 h-3.5 text-gray-400" />
+                      迟交设置
+                    </Label>
+                    <div className="flex items-center gap-2.5 h-9 px-3 rounded-md border border-input bg-background">
+                      <Switch
+                        id="editAllowLate"
+                        checked={editAllowLate}
+                        onCheckedChange={setEditAllowLate}
+                      />
+                      <Label htmlFor="editAllowLate" className="text-sm font-normal cursor-pointer">
+                        允许迟交
+                      </Label>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="editAllowLate"
-                checked={editAllowLate}
-                onChange={(e) => setEditAllowLate(e.target.checked)}
-                className="rounded border-gray-300"
-              />
-              <label htmlFor="editAllowLate" className="text-sm">允许迟交</label>
-            </div>
-
+            {/* 项目小组配置 */}
             {editingHomework?.type === 'GROUP_PROJECT' && (
-              <div className="p-3 bg-blue-50 rounded-lg space-y-3">
-                <p className="text-sm font-medium text-blue-700">项目小组配置</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-600">最小人数</label>
-                    <Input type="number" value={editGroupMinSize} onChange={(e) => setEditGroupMinSize(e.target.value)} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-600">最大人数</label>
-                    <Input type="number" value={editGroupMaxSize} onChange={(e) => setEditGroupMaxSize(e.target.value)} />
-                  </div>
+              <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50/80 to-indigo-50/50 overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-3 bg-blue-100/60 border-b border-blue-200">
+                  <Users className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-semibold text-blue-700">项目小组配置</span>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-gray-600">组队截止时间</label>
-                  <Input type="datetime-local" value={editGroupDeadline} onChange={(e) => setEditGroupDeadline(e.target.value)} />
-                </div>
-                <p className="text-sm font-medium text-blue-700 mt-2">互评配置</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-600">每份作业评审人数</label>
-                    <Input type="number" value={editReviewersCount} onChange={(e) => setEditReviewersCount(e.target.value)} />
+                <div className="p-4 space-y-4">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-gray-600">最小人数</Label>
+                      <Input type="number" value={editGroupMinSize} onChange={(e) => setEditGroupMinSize(e.target.value)} className="h-9" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-gray-600">最大人数</Label>
+                      <Input type="number" value={editGroupMaxSize} onChange={(e) => setEditGroupMaxSize(e.target.value)} className="h-9" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-gray-600">组队截止</Label>
+                      <Input type="datetime-local" value={editGroupDeadline} onChange={(e) => setEditGroupDeadline(e.target.value)} className="h-9 text-xs" />
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-600">互评截止时间</label>
-                    <Input type="datetime-local" value={editReviewDeadline} onChange={(e) => setEditReviewDeadline(e.target.value)} />
+                  <Separator className="bg-blue-100" />
+                  <div className="flex items-center gap-2 text-sm font-medium text-blue-700">
+                    <UserCheck className="w-3.5 h-3.5" />
+                    互评配置
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-gray-600">每份评审人数</Label>
+                      <Input type="number" value={editReviewersCount} onChange={(e) => setEditReviewersCount(e.target.value)} className="h-9" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-gray-600">互评截止时间</Label>
+                      <Input type="datetime-local" value={editReviewDeadline} onChange={(e) => setEditReviewDeadline(e.target.value)} className="h-9 text-xs" />
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
+            {/* 自主实践配置 */}
             {editingHomework?.type === 'SELF_PRACTICE' && (
-              <div className="p-3 bg-green-50 rounded-lg space-y-3">
-                <p className="text-sm font-medium text-green-700">自主实践配置</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-600">加分上限</label>
-                    <Input type="number" value={editBonusCap} onChange={(e) => setEditBonusCap(e.target.value)} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-gray-600">提交次数上限</label>
-                    <Input type="number" value={editCountLimit} onChange={(e) => setEditCountLimit(e.target.value)} />
+              <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-green-50/50 overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-3 bg-emerald-100/60 border-b border-emerald-200">
+                  <Target className="w-4 h-4 text-emerald-600" />
+                  <span className="text-sm font-semibold text-emerald-700">自主实践配置</span>
+                </div>
+                <div className="p-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-gray-600">加分上限</Label>
+                      <Input type="number" value={editBonusCap} onChange={(e) => setEditBonusCap(e.target.value)} className="h-9" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-gray-600">提交次数上限</Label>
+                      <Input type="number" value={editCountLimit} onChange={(e) => setEditCountLimit(e.target.value)} className="h-9" />
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
             {editingHomework && (editingHomework._count?.submissions ?? 0) > 0 && (
-              <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded">
-                ⚠️ 已有 {editingHomework._count?.submissions} 位学生提交作业，修改不会影响已提交的内容。
-              </p>
+              <div className="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 p-3 rounded-lg">
+                <Bell className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                <span>已有 {editingHomework._count?.submissions} 位学生提交作业，修改不会影响已提交的内容。</span>
+              </div>
             )}
 
             <Button
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-blue-600 hover:bg-blue-700 h-10 text-base font-medium mt-2"
               onClick={handleEditHomework}
               disabled={!editTitle.trim() || !editDeadline}
             >
+              <Save className="w-4 h-4 mr-1.5" />
               保存修改
             </Button>
           </div>

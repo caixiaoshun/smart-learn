@@ -744,7 +744,7 @@ export function HomeworkManagementPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label className="text-xs text-gray-600">每份评审人数</Label>
+                        <Label className="text-xs text-gray-600">每份作业评审人数</Label>
                         <Input type="number" value={reviewersCount} onChange={(e) => setReviewersCount(e.target.value)} className="h-9" />
                       </div>
                       <div className="space-y-1.5">
@@ -1445,7 +1445,7 @@ export function HomeworkManagementPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <Label className="text-xs text-gray-600">每份评审人数</Label>
+                      <Label className="text-xs text-gray-600">每份作业评审人数</Label>
                       <Input type="number" value={editReviewersCount} onChange={(e) => setEditReviewersCount(e.target.value)} className="h-9" />
                     </div>
                     <div className="space-y-1.5">

@@ -73,7 +73,6 @@ export function ClassManagementPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold">创建与管理班级</h1>
-            <p className="mt-2 text-sm text-sky-100">支持班级 CRUD、邀请码复制和学生名单管理。</p>
           </div>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>

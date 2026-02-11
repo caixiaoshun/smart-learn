@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI 助手界面 - 智慧教育平台</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2563eb","primary-hover": "#1d4ed8",
+                        "background-main": "#f0f4fa","surface-white": "#ffffff",
+                        "surface-active": "#eff6ff","surface-hover": "#e0e7ff",
+                        "border-light": "#e2e8f0","text-main": "#1e293b","text-secondary": "#64748b",},
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "md": "0.375rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        .message-anim {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .mask-linear {
+            mask-image: linear-gradient(to right, black 85%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+        }
+    </style>
+</head>
+<body class="bg-background-main text-text-main font-display antialiased overflow-hidden h-screen flex selection:bg-primary selection:text-white">
+<aside class="w-80 flex-shrink-0 flex flex-col border-r border-border-light bg-surface-white h-full shadow-sm z-10">
+<div class="p-6 pb-2">
+<div class="flex items-center gap-3 mb-6">
+<div class="size-8 rounded-lg bg-primary flex items-center justify-center shadow-md shadow-primary/20">
+<span class="material-symbols-outlined text-white text-[20px]">school</span>
+</div>
+<h1 class="text-text-main text-lg font-bold tracking-tight">智慧教育平台</h1>
+</div>
+<button class="w-full flex items-center justify-center gap-2 rounded-lg h-11 bg-primary hover:bg-primary-hover transition-colors text-white text-sm font-bold shadow-lg shadow-primary/20 group">
+<span class="material-symbols-outlined text-[20px] transition-transform group-hover:rotate-90">add</span>
+<span>新对话</span>
+</button>
+</div>
+<div class="px-4 py-2 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:text-primary hover:bg-surface-active transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">仪表盘</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:text-primary hover:bg-surface-active transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">library_books</span>
+<span class="text-sm font-medium">我的课程</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-surface-active text-primary shadow-sm ring-1 ring-primary/10" href="#">
+<span class="material-symbols-outlined text-[20px] fill-current">smart_toy</span>
+<span class="text-sm font-medium">AI 助手</span>
+</a>
+</div>
+<div class="h-px bg-border-light mx-6 my-2"></div>
+<div class="px-4 py-2">
+<div class="relative group/search">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-text-secondary group-focus-within/search:text-primary text-[20px]">search</span>
+</div>
+<input class="block w-full rounded-lg border-none bg-surface-active py-2.5 pl-10 pr-3 text-sm text-text-main placeholder-text-secondary focus:ring-1 focus:ring-primary focus:bg-white transition-all" placeholder="搜索对话..." type="text"/>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto px-4 py-2 space-y-6">
+<div class="flex flex-col gap-2">
+<h3 class="px-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">今天</h3>
+<button class="flex items-center gap-3 px-3 py-3 rounded-lg bg-surface-active/60 hover:bg-surface-active transition-colors w-full text-left group">
+<span class="material-symbols-outlined text-primary text-[20px]">chat_bubble_outline</span>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-text-main truncate">精准干预问答</p>
+</div>
+</button>
+</div>
+<div class="flex flex-col gap-2">
+<h3 class="px-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">昨天</h3>
+<button class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-surface-active transition-colors w-full text-left group">
+<span class="material-symbols-outlined text-text-secondary group-hover:text-primary text-[20px]">chat_bubble_outline</span>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-text-secondary group-hover:text-text-main truncate">行为数据分析</p>
+</div>
+</button>
+<button class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-surface-active transition-colors w-full text-left group">
+<span class="material-symbols-outlined text-text-secondary group-hover:text-primary text-[20px]">chat_bubble_outline</span>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-text-secondary group-hover:text-text-main truncate">课程评价指标</p>
+</div>
+</button>
+</div>
+</div>
+<div class="p-4 border-t border-border-light bg-surface-white">
+<button class="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-surface-active transition-colors text-left">
+<img class="size-9 rounded-full bg-gray-100 object-cover border border-border-light" data-alt="User profile avatar showing a student portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOtobzhl8DFCXeY99cv9qtjPzd5Sh-2Re48L7aTRidY1cyba3nXSU4hrBHi_mWOdkqD9FyFQKil0tzWU0OoO804pdg5kLO4NtY7plr7r-eItq6umwdUe8aZp1uA0__a2paOpGKbphWnV2s90IK6IPEyMdChrBFX9LaHSYEeeZkUz5IPSaXC3mD4DVYCG8NecXYbHBSQ3qoQ6CHof1Iy0Ws9JswEhozvqDPsCXk79_h5W9olmMWFil3fPdjXo5GOltRO1zjV3QTeKQ"/>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-text-main">Alex Johnson</p>
+<p class="text-xs text-text-secondary">学生账号</p>
+</div>
+<span class="material-symbols-outlined text-text-secondary text-[20px]">settings</span>
+</button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-full bg-background-main relative">
+<header class="flex-shrink-0 h-16 border-b border-border-light flex items-center justify-between px-8 bg-surface-white/80 backdrop-blur-md z-10">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="size-2.5 rounded-full bg-green-500 absolute top-0 right-0 border-2 border-surface-white"></div>
+<span class="material-symbols-outlined text-primary text-[28px]">smart_toy</span>
+</div>
+<div>
+<h2 class="text-text-main text-base font-bold leading-none">EduBot 助手</h2>
+<span class="text-xs text-green-600 font-medium">在线 • 个性化学习</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-text-secondary hover:text-primary hover:bg-surface-active rounded-lg transition-colors" title="历史记录">
+<span class="material-symbols-outlined text-[20px]">history</span>
+</button>
+<button class="p-2 text-text-secondary hover:text-primary hover:bg-surface-active rounded-lg transition-colors" title="设置">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+</button>
+<button class="p-2 text-text-secondary hover:text-primary hover:bg-surface-active rounded-lg transition-colors" title="帮助">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+</button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 scroll-smooth" id="chat-container">
+<div class="flex justify-center">
+<span class="text-xs font-medium text-text-secondary bg-surface-active border border-border-light px-3 py-1 rounded-full">今天, 上午 10:23</span>
+</div>
+<div class="flex gap-4 max-w-3xl message-anim">
+<div class="flex-shrink-0 size-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shadow-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">smart_toy</span>
+</div>
+<div class="flex flex-col gap-2 flex-1">
+<div class="flex items-baseline gap-2">
+<span class="text-sm font-bold text-text-main">EduBot</span>
+<span class="text-xs text-text-secondary">10:23</span>
+</div>
+<div class="bg-surface-white text-text-main/90 p-4 rounded-2xl rounded-tl-none border border-border-light leading-relaxed shadow-sm">
+<p>你好 Alex！👋 根据你最近在<strong class="text-text-main">认知心理学</strong>中的测验成绩，我发现你在记忆模型方面表现不错，但可能需要复习一下<span class="text-primary underline decoration-dotted cursor-pointer">行为干预</span>。</p>
+<p class="mt-2">你是想回顾一个关于精准干预的案例研究，还是开始一个小测验？</p>
+</div>
+<div class="flex flex-wrap gap-2 mt-1">
+<button class="px-4 py-2 rounded-full border border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary text-sm font-medium transition-colors">回顾案例研究</button>
+<button class="px-4 py-2 rounded-full border border-border-light bg-surface-white hover:bg-surface-active hover:border-primary/30 text-text-secondary hover:text-primary text-sm font-medium transition-colors shadow-sm">参加测验</button>
+</div>
+</div>
+</div>
+<div class="flex gap-4 flex-row-reverse max-w-3xl ml-auto message-anim" style="animation-delay: 0.1s;">
+<div class="flex-shrink-0 size-10 rounded-full bg-white border border-border-light overflow-hidden shadow-sm">
+<img class="object-cover h-full w-full" data-alt="User profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbTrIXmgbYEIef3quu_uoUcQQBaCrPm51qWNcWa7VfpMoJ72u3sJAWe8YJOb0xGS11Hl6EobEKpXywCzZ6mvkUgNqzusUSimLFdjAcLkB_aIWp042zSYU_aSzjFu5OVC2Rdxyv4U1gNt6J8sjvXPOprVy9cPD0cRF6MWlXG_mtQ1fIw-PRyF0dMAnsCplyuEO5YaFQQoT8_nqRcSWVaiUlmYUK06p44E97P7dq3Mc0TdW6nN5IgUA2UTlwdOA30o918o83QcuXwxc"/>
+</div>
+<div class="flex flex-col gap-2 items-end flex-1">
+<div class="flex items-baseline gap-2">
+<span class="text-xs text-text-secondary">10:25</span>
+<span class="text-sm font-bold text-text-main">你</span>
+</div>
+<div class="bg-primary text-white p-4 rounded-2xl rounded-tr-none shadow-md leading-relaxed shadow-blue-500/20">
+<p>我实际上对“精准干预”在真实课堂环境中是如何运作的感到困惑。你能解释一下吗？</p>
+</div>
+</div>
+</div>
+<div class="flex gap-4 max-w-3xl message-anim" style="animation-delay: 0.2s;">
+<div class="flex-shrink-0 size-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shadow-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">smart_toy</span>
+</div>
+<div class="flex flex-col gap-2 flex-1">
+<div class="flex items-baseline gap-2">
+<span class="text-sm font-bold text-text-main">EduBot</span>
+<span class="text-xs text-text-secondary">10:25</span>
+</div>
+<div class="bg-surface-white text-text-main/90 p-4 rounded-2xl rounded-tl-none border border-border-light leading-relaxed shadow-sm">
+<p class="mb-3">没问题！教育中的<strong>精准干预</strong>是指利用数据针对特定的学习差距，而不是应用“一刀切”的解决方案。</p>
+<ul class="list-disc list-outside ml-4 space-y-1 mb-4 text-text-secondary">
+<li><strong class="text-text-main">识别：</strong> 使用行为数据找出确切的困难点（例如，学生仅在代数应用题上不及格）。</li>
+<li><strong class="text-text-main">目标：</strong> 针对该差距应用特定的教学策略。</li>
+<li><strong class="text-text-main">评估：</strong> 使用即时反馈衡量干预是否有效。</li>
+</ul>
+<p>这是你课程库中的一个资源，完美地展示了这个循环：</p>
+<div class="mt-4 group border border-border-light rounded-xl overflow-hidden bg-white hover:border-primary/50 transition-colors cursor-pointer shadow-sm hover:shadow-md">
+<div class="flex">
+<div class="w-32 h-auto relative hidden sm:block">
+<img class="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" data-alt="Abstract educational chart showing data trends in blue and purple gradients" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAmVU2oRPEZP_EpEdELax80OTWkuoti5oCE-OXSlU-nE2rWx8APD0pIHyEs_cdRHWhMcdZJN6FclCWUQfpK0INEB2LOkaQOdtgusoIb-C7YEAdAWatNrsHWugS4NbZmOT614voB6pyvZBN-b8ApDmssFIu6ITmmj2BKLVS0E4cg2i8D3s7ZpSTwy74BmMf_4DGJCP1Yjr4VxwZ24ZMhqlrCuGf9gYaP8GQ23zm5gCbBs9RXRJH0tc7T2MXA5JZbZFucel6bCOywFw"/>
+</div>
+<div class="p-4 flex-1">
+<div class="flex items-start justify-between">
+<div>
+<span class="text-[10px] font-bold uppercase tracking-wider text-primary mb-1 block">案例资源</span>
+<h4 class="text-text-main font-bold text-sm mb-1 group-hover:text-primary transition-colors">“翻转课堂”干预模型</h4>
+<p class="text-xs text-text-secondary line-clamp-2">分析教师“A”如何利用行为数据为学习困难的学生分配特定的课前视频。</p>
+</div>
+<span class="material-symbols-outlined text-text-secondary group-hover:text-primary text-[20px] ml-2">open_in_new</span>
+</div>
+<div class="mt-3 flex items-center gap-3">
+<div class="flex items-center gap-1 text-[10px] text-text-secondary bg-surface-active px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[12px]">bar_chart</span>
+<span>数据分析</span>
+</div>
+<div class="flex items-center gap-1 text-[10px] text-text-secondary bg-surface-active px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[12px]">schedule</span>
+<span>5分钟阅读</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 mt-1 ml-1">
+<button class="p-1 text-text-secondary hover:text-green-600 transition-colors" title="有帮助">
+<span class="material-symbols-outlined text-[18px]">thumb_up</span>
+</button>
+<button class="p-1 text-text-secondary hover:text-red-500 transition-colors" title="无帮助">
+<span class="material-symbols-outlined text-[18px]">thumb_down</span>
+</button>
+<button class="p-1 text-text-secondary hover:text-text-main transition-colors ml-auto flex items-center gap-1 text-xs" title="复制">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+                        复制
+                    </button>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4 sm:p-6 bg-background-main relative z-20">
+<div class="max-w-4xl mx-auto relative">
+<div class="absolute -top-12 left-0 flex gap-2 overflow-x-auto w-full pb-2 mask-linear">
+<button class="flex-shrink-0 px-3 py-1.5 bg-surface-white hover:bg-surface-active border border-border-light rounded-lg text-xs text-text-secondary hover:text-primary transition-colors flex items-center gap-2 shadow-sm backdrop-blur-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">lightbulb</span>
+                    解释行为数据图表？
+                </button>
+<button class="flex-shrink-0 px-3 py-1.5 bg-surface-white hover:bg-surface-active border border-border-light rounded-lg text-xs text-text-secondary hover:text-primary transition-colors flex items-center gap-2 shadow-sm backdrop-blur-sm">
+<span class="material-symbols-outlined text-[16px] text-purple-500">quiz</span>
+                    生成练习题
+                </button>
+</div>
+<div class="relative flex items-end gap-2 bg-surface-white p-2 rounded-xl ring-1 ring-border-light focus-within:ring-primary shadow-xl shadow-blue-900/5 transition-shadow">
+<button class="p-2 text-text-secondary hover:text-primary hover:bg-surface-active rounded-lg transition-colors flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">add_circle</span>
+</button>
+<textarea class="w-full bg-transparent border-none focus:ring-0 text-text-main placeholder-text-secondary resize-none py-3 max-h-32 text-base" placeholder="询问关于课程的问题，上传文档，或请求数据分析..." rows="1"></textarea>
+<button class="p-2 text-text-secondary hover:text-primary hover:bg-surface-active rounded-lg transition-colors flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">mic</span>
+</button>
+<button class="p-2 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors flex-shrink-0 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[20px] translate-x-0.5">send</span>
+</button>
+</div>
+<p class="text-center text-[11px] text-text-secondary mt-3 opacity-80">
+                AI 可能会犯错。请核对重要信息。
+            </p>
+</div>
+</div>
+</main>
+<script>
+        // Simple script to auto-resize textarea
+        const textarea = document.querySelector('textarea');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if(this.value === '') this.style.height = 'auto';
+        });
+    </script>
+
+</body></html>

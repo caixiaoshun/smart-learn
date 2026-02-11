@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>教师发布作业（增强版） - 混合式教学平台</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b96ee",
+                        "primary-dark": "#1a7bc9",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101a22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>.markdown-toolbar-btn {
+            @apply p-1.5 rounded text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors;
+        }.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 font-display transition-colors duration-300">
+<nav class="sticky top-0 z-50 bg-white/80 dark:bg-[#101a22]/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-16">
+<div class="flex items-center gap-3">
+<div class="flex-shrink-0 bg-primary/10 p-2 rounded-lg">
+<span class="material-icons text-primary text-2xl">school</span>
+</div>
+<div class="hidden md:block">
+<h1 class="text-xl font-bold text-gray-900 dark:text-white">智教云 <span class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">教师工作台</span></h1>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">
+<span class="material-icons">notifications_none</span>
+</button>
+<div class="flex items-center gap-2">
+<img alt="User profile picture" class="h-8 w-8 rounded-full border border-gray-200 dark:border-gray-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5aocHb3w_8WapNGIZZ9ourBM2M63DecGdMbfkDi2KNk0dZrAOtNV5JnRW2mpl0Oyclfa8lWJSiJeJOay6gFQkfT0CFnl8KCDiTAFO1aIJRhJ6pVbhZ3Jf9rsNaCMwcqoYzy5ugL3Suh90tyWsfMFEk5wz1BmcAVhHa9WGmoE1sUwLN6EMk-OwFQTFdrh-ppyszJwvCjUt3VQAXWqwa15e41lmGdSu7HIJs991tw-X2TyAc9mepfBxMmeHjjE66YzGXnPAK17QAI0"/>
+<span class="text-sm font-medium hidden sm:block">张教授</span>
+</div>
+</div>
+</div>
+</div>
+</nav>
+<main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="mb-8">
+<nav aria-label="Breadcrumb" class="flex text-sm text-gray-500 dark:text-gray-400 mb-2">
+<ol class="flex items-center space-x-2">
+<li><a class="hover:text-primary transition-colors" href="#">课程管理</a></li>
+<li><span class="material-icons text-xs mx-1">chevron_right</span></li>
+<li><a class="hover:text-primary transition-colors" href="#">人工智能基础</a></li>
+<li><span class="material-icons text-xs mx-1">chevron_right</span></li>
+<li aria-current="page" class="font-medium text-gray-900 dark:text-white">发布新作业</li>
+</ol>
+</nav>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<h2 class="text-3xl font-bold text-gray-900 dark:text-white">教师发布作业（增强版）</h2>
+<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">配置多元化作业形态、组队规则、评价体系及智能评估参数。</p>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs text-gray-500 dark:text-gray-500 flex items-center gap-1">
+<span class="material-icons text-sm">cloud_done</span> 自动保存于 14:32
+                </span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<div class="lg:col-span-8 space-y-6">
+<div class="bg-white dark:bg-[#1a2634] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+<span class="material-icons text-primary text-xl">assignment</span>
+                        基本信息
+                    </h3>
+</div>
+<div class="space-y-5">
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="title">作业标题 <span class="text-red-500">*</span></label>
+<input class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary shadow-sm placeholder-gray-400" id="title" placeholder="例如：第三章 生成对抗网络原理分析" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" for="chapter">所属章节</label>
+<select class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary shadow-sm" id="chapter">
+<option>第一章：AI 概述与发展历程</option>
+<option>第二章：机器学习基础算法</option>
+<option selected="">第三章：深度学习与神经网络</option>
+<option>第四章：大语言模型应用实践</option>
+</select>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-[#1a2634] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+<h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-5">
+<span class="material-icons text-primary text-xl">category</span>
+                    作业形态配置
+                </h3>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="assignment_type" type="radio" value="normal"/>
+<div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-primary/50 peer-checked:border-primary peer-checked:bg-blue-50/50 dark:peer-checked:bg-primary/10 transition-all h-full">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-icons text-gray-400 peer-checked:text-primary group-hover:text-primary">article</span>
+<span class="font-medium text-gray-900 dark:text-white">普通作业</span>
+</div>
+<p class="text-xs text-gray-500 dark:text-gray-400">传统的个人提交作业，适用于日常练习。</p>
+</div>
+<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 text-primary">
+<span class="material-icons text-lg">check_circle</span>
+</div>
+</label>
+<label class="relative cursor-pointer group">
+<input checked="" class="peer sr-only" name="assignment_type" type="radio" value="group"/>
+<div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-primary/50 peer-checked:border-primary peer-checked:bg-blue-50/50 dark:peer-checked:bg-primary/10 transition-all h-full">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-icons text-gray-400 peer-checked:text-primary group-hover:text-primary">groups</span>
+<span class="font-medium text-gray-900 dark:text-white">项目小组</span>
+</div>
+<p class="text-xs text-gray-500 dark:text-gray-400">支持动态组队、分工协作与项目成果提交。</p>
+</div>
+<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 text-primary">
+<span class="material-icons text-lg">check_circle</span>
+</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="assignment_type" type="radio" value="practice"/>
+<div class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-primary/50 peer-checked:border-primary peer-checked:bg-blue-50/50 dark:peer-checked:bg-primary/10 transition-all h-full">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-icons text-gray-400 peer-checked:text-primary group-hover:text-primary">rocket_launch</span>
+<span class="font-medium text-gray-900 dark:text-white">自主实践</span>
+</div>
+<p class="text-xs text-gray-500 dark:text-gray-400">开放式任务，支持积分激励与成果展示。</p>
+</div>
+<div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 text-primary">
+<span class="material-icons text-lg">check_circle</span>
+</div>
+</label>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-5 border border-slate-200 dark:border-slate-700 relative">
+<div class="absolute -top-3 left-6 bg-white dark:bg-[#1a2634] px-2 text-xs font-semibold text-primary border border-slate-200 dark:border-slate-700 rounded-md">
+                        组队规则配置
+                    </div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">小组人数限制</label>
+<div class="flex items-center gap-2">
+<input class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-sm focus:ring-primary focus:border-primary" placeholder="Min" type="number" value="3"/>
+<span class="text-gray-400">-</span>
+<input class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-sm focus:ring-primary focus:border-primary" placeholder="Max" type="number" value="5"/>
+<span class="text-sm text-gray-500">人</span>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">组队截止时间</label>
+<input class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-sm focus:ring-primary focus:border-primary" type="datetime-local"/>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div>
+<label class="text-sm font-medium text-gray-700 dark:text-gray-300">锁组策略</label>
+<p class="text-xs text-gray-500">截止后是否允许成员变更</p>
+</div>
+<select class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-sm py-1.5 focus:ring-primary focus:border-primary">
+<option>完全锁定</option>
+<option>仅允许加入</option>
+<option>仅允许退出</option>
+</select>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div>
+<label class="text-sm font-medium text-gray-700 dark:text-gray-300">组员分工模板</label>
+<p class="text-xs text-gray-500">强制学生填写具体贡献</p>
+</div>
+<button aria-checked="true" class="bg-primary relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" role="switch" type="button">
+<span aria-hidden="true" class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-[#1a2634] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-bl-full pointer-events-none"></div>
+<div class="flex items-center justify-between mb-4 relative z-10">
+<h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+<span class="material-icons text-primary text-xl">description</span>
+                        详细说明
+                    </h3>
+<button class="group flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all transform hover:-translate-y-0.5">
+<span class="material-icons text-base">auto_awesome</span>
+<span>AI 辅助出题</span>
+<span class="hidden group-hover:block absolute top-full right-0 mt-2 w-48 bg-gray-900 text-white text-xs p-2 rounded shadow-lg z-20">
+                            基于所选章节内容自动生成题目草稿。
+                        </span>
+</button>
+</div>
+<div class="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-800">
+<div class="flex items-center gap-1 p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+<button class="markdown-toolbar-btn" title="Bold"><span class="material-icons text-lg">format_bold</span></button>
+<button class="markdown-toolbar-btn" title="Italic"><span class="material-icons text-lg">format_italic</span></button>
+<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+<button class="markdown-toolbar-btn" title="List"><span class="material-icons text-lg">format_list_bulleted</span></button>
+<button class="markdown-toolbar-btn" title="Ordered List"><span class="material-icons text-lg">format_list_numbered</span></button>
+<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+<button class="markdown-toolbar-btn" title="Link"><span class="material-icons text-lg">link</span></button>
+<button class="markdown-toolbar-btn" title="Image"><span class="material-icons text-lg">image</span></button>
+<div class="flex-grow"></div>
+<button class="text-xs text-primary font-medium px-2">预览 Markdown</button>
+</div>
+<textarea class="w-full h-64 p-4 border-none focus:ring-0 dark:bg-gray-800 dark:text-white resize-none font-mono text-sm" placeholder="在此输入作业要求、评分标准等详细信息...（支持Markdown语法）">## 项目目标
+小组合作完成一个简单的 GAN 模型训练，并生成一组手写数字图像。
+## 分工要求
+1. **组长**：负责整体进度把控和最终报告整合。
+2. **算法工程师**：负责 Generator 和 Discriminator 的代码实现。
+3. **数据分析师**：负责训练过程中的 Loss 曲线绘制与分析。
+## 提交内容
+1. 项目代码仓库链接（GitHub/GitLab）。
+2. 项目演示 PPT（不超过 10 页）。
+3. 详细的分工贡献表。
+</textarea>
+</div>
+</div>
+<div class="bg-white dark:bg-[#1a2634] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+<h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+<span class="material-icons text-primary text-xl">folder_open</span>
+                    参考资料
+                </h3>
+<div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors cursor-pointer group">
+<div class="inline-flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors mb-3">
+<span class="material-icons">cloud_upload</span>
+</div>
+<p class="text-sm font-medium text-gray-900 dark:text-white">点击上传或拖拽文件至此</p>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">支持 PDF, DOCX, PPTX (最大 50MB)</p>
+</div>
+<div class="mt-4 space-y-3">
+<div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-700">
+<div class="flex items-center gap-3">
+<span class="material-icons text-red-500 text-2xl">picture_as_pdf</span>
+<div>
+<p class="text-sm font-medium text-gray-900 dark:text-white">GAN_Tutorial_2023.pdf</p>
+<p class="text-xs text-gray-500">2.4 MB</p>
+</div>
+</div>
+<button class="text-gray-400 hover:text-red-500 transition-colors">
+<span class="material-icons">close</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-4 space-y-6">
+<div class="bg-white dark:bg-[#1a2634] rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 sticky top-24">
+<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+<span class="material-icons text-primary text-xl">tune</span>
+                    任务设置
+                </h3>
+<div class="space-y-6">
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">作业截止日期</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-icons text-gray-400 text-sm">event</span>
+</div>
+<input class="pl-10 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:border-primary focus:ring-primary sm:text-sm shadow-sm" type="datetime-local" value="2023-11-20T23:59"/>
+</div>
+</div>
+<div class="border-t border-b border-gray-100 dark:border-gray-700 py-4 space-y-4">
+<div class="flex items-center justify-between">
+<label class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1">
+<span class="material-icons text-xs text-gray-400">rate_review</span>
+                                评价体系配置
+                            </label>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm text-gray-600 dark:text-gray-400">开启自评</span>
+<button class="bg-gray-200 dark:bg-gray-700 relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" type="button">
+<span class="translate-x-0 pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+</button>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm text-gray-600 dark:text-gray-400">开启互评</span>
+<button aria-checked="true" class="bg-primary relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" type="button">
+<span class="translate-x-4 pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+</button>
+</div>
+<div class="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg space-y-3">
+<div>
+<label class="block text-xs text-gray-500 mb-1">互评分配数 (N)</label>
+<input class="w-full text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 p-1.5 focus:border-primary focus:ring-primary" type="number" value="3"/>
+</div>
+<div>
+<label class="block text-xs text-gray-500 mb-1">匿名程度</label>
+<select class="w-full text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 p-1.5 focus:border-primary focus:ring-primary">
+<option>单向匿名（评价者匿名）</option>
+<option>双向匿名</option>
+<option>实名互评</option>
+</select>
+</div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">积分权重</label>
+<span class="bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded">20 分</span>
+</div>
+<input class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary dark:bg-gray-700" max="100" min="0" type="range" value="20"/>
+<p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            此作业占章节总积分的 20%。关联行为数据分析模块。
+                        </p>
+</div>
+<hr class="border-gray-200 dark:border-gray-700 my-4"/>
+<div class="flex flex-col gap-3">
+<button class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                            发布作业
+                        </button>
+<button class="w-full flex justify-center py-2.5 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                            存为草稿
+                        </button>
+</div>
+</div>
+</div>
+<div class="bg-gradient-to-br from-indigo-500 to-primary rounded-xl shadow-lg p-5 text-white relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 opacity-20">
+<span class="material-icons text-9xl">analytics</span>
+</div>
+<h4 class="font-bold text-lg mb-2 relative z-10">教学数据洞察</h4>
+<p class="text-xs text-white/90 relative z-10 leading-relaxed mb-3">
+                    根据历史数据，小组项目能提升 15% 的知识留存率。建议开启“互评”以增强学生思辨能力。
+                </p>
+<a class="inline-flex items-center text-xs font-semibold hover:underline relative z-10" href="#">
+                    查看详情 <span class="material-icons text-xs ml-1">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</main>
+<footer class="bg-white dark:bg-[#101a22] border-t border-gray-200 dark:border-gray-800 mt-12 py-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="text-sm text-gray-500 dark:text-gray-400">© 2023 智教云混合式教学平台. All rights reserved.</p>
+<div class="flex items-center gap-6">
+<a class="text-sm text-gray-500 hover:text-primary dark:text-gray-400" href="#">帮助中心</a>
+<a class="text-sm text-gray-500 hover:text-primary dark:text-gray-400" href="#">隐私政策</a>
+<a class="text-sm text-gray-500 hover:text-primary dark:text-gray-400" href="#">反馈建议</a>
+</div>
+</div>
+</footer>
+
+</body></html>

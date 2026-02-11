@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>平时表现管理中心 - Smart-Learn</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+            extend: {
+                colors: {
+                "primary": "#2b96ee",
+                "primary-dark": "#1a7ac7",
+                "background-light": "#f6f7f8",
+                "background-dark": "#101a22",
+                "surface-light": "#ffffff",
+                "surface-dark": "#1c2a35",
+                },
+                fontFamily: {
+                "display": ["Inter", "sans-serif"]
+                },
+                borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for better look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        .hide-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 font-display min-h-screen flex flex-col">
+<!-- Navbar -->
+<header class="bg-surface-light dark:bg-surface-dark border-b border-slate-200 dark:border-slate-700 h-16 sticky top-0 z-30 flex items-center justify-between px-6 shadow-sm">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">S</div>
+<nav class="hidden md:flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+<span>Smart-Learn</span>
+<span class="material-icons text-base">chevron_right</span>
+<span>计算机科学导论 (2023秋)</span>
+<span class="material-icons text-base">chevron_right</span>
+<span class="font-medium text-slate-800 dark:text-white">平时表现管理</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-icons text-slate-400 cursor-pointer">notifications</span>
+<div class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></div>
+</div>
+<div class="flex items-center gap-2 cursor-pointer">
+<img class="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-600" data-alt="Teacher avatar profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmucKBzykDBRhniDW7kVTGQprI7bsgrm4r5NC8BgMufa_KdmLkziYAqft3xp6ADTXCxMYUgboDbhcLnvQCIelwRTjQTUYF6yG5Dpb42R6RazaxaQx57jWPnl6ryWSHl7JQ8cR-ZVZ2cx-HGmSZYN9FIv21CgLqQYu4lnk5G1W1Xj4Coqemco9igSbLAZ8oJD9oLODX1PkRlfK0C8gZ1yWsg8uaD55KYlko6TUmrDxIEzJ_kVGuclJxNFixkc9UEX47v3pxycHQksk"/>
+<span class="text-sm font-medium hidden sm:block">李老师</span>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 p-6 max-w-[1600px] mx-auto w-full grid grid-cols-12 gap-6">
+<!-- Header Section with Actions -->
+<div class="col-span-12 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+<div>
+<h1 class="text-2xl font-bold text-slate-900 dark:text-white">平时表现管理中心</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1">记录学生课堂互动、分享及知识点掌握情况。</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm">
+<span class="material-icons text-lg text-slate-500">settings</span>
+                    评分规则设置
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors shadow-sm shadow-primary/30">
+<span class="material-icons text-lg">file_download</span>
+                    一键导出到成绩册
+                </button>
+</div>
+</div>
+<!-- Zone 1: Classroom Performance (Left Column - Larger) -->
+<div class="col-span-12 lg:col-span-8 flex flex-col gap-6">
+<!-- Classroom Performance Card -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col h-full">
+<div class="p-5 border-b border-slate-100 dark:border-slate-700/50 flex flex-wrap justify-between items-center gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-icons">how_to_reg</span>
+</div>
+<div>
+<h2 class="font-bold text-lg">课堂表现</h2>
+<p class="text-xs text-slate-500">快速勾选记录加减分</p>
+</div>
+</div>
+<div class="flex items-center gap-3 bg-slate-50 dark:bg-slate-800/50 p-1 rounded-lg border border-slate-100 dark:border-slate-700">
+<button class="px-3 py-1.5 bg-white dark:bg-surface-dark rounded text-sm font-medium shadow-sm text-primary">网格视图</button>
+<button class="px-3 py-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-sm font-medium">列表视图</button>
+</div>
+<div class="flex items-center gap-2">
+<div class="relative">
+<span class="material-icons absolute left-2.5 top-2 text-slate-400 text-lg">search</span>
+<input class="pl-9 pr-4 py-1.5 text-sm bg-slate-50 dark:bg-slate-800 border-none rounded-lg focus:ring-1 focus:ring-primary w-40 sm:w-60" placeholder="搜索学生..." type="text"/>
+</div>
+<button class="text-sm text-primary font-medium hover:underline">全选</button>
+</div>
+</div>
+<!-- Knowledge Point Selector (Context for scoring) -->
+<div class="px-5 py-3 bg-primary/5 dark:bg-primary/10 border-b border-primary/10 flex items-center justify-between">
+<div class="flex items-center gap-2 text-sm">
+<span class="text-slate-500 dark:text-slate-400">当前关联知识点:</span>
+<span class="font-medium text-primary bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-primary/20">第三章：二叉树的遍历算法</span>
+<button class="text-slate-400 hover:text-primary"><span class="material-icons text-sm">edit</span></button>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-md text-xs font-bold border border-green-200 dark:border-green-800 hover:bg-green-200 transition-colors">
+<span class="material-icons text-sm">add</span> 表现优秀 (+2)
+                        </button>
+<button class="flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-md text-xs font-bold border border-blue-200 dark:border-blue-800 hover:bg-blue-200 transition-colors">
+<span class="material-icons text-sm">add</span> 积极互动 (+1)
+                        </button>
+<button class="flex items-center gap-1 px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md text-xs font-medium border border-red-100 dark:border-red-900 hover:bg-red-100 transition-colors">
+<span class="material-icons text-sm">remove</span> 违纪提醒 (-1)
+                        </button>
+</div>
+</div>
+<!-- Students Grid -->
+<div class="p-5 overflow-y-auto max-h-[500px] grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+<!-- Student Card 1 (Selected) -->
+<div class="group relative bg-primary/5 dark:bg-primary/10 border-2 border-primary rounded-xl p-4 flex flex-col items-center cursor-pointer transition-all hover:shadow-md">
+<div class="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center text-white">
+<span class="material-icons text-xs">check</span>
+</div>
+<img class="w-16 h-16 rounded-full object-cover mb-3 border-2 border-white dark:border-slate-700 shadow-sm" data-alt="Student portrait female" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYgRzaRaZOPLE4AXZCLKhlTkk_QnRd5dTlnN4roicN75yU6-w2eIpJZRcugr4RgtmQFXfSr32zcTFBe9GWVg5y4Cx-fC9Zadkn9lAqhe5OVUeHcfUvMBHGdLS9ZOsvqbJpOaVvjAKCLWxk7Aau59ckFKxDhagf-yuxpZ8iLqKBPuT0EezAf730AlGqPrA-EGPklZiuX-2kkJePt5fLxtFGPIeeTaEtlHjilpOBSvgbZJEz9GBDv_RYIVoa9dJlHvCOVmr5wAdxaR0"/>
+<h3 class="font-bold text-slate-800 dark:text-white text-sm">陈小明</h3>
+<p class="text-xs text-slate-500 mb-2">2021001</p>
+<div class="flex items-center gap-1 text-xs font-medium bg-white dark:bg-slate-800 px-2 py-1 rounded-full border border-slate-200 dark:border-slate-600">
+<span class="text-primary">95分</span>
+</div>
+</div>
+<!-- Student Card 2 -->
+<div class="group relative bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 hover:border-primary/50 rounded-xl p-4 flex flex-col items-center cursor-pointer transition-all hover:shadow-md">
+<img class="w-16 h-16 rounded-full object-cover mb-3 border-2 border-white dark:border-slate-700 shadow-sm grayscale group-hover:grayscale-0 transition-all" data-alt="Student portrait male" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJDyN0sclWnKwuToQK3Pp6xm-grU5n8wYH3fwrq-s8TeHfDPYrPKtqr6kdlQgD7RuymPfbho34q4rEXG1bxvqCzZDBl6n_n9Vd5a52l-1pO2NMwXsvf1WblZJ8DD7oymtWhvfydsOQKLtFxVvWqixCO_YXtEYyuBO6WEyWYnjgVynBuM8xgpHmS_4RGU0ZAs-v269TJSRcZM7KdnahQtZjWIBiigzt5UVkEF5yvNt2eyRBb5PIyrMfCEFB6dG9HxHJ9r2M2iAuYb8"/>
+<h3 class="font-bold text-slate-800 dark:text-white text-sm">张伟</h3>
+<p class="text-xs text-slate-500 mb-2">2021002</p>
+<div class="flex items-center gap-1 text-xs font-medium bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-full">
+<span class="text-slate-600 dark:text-slate-300">88分</span>
+</div>
+</div>
+<!-- Student Card 3 -->
+<div class="group relative bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 hover:border-primary/50 rounded-xl p-4 flex flex-col items-center cursor-pointer transition-all hover:shadow-md">
+<img class="w-16 h-16 rounded-full object-cover mb-3 border-2 border-white dark:border-slate-700 shadow-sm grayscale group-hover:grayscale-0 transition-all" data-alt="Student portrait female smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBALv0yi9kY2tIKWpzWCxln6LajPpA1NAgwQBS2YMLCROPu-d_K_WcXSl_ZFHyjMowIoRwsyOz7CQDZ8TzJjTgBA5XRP3M0D6OVN630RAuGbAXwhnk_VVGiyYQ7vSBZowJtBI2ccNHZealyuXkh8C6rjzu4uFAkcjpsD0oNn9ErESCB_NvU83iLAR8AHXAvaxcvN1L2-oVYjrmOGcqb-jinIh5rWrH9YYpmMo8HA7FYPRoV0Oo_Hlk94IweyklYXE_dT2u-HtKOxEw"/>
+<h3 class="font-bold text-slate-800 dark:text-white text-sm">李娜</h3>
+<p class="text-xs text-slate-500 mb-2">2021003</p>
+<div class="flex items-center gap-1 text-xs font-medium bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-full">
+<span class="text-slate-600 dark:text-slate-300">92分</span>
+</div>
+</div>
+<!-- Student Card 4 (Selected) -->
+<div class="group relative bg-primary/5 dark:bg-primary/10 border-2 border-primary rounded-xl p-4 flex flex-col items-center cursor-pointer transition-all hover:shadow-md">
+<div class="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center text-white">
+<span class="material-icons text-xs">check</span>
+</div>
+<img class="w-16 h-16 rounded-full object-cover mb-3 border-2 border-white dark:border-slate-700 shadow-sm" data-alt="Student portrait male glasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBnrJNFsxTj7h2bnyQAAJwmWPXCXiGonsMT-IrWMKmew6epLHvLMnBYQUHfiuWXeIP4gwQ1lAFH70EeNzPeM4JgFcYaTm76s5VQ07y-EaGmo_zXfUrSHc28-PSLAt2QvQwcpC73jDJ4CvrQ1SKTJM5HwK8INxOo5nu-Hxo8L2t0w3c7paHRT3Mvqk6UievDbU60aKlFQspmrD3rqpNhc1CRpAV5WvvVZDHqJfTLG9qwoS5FcY2Ab8xdtsMq2uIOT6gFbsuAJbAqRE"/>
+<h3 class="font-bold text-slate-800 dark:text-white text-sm">王强</h3>
+<p class="text-xs text-slate-500 mb-2">2021004</p>
+<div class="flex items-center gap-1 text-xs font-medium bg-white dark:bg-slate-800 px-2 py-1 rounded-full border border-slate-200 dark:border-slate-600">
+<span class="text-primary">90分</span>
+</div>
+</div>
+<!-- Student Card 5 -->
+<div class="group relative bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 hover:border-primary/50 rounded-xl p-4 flex flex-col items-center cursor-pointer transition-all hover:shadow-md">
+<img class="w-16 h-16 rounded-full object-cover mb-3 border-2 border-white dark:border-slate-700 shadow-sm grayscale group-hover:grayscale-0 transition-all" data-alt="Student portrait female short hair" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnPaAlmA8KHGtG4XTb5J_WDpbZ-fhHLb-m-ujk-Fwyxw2FS868o4Zl8mFzGlJLOEeBzC0ouTFEwGGnm7PQqWAysLPaRATYY2Cnt3OE4rJn2f9wyp1SHBUmtkH5Udh-ceMFt0qrQ0-a3zjaGq97nl1ScADUDY7zVx0-jDod_kCP2mBiMLHnLag4-xsbMm146qHtaRDKVqb49ssLqd2-YViTKi1ziaL4UT6jfsKpwJ9XE_1us6AWC32a7jNMQWVA_3EleOgiTsofSo4"/>
+<h3 class="font-bold text-slate-800 dark:text-white text-sm">刘芳</h3>
+<p class="text-xs text-slate-500 mb-2">2021005</p>
+<div class="flex items-center gap-1 text-xs font-medium bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-full">
+<span class="text-slate-600 dark:text-slate-300">85分</span>
+</div>
+</div>
+<!-- Placeholder for more students -->
+<div class="flex items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-4 text-slate-400 text-sm">
+                       + 35 位学生
+                    </div>
+</div>
+<div class="px-5 py-3 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/30 text-xs text-slate-500 flex justify-between">
+<span>已选: 2 人</span>
+<span>最后更新: 刚刚</span>
+</div>
+</div>
+<!-- Zone 2: Knowledge Sharing (Bottom Left) -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+<div class="p-5 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
+<span class="material-icons">share</span>
+</div>
+<div>
+<h2 class="font-bold text-lg">知识分享记录</h2>
+<p class="text-xs text-slate-500">学生课堂分享及质量评定</p>
+</div>
+</div>
+<button class="text-primary text-sm font-medium hover:bg-primary/5 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+<span class="material-icons text-base">add</span> 新增记录
+                    </button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm">
+<thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 font-medium">
+<tr>
+<th class="px-5 py-3">学生姓名</th>
+<th class="px-5 py-3">分享主题</th>
+<th class="px-5 py-3">质量等级</th>
+<th class="px-5 py-3">佐证材料</th>
+<th class="px-5 py-3 text-right">操作</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-5 py-3 font-medium">陈小明</td>
+<td class="px-5 py-3">React Hooks 原理分析</td>
+<td class="px-5 py-3">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400">
+                                        ★★★★★ 卓越
+                                    </span>
+</td>
+<td class="px-5 py-3">
+<a class="text-primary hover:underline flex items-center gap-1" href="#">
+<span class="material-icons text-base">link</span> PDF讲义
+                                    </a>
+</td>
+<td class="px-5 py-3 text-right">
+<button class="text-slate-400 hover:text-primary"><span class="material-icons text-base">edit</span></button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-5 py-3 font-medium">李娜</td>
+<td class="px-5 py-3">数据库范式详解</td>
+<td class="px-5 py-3">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                                        ★★★★ 优秀
+                                    </span>
+</td>
+<td class="px-5 py-3">
+<a class="text-primary hover:underline flex items-center gap-1" href="#">
+<span class="material-icons text-base">link</span> Github
+                                    </a>
+</td>
+<td class="px-5 py-3 text-right">
+<button class="text-slate-400 hover:text-primary"><span class="material-icons text-base">edit</span></button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-5 py-3 font-medium">王强</td>
+<td class="px-5 py-3">TCP/IP 协议栈</td>
+<td class="px-5 py-3">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                        ★★★ 合格
+                                    </span>
+</td>
+<td class="px-5 py-3 text-slate-400 text-xs italic">
+                                    无附件
+                                </td>
+<td class="px-5 py-3 text-right">
+<button class="text-slate-400 hover:text-primary"><span class="material-icons text-base">edit</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Zone 3: Statistics & Insights (Right Column) -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+<!-- Mastery Stats Card -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 h-full">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600 dark:text-orange-400">
+<span class="material-icons">analytics</span>
+</div>
+<div>
+<h2 class="font-bold text-lg">知识点掌握度统计</h2>
+<p class="text-xs text-slate-500">全班自评分布图</p>
+</div>
+</div>
+<!-- Filter -->
+<div class="mb-6">
+<label class="block text-xs font-medium text-slate-500 mb-2">选择统计范围</label>
+<select class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm rounded-lg p-2.5 focus:ring-primary focus:border-primary">
+<option>第三章：数据结构基础</option>
+<option>第二章：算法复杂度</option>
+<option>第一章：绪论</option>
+</select>
+</div>
+<!-- Visualization -->
+<div class="space-y-6">
+<!-- Stat Item 1 -->
+<div>
+<div class="flex justify-between items-end mb-1">
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200">二叉树遍历</span>
+<span class="text-xs text-slate-400">平均掌握度: <span class="text-green-500 font-bold">85%</span></span>
+</div>
+<div class="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
+<div class="h-full bg-primary" style="width: 60%" title="完全掌握"></div>
+<div class="h-full bg-primary/50" style="width: 25%" title="基本掌握"></div>
+<div class="h-full bg-slate-300 dark:bg-slate-600" style="width: 15%" title="需加强"></div>
+</div>
+<div class="flex justify-between mt-1 text-[10px] text-slate-400">
+<span>24人完全掌握</span>
+<span>6人需加强</span>
+</div>
+</div>
+<!-- Stat Item 2 -->
+<div>
+<div class="flex justify-between items-end mb-1">
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200">链表反转</span>
+<span class="text-xs text-slate-400">平均掌握度: <span class="text-yellow-500 font-bold">62%</span></span>
+</div>
+<div class="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
+<div class="h-full bg-primary" style="width: 30%"></div>
+<div class="h-full bg-primary/50" style="width: 40%"></div>
+<div class="h-full bg-slate-300 dark:bg-slate-600" style="width: 30%"></div>
+</div>
+</div>
+<!-- Stat Item 3 -->
+<div>
+<div class="flex justify-between items-end mb-1">
+<span class="text-sm font-medium text-slate-700 dark:text-slate-200">栈与队列</span>
+<span class="text-xs text-slate-400">平均掌握度: <span class="text-green-500 font-bold">92%</span></span>
+</div>
+<div class="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
+<div class="h-full bg-primary" style="width: 80%"></div>
+<div class="h-full bg-primary/50" style="width: 15%"></div>
+<div class="h-full bg-slate-300 dark:bg-slate-600" style="width: 5%"></div>
+</div>
+</div>
+</div>
+<!-- Legend -->
+<div class="flex gap-4 mt-6 justify-center">
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<span class="text-xs text-slate-500">完全掌握</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded-full bg-primary/50"></div>
+<span class="text-xs text-slate-500">基本掌握</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+<span class="text-xs text-slate-500">需加强</span>
+</div>
+</div>
+<!-- Call to action card inside stats -->
+<div class="mt-8 bg-blue-50 dark:bg-blue-900/10 rounded-lg p-4 border border-blue-100 dark:border-blue-800/30">
+<h4 class="text-sm font-bold text-blue-800 dark:text-blue-300 mb-2">教学建议</h4>
+<p class="text-xs text-blue-600 dark:text-blue-400 leading-relaxed">
+                        根据数据显示，<span class="font-bold">链表反转</span> 知识点有30%的学生标记为"需加强"。建议在下次课程中安排10分钟的专项复习或小组讨论。
+                    </p>
+<button class="mt-3 text-xs font-medium text-primary hover:text-primary-dark">生成专项练习题 →</button>
+</div>
+</div>
+<!-- Recent Activity / Notifications (Mini panel) -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5">
+<h3 class="font-bold text-sm mb-4 text-slate-700 dark:text-slate-200">最近动态</h3>
+<div class="space-y-4">
+<div class="flex gap-3 items-start">
+<div class="w-2 h-2 rounded-full bg-green-500 mt-1.5"></div>
+<div>
+<p class="text-xs text-slate-600 dark:text-slate-300"><span class="font-medium">陈小明</span> 在讨论区提交了新的问题。</p>
+<span class="text-[10px] text-slate-400">5分钟前</span>
+</div>
+</div>
+<div class="flex gap-3 items-start">
+<div class="w-2 h-2 rounded-full bg-primary mt-1.5"></div>
+<div>
+<p class="text-xs text-slate-600 dark:text-slate-300">系统自动统计了 <span class="font-medium">第三章测验</span> 成绩。</p>
+<span class="text-[10px] text-slate-400">1小时前</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

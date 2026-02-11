@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>教师作业批改详情 - 混合式教学平台</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#2b96ee",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101a22",
+              "neutral-50": "#f0f7fc", // Derived from primary hue
+              "neutral-100": "#e0eff9",
+              "neutral-200": "#c0dff4",
+              "neutral-300": "#90c7ed",
+              "neutral-400": "#5ca8e4",
+              "neutral-500": "#2b96ee", // Base primary
+              "neutral-600": "#1d7bc5",
+              "neutral-700": "#16619e",
+              "neutral-800": "#145284",
+              "neutral-900": "#13446c",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for better looking internal scrolls */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-white h-screen flex flex-col overflow-hidden font-display">
+<!-- Top Navigation -->
+<header class="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 h-16 flex items-center justify-between px-6 shrink-0 z-20">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 text-primary font-bold text-xl">
+<span class="material-icons">school</span>
+<span>智教云平台</span>
+</div>
+<div class="h-6 w-px bg-neutral-200 dark:bg-neutral-700 mx-2"></div>
+<nav class="flex items-center text-sm text-neutral-600 dark:text-neutral-400">
+<span class="hover:text-primary cursor-pointer">我的课程</span>
+<span class="material-icons text-base mx-1">chevron_right</span>
+<span class="hover:text-primary cursor-pointer">机器学习基础 (2023秋)</span>
+<span class="material-icons text-base mx-1">chevron_right</span>
+<span class="hover:text-primary cursor-pointer">作业列表</span>
+<span class="material-icons text-base mx-1">chevron_right</span>
+<span class="text-primary font-medium">批改详情</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-neutral-500 hover:text-primary rounded-full hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+<span class="material-icons">notifications</span>
+</button>
+<div class="flex items-center gap-2 pl-4 border-l border-neutral-200 dark:border-neutral-700">
+<div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm">
+                    T
+                </div>
+<span class="text-sm font-medium hidden md:block">李老师</span>
+</div>
+</div>
+</header>
+<!-- Student Navigation & Toolbar -->
+<div class="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 py-3 px-6 flex items-center justify-between shrink-0 shadow-sm z-10">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-3">
+<img alt="Student Avatar" class="w-10 h-10 rounded-full" data-alt="avatar of student Zhang" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_HUbMlp64m5iOIpxzHtg-ARbtr9A-KvSL_EHUHcTIJjNWo4i08OCrNGLjlQNZeK9mejKyeSpok4hBy2NCjuNZhKbZ3qHsJ8q53LqYYC2l939Q7lQxSywD8LqVV5WRgkuw1ILwxPiJqsYpUevhNhax-2WBBmu4N6H9vyyH_KPB0aSupDyZUAK68xIbhAFsbDqxWOQmLwEF0C7VQMS5hCmjrohn-SbuWs3VXNBIMYDpKlqSViPPmpcq66IkpIYWLHVbpYeMAziRs_0"/>
+<div>
+<h2 class="text-base font-bold text-neutral-800 dark:text-white flex items-center gap-2">
+                        张三丰
+                        <span class="text-xs font-normal text-neutral-500 bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full border border-neutral-200 dark:border-neutral-700">学号: 20210082</span>
+</h2>
+<div class="text-xs text-neutral-500 flex items-center gap-2 mt-0.5">
+<span class="flex items-center gap-1"><span class="material-icons text-[12px]">schedule</span> 提交时间: 2023-10-24 14:30</span>
+<span class="flex items-center gap-1 text-green-600"><span class="material-icons text-[12px]">check_circle</span> 按时提交</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center bg-neutral-50 dark:bg-neutral-800 rounded-lg p-1 border border-neutral-200 dark:border-neutral-700">
+<button class="p-1.5 hover:bg-white dark:hover:bg-neutral-700 rounded-md text-neutral-500 hover:text-primary disabled:opacity-50 transition-all shadow-sm">
+<span class="material-icons text-lg">chevron_left</span>
+</button>
+<span class="text-xs font-medium px-3 text-neutral-600 dark:text-neutral-300">学生 12 / 45</span>
+<button class="p-1.5 hover:bg-white dark:hover:bg-neutral-700 rounded-md text-neutral-500 hover:text-primary transition-all shadow-sm">
+<span class="material-icons text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Main Content Area -->
+<main class="flex-1 flex overflow-hidden">
+<!-- Left Panel: Assignment Preview -->
+<section class="flex-1 bg-neutral-100 dark:bg-background-dark flex flex-col min-w-0 border-r border-neutral-200 dark:border-neutral-800 relative">
+<!-- File Tabs -->
+<div class="bg-neutral-50 dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 px-4 pt-2 flex items-end gap-2 overflow-x-auto">
+<button class="px-4 py-2 bg-white dark:bg-neutral-800 border-t border-x border-neutral-200 dark:border-neutral-700 rounded-t-lg text-sm font-medium text-primary shadow-sm relative top-px flex items-center gap-2">
+<span class="material-icons text-base">code</span>
+                    main_analysis.ipynb
+                </button>
+<button class="px-4 py-2 hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400 text-sm font-medium rounded-t-lg flex items-center gap-2">
+<span class="material-icons text-base">picture_as_pdf</span>
+                    report_final.pdf
+                </button>
+<button class="px-4 py-2 hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50 text-neutral-600 dark:text-neutral-400 text-sm font-medium rounded-t-lg flex items-center gap-2">
+<span class="material-icons text-base">image</span>
+                    result_plot.png
+                </button>
+</div>
+<!-- Toolbar -->
+<div class="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 p-2 flex items-center justify-between">
+<div class="flex items-center gap-1">
+<button class="p-1.5 text-neutral-500 hover:text-primary rounded hover:bg-neutral-50 dark:hover:bg-neutral-800" title="Zoom Out">
+<span class="material-icons text-lg">remove</span>
+</button>
+<span class="text-xs text-neutral-500 font-medium w-12 text-center">100%</span>
+<button class="p-1.5 text-neutral-500 hover:text-primary rounded hover:bg-neutral-50 dark:hover:bg-neutral-800" title="Zoom In">
+<span class="material-icons text-lg">add</span>
+</button>
+<div class="w-px h-4 bg-neutral-200 dark:bg-neutral-700 mx-1"></div>
+<button class="p-1.5 text-neutral-500 hover:text-primary rounded hover:bg-neutral-50 dark:hover:bg-neutral-800" title="Highlight">
+<span class="material-icons text-lg">format_ink_highlighter</span>
+</button>
+<button class="p-1.5 text-neutral-500 hover:text-primary rounded hover:bg-neutral-50 dark:hover:bg-neutral-800" title="Comment">
+<span class="material-icons text-lg">comment</span>
+</button>
+</div>
+<div class="text-xs text-neutral-400">只读模式</div>
+</div>
+<!-- Document Content (Mock Jupyter Notebook) -->
+<div class="flex-1 overflow-y-auto p-8 custom-scrollbar bg-white dark:bg-neutral-900 shadow-inner">
+<div class="max-w-4xl mx-auto bg-white dark:bg-neutral-900 min-h-[1000px]">
+<!-- Notebook Cell 1: Markdown -->
+<div class="mb-6 group relative border border-transparent hover:border-primary/20 rounded-lg p-2 transition-colors">
+<h1 class="text-2xl font-bold text-neutral-900 dark:text-white mb-4">案例分析：波士顿房价预测模型</h1>
+<p class="text-neutral-700 dark:text-neutral-300 mb-2 leading-relaxed">
+                            本次作业主要使用线性回归模型对波士顿房价数据集进行分析。我们将涵盖数据预处理、特征工程、模型训练及评估四个部分。
+                        </p>
+<div class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="bg-primary text-white p-1 rounded shadow-lg text-xs flex items-center gap-1">
+<span class="material-icons text-sm">add_comment</span> 批注
+                            </button>
+</div>
+</div>
+<!-- Notebook Cell 2: Code -->
+<div class="mb-6 flex gap-2">
+<div class="text-xs font-mono text-neutral-400 w-8 pt-2 text-right">In [1]:</div>
+<div class="flex-1 bg-neutral-50 dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+<div class="bg-neutral-100 dark:bg-neutral-800 px-4 py-2 border-b border-neutral-200 dark:border-neutral-700 flex justify-between">
+<span class="text-xs font-mono text-neutral-500">Python 3</span>
+<span class="material-icons text-neutral-400 text-sm">content_copy</span>
+</div>
+<pre class="p-4 font-mono text-sm text-neutral-800 dark:text-neutral-200 overflow-x-auto"><code>import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+
+# 加载数据
+data_url = "http://lib.stat.cmu.edu/datasets/boston"
+raw_df = pd.read_csv(data_url, sep="\s+", skiprows=22, header=None)
+print("Data loaded successfully.")</code></pre>
+</div>
+</div>
+<!-- Notebook Cell 3: Output -->
+<div class="mb-6 flex gap-2">
+<div class="text-xs font-mono text-neutral-400 w-8 pt-2 text-right"></div>
+<div class="flex-1">
+<div class="text-sm font-mono text-neutral-600 dark:text-neutral-400 mb-2">Data loaded successfully.</div>
+</div>
+</div>
+<!-- Notebook Cell 4: Markdown Analysis -->
+<div class="mb-6 group relative border border-transparent hover:border-primary/20 rounded-lg p-2 transition-colors">
+<h3 class="text-lg font-semibold text-neutral-900 dark:text-white mb-2">2. 数据可视化分析</h3>
+<p class="text-neutral-700 dark:text-neutral-300 mb-2 leading-relaxed">
+                            为了更好地理解特征与目标变量之间的关系，我们绘制了散点图矩阵。
+                        </p>
+</div>
+<!-- Notebook Cell 5: Image Output -->
+<div class="mb-6 flex gap-2">
+<div class="text-xs font-mono text-neutral-400 w-8 pt-2 text-right">Out[2]:</div>
+<div class="flex-1">
+<div class="rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-700 inline-block">
+<div class="bg-gradient-to-br from-neutral-100 to-white dark:from-neutral-800 dark:to-neutral-900 w-[500px] h-[300px] flex items-center justify-center relative">
+<div class="absolute inset-0 opacity-20 bg-[radial-gradient(#2b96ee_1px,transparent_1px)] [background-size:16px_16px]"></div>
+<!-- Simulated Plot -->
+<div class="w-3/4 h-3/4 border-l-2 border-b-2 border-neutral-400 relative">
+<div class="absolute bottom-2 left-4 w-2 h-2 rounded-full bg-primary/60"></div>
+<div class="absolute bottom-8 left-12 w-2 h-2 rounded-full bg-primary/60"></div>
+<div class="absolute bottom-16 left-20 w-2 h-2 rounded-full bg-primary/60"></div>
+<div class="absolute bottom-12 left-32 w-2 h-2 rounded-full bg-primary/60"></div>
+<div class="absolute bottom-24 left-40 w-2 h-2 rounded-full bg-primary/60"></div>
+<div class="absolute bottom-32 left-48 w-2 h-2 rounded-full bg-primary/60"></div>
+<div class="absolute left-0 top-0 h-full w-[1px] bg-red-400 rotate-12 origin-bottom-left"></div>
+</div>
+<span class="absolute bottom-2 text-xs text-neutral-400">Scatter Plot Visualization</span>
+</div>
+<img alt="" class="hidden" data-alt="Scatter plot showing linear regression trend line on data points" src=""/>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Panel: Grading & Feedback -->
+<aside class="w-[420px] bg-white dark:bg-neutral-900 border-l border-neutral-200 dark:border-neutral-800 flex flex-col shrink-0 z-10 shadow-lg">
+<div class="p-4 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-800/50">
+<h3 class="font-bold text-lg text-neutral-800 dark:text-white flex items-center gap-2">
+<span class="material-icons text-primary">rate_review</span>
+                    批改与反馈
+                </h3>
+</div>
+<div class="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-6">
+<!-- Section 1: Scoring Dimensions -->
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<h4 class="text-sm font-bold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider">评分维度</h4>
+<span class="text-xs text-primary bg-primary/10 px-2 py-1 rounded">总分权重: 100%</span>
+</div>
+<!-- Rubric Item 1 -->
+<div class="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-3 shadow-sm">
+<div class="flex justify-between items-center mb-2">
+<label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">代码逻辑正确性</label>
+<span class="text-sm font-bold text-primary">38 <span class="text-neutral-400 text-xs font-normal">/ 40</span></span>
+</div>
+<input class="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary" max="40" min="0" type="range" value="38"/>
+<div class="flex justify-between mt-1 text-[10px] text-neutral-400">
+<span>有严重错误</span>
+<span>完美运行</span>
+</div>
+</div>
+<!-- Rubric Item 2 -->
+<div class="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-3 shadow-sm">
+<div class="flex justify-between items-center mb-2">
+<label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">数据分析深度</label>
+<span class="text-sm font-bold text-primary">25 <span class="text-neutral-400 text-xs font-normal">/ 30</span></span>
+</div>
+<input class="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary" max="30" min="0" type="range" value="25"/>
+</div>
+<!-- Rubric Item 3 -->
+<div class="bg-white dark:bg-neutral-800 rounded-lg border border-neutral-200 dark:border-neutral-700 p-3 shadow-sm">
+<div class="flex justify-between items-center mb-2">
+<label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">文档规范与可视化</label>
+<span class="text-sm font-bold text-primary">25 <span class="text-neutral-400 text-xs font-normal">/ 30</span></span>
+</div>
+<input class="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary" max="30" min="0" type="range" value="25"/>
+</div>
+</div>
+<hr class="border-neutral-200 dark:border-neutral-700"/>
+<!-- Section 2: AI Assistance -->
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<h4 class="text-sm font-bold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider flex items-center gap-1">
+<span class="material-icons text-sm text-purple-500">auto_awesome</span> 
+                            AI 智能辅助
+                        </h4>
+</div>
+<div class="bg-gradient-to-br from-purple-50 to-primary/5 dark:from-purple-900/20 dark:to-primary/10 rounded-xl p-4 border border-purple-100 dark:border-purple-800/30">
+<p class="text-xs text-neutral-600 dark:text-neutral-400 mb-3">基于学生的代码行为数据与案例资源库，生成针对性诊断建议。</p>
+<button class="w-full py-2 bg-white dark:bg-neutral-800 border border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-300 rounded-lg text-sm font-medium shadow-sm hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all flex items-center justify-center gap-2 group">
+<span class="material-icons text-base group-hover:animate-pulse">smart_toy</span>
+                            一键生成 AI 评语
+                        </button>
+</div>
+</div>
+<!-- Section 3: Teacher Feedback -->
+<div class="space-y-2">
+<h4 class="text-sm font-bold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider">评语反馈</h4>
+<div class="relative">
+<textarea class="w-full h-32 p-3 text-sm bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none leading-relaxed text-neutral-700 dark:text-neutral-200" placeholder="在此输入详细评语...">该生对线性回归模型的理解较为透彻，能够独立完成数据预处理和特征选择。在可视化部分，建议尝试使用 Seaborn 库以获得更美观的图表。注意：代码第 15 行存在冗余操作，建议优化。</textarea>
+<div class="absolute bottom-2 right-2 flex gap-1">
+<button class="p-1 text-neutral-400 hover:text-primary rounded hover:bg-neutral-100 dark:hover:bg-neutral-700" title="Insert Template">
+<span class="material-icons text-lg">library_books</span>
+</button>
+<button class="p-1 text-neutral-400 hover:text-primary rounded hover:bg-neutral-100 dark:hover:bg-neutral-700" title="Voice Input">
+<span class="material-icons text-lg">mic</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer: Summary & Actions -->
+<div class="p-4 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+<div class="flex items-center justify-between mb-4">
+<span class="text-sm text-neutral-500">当前总分</span>
+<div class="flex items-baseline gap-1">
+<span class="text-3xl font-bold text-primary">88</span>
+<span class="text-sm text-neutral-400">/ 100</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<button class="py-2.5 px-4 rounded-lg border border-neutral-300 dark:border-neutral-600 text-neutral-600 dark:text-neutral-300 font-medium text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                        保存草稿
+                    </button>
+<button class="py-2.5 px-4 rounded-lg bg-primary hover:bg-blue-600 text-white font-medium text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group">
+<span class="material-icons text-lg">cloud_upload</span>
+                        录入积分并提交
+                    </button>
+</div>
+<div class="text-center mt-2">
+<span class="text-[10px] text-neutral-400 flex items-center justify-center gap-1">
+<span class="material-icons text-[10px]">sync</span>
+                        自动同步至“积分评价”机制
+                    </span>
+</div>
+</div>
+</aside>
+</main>
+<!-- Floating Action Button for Help (Optional) -->
+<button class="fixed bottom-6 right-[440px] w-10 h-10 bg-white dark:bg-neutral-800 rounded-full shadow-lg border border-neutral-200 dark:border-neutral-700 flex items-center justify-center text-neutral-500 hover:text-primary transition-colors z-30" title="Help">
+<span class="material-icons">help_outline</span>
+</button>
+</body></html>

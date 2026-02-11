@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>课程思政案例库 - EduTech AI</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#0ea5e9", // Sky Blue - brighter and friendlier
+              "primary-dark": "#0284c7", // Darker Sky Blue
+              "secondary": "#3b82f6", // Royal Blue
+              "accent": "#06b6d4", // Cyan
+              "background-light": "#f0f9ff", // Very light blue background
+              "background-dark": "#0f172a", // Slate 900
+              "surface-light": "#ffffff",
+              "surface-blue": "#e0f2fe", // Light blue surface
+              "border-light": "#bae6fd", // Light blue border
+              "text-primary": "#0c4a6e", // Dark Blue text
+              "text-secondary": "#475569", // Slate text
+              "header-bg": "#0284c7", // Professional Header Blue
+            },
+            fontFamily: {
+              "display": ["Inter", "Noto Sans SC", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+    @layer utilities {
+        .bg-gradient-blue {
+            background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%);
+        }
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #0ea5e9, #3b82f6);
+        }
+    }
+</style>
+</head>
+<body class="bg-background-light text-text-secondary font-display overflow-x-hidden min-h-screen flex flex-col">
+<header class="sticky top-0 z-50 bg-white border-b border-border-light w-full shadow-sm">
+<div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="text-primary bg-sky-50 p-2 rounded-lg">
+<span class="material-symbols-outlined text-3xl">school</span>
+</div>
+<h2 class="text-text-primary text-xl font-bold leading-tight tracking-tight">EduTech AI 平台</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-slate-600 text-sm font-medium hover:text-primary transition-colors" href="#">首页</a>
+<a class="text-slate-600 text-sm font-medium hover:text-primary transition-colors" href="#">我的课程</a>
+<a class="text-primary text-sm font-bold border-b-2 border-primary pb-0.5" href="#">资源库</a>
+<a class="text-slate-600 text-sm font-medium hover:text-primary transition-colors" href="#">行为分析</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:text-primary hover:bg-sky-50 rounded-full transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-9 ring-2 ring-primary/20" data-alt="用户头像占位符，抽象渐变" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAuytIn7n2JUdZ_HTmJzhNIcQ0v57LZmLpLqH5WCQyP1TjkR-QIe-qq3xB9v9KKU_unJd-kQGLB7-DWgwlgtNgMR2HX-Sv6qzIk1FOZnbeP_LSDfs7joqYi-vHHiShgZ1Hvo36P-u0vwqLnUwtXY_W15NgjPSl5oEs_WXn36W5Oz5ODpbosjtWb7QbUj135Teueo8l9dKdjOBEhqhE5KL59CNlpx80UbHRxOvujBtv5W2PNPIoVzH0BvsECFla0390d0UpsLQxNUnI");'>
+</div>
+</div>
+</div>
+</header>
+<div class="flex-1 max-w-[1440px] w-full mx-auto p-6 md:p-8 lg:px-12 flex flex-col gap-6">
+<div class="flex flex-wrap items-center gap-2 text-sm bg-white/50 backdrop-blur-sm p-3 rounded-lg border border-border-light/30">
+<a class="text-slate-500 hover:text-primary" href="#">首页</a>
+<span class="text-slate-400">/</span>
+<a class="text-slate-500 hover:text-primary" href="#">课程</a>
+<span class="text-slate-400">/</span>
+<a class="text-slate-500 hover:text-primary" href="#">数据挖掘导论</a>
+<span class="text-slate-400">/</span>
+<span class="text-primary font-semibold">案例库</span>
+</div>
+<div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6 pb-6 border-b border-border-light/60">
+<div class="flex flex-col gap-3 max-w-3xl">
+<h1 class="text-3xl md:text-4xl font-black leading-tight tracking-tight text-text-primary">
+                    《数据挖掘导论》课程思政案例库
+                </h1>
+<p class="text-slate-600 text-lg leading-relaxed">
+                    融合现代技术与思政教育，提供 150+ 个精选教学案例。覆盖分类、聚类、关联规则等核心算法，支持 <span class="font-semibold text-primary">"案例资源 — 行为数据 — 积分评价"</span> 一体化教学。
+                </p>
+</div>
+<div class="flex items-start gap-3">
+<button class="flex items-center gap-2 px-5 py-2.5 bg-white border border-border-light rounded-lg text-primary hover:bg-sky-50 hover:border-primary transition-all shadow-sm">
+<span class="material-symbols-outlined text-lg">upload_file</span>
+<span class="font-medium">上传案例</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-secondary text-white rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all shadow-md">
+<span class="material-symbols-outlined text-lg">auto_awesome</span>
+<span class="font-medium">AI 生成案例</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col lg:flex-row gap-8">
+<aside class="w-full lg:w-80 flex-shrink-0 flex flex-col gap-6">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-primary/70">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 border border-border-light rounded-xl leading-5 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary sm:text-sm shadow-sm transition-all" placeholder="按关键字、算法搜索..." type="text"/>
+</div>
+<div class="flex flex-col gap-4 bg-white p-5 rounded-xl border border-border-light shadow-sm">
+<div class="flex items-center justify-between border-b border-slate-100 pb-2">
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-500">筛选</h3>
+<button class="text-xs text-primary font-semibold hover:text-primary-dark transition-colors">重置所有</button>
+</div>
+<details class="group open:bg-transparent" open="">
+<summary class="flex cursor-pointer items-center justify-between py-2 list-none text-slate-800 font-semibold hover:text-primary transition-colors">
+<span>知识点</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180 text-slate-400">expand_more</span>
+</summary>
+<div class="pt-2 pb-2 flex flex-col gap-2 pl-2 border-l-2 border-sky-100 ml-1">
+<label class="flex items-center gap-3 cursor-pointer group/item hover:bg-sky-50 p-1.5 rounded transition-colors">
+<input class="form-checkbox rounded text-primary border-slate-300 focus:ring-offset-white focus:ring-primary h-4 w-4" type="checkbox"/>
+<span class="text-sm text-slate-600 group-hover/item:text-primary transition-colors">分类算法</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group/item hover:bg-sky-50 p-1.5 rounded transition-colors">
+<input class="form-checkbox rounded text-primary border-slate-300 focus:ring-offset-white focus:ring-primary h-4 w-4" type="checkbox"/>
+<span class="text-sm text-slate-600 group-hover/item:text-primary transition-colors">聚类分析</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group/item hover:bg-sky-50 p-1.5 rounded transition-colors">
+<input checked="" class="form-checkbox rounded text-primary border-slate-300 focus:ring-offset-white focus:ring-primary h-4 w-4" type="checkbox"/>
+<span class="text-sm text-slate-900 font-medium transition-colors">关联规则</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group/item hover:bg-sky-50 p-1.5 rounded transition-colors">
+<input class="form-checkbox rounded text-primary border-slate-300 focus:ring-offset-white focus:ring-primary h-4 w-4" type="checkbox"/>
+<span class="text-sm text-slate-600 group-hover/item:text-primary transition-colors">数据预处理</span>
+</label>
+</div>
+</details>
+<details class="group open:bg-transparent" open="">
+<summary class="flex cursor-pointer items-center justify-between py-2 list-none text-slate-800 font-semibold hover:text-primary transition-colors">
+<span>思政主题</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180 text-slate-400">expand_more</span>
+</summary>
+<div class="pt-2 pb-2 flex flex-col gap-2 pl-2 border-l-2 border-sky-100 ml-1">
+<label class="flex items-center gap-3 cursor-pointer group/item hover:bg-sky-50 p-1.5 rounded transition-colors">
+<input class="form-checkbox rounded text-primary border-slate-300 focus:ring-offset-white focus:ring-primary h-4 w-4" type="checkbox"/>
+<span class="text-sm text-slate-600 group-hover/item:text-primary transition-colors">隐私与伦理</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group/item hover:bg-sky-50 p-1.5 rounded transition-colors">
+<input class="form-checkbox rounded text-primary border-slate-300 focus:ring-offset-white focus:ring-primary h-4 w-4" type="checkbox"/>
+<span class="text-sm text-slate-600 group-hover/item:text-primary transition-colors">文化自信</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group/item hover:bg-sky-50 p-1.5 rounded transition-colors">
+<input class="form-checkbox rounded text-primary border-slate-300 focus:ring-offset-white focus:ring-primary h-4 w-4" type="checkbox"/>
+<span class="text-sm text-slate-600 group-hover/item:text-primary transition-colors">科学精神</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group/item hover:bg-sky-50 p-1.5 rounded transition-colors">
+<input class="form-checkbox rounded text-primary border-slate-300 focus:ring-offset-white focus:ring-primary h-4 w-4" type="checkbox"/>
+<span class="text-sm text-slate-600 group-hover/item:text-primary transition-colors">国家安全</span>
+</label>
+</div>
+</details>
+</div>
+<div class="rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 p-5 shadow-lg shadow-blue-200">
+<div class="flex items-center gap-2 text-white mb-2">
+<span class="material-symbols-outlined">insights</span>
+<span class="text-sm font-bold">数据洞察</span>
+</div>
+<p class="text-xs text-blue-50 mb-3 leading-relaxed">
+                            本周大多数学生参与了涉及“社交网络”的案例。
+                        </p>
+<a class="text-xs font-bold text-white hover:text-blue-100 flex items-center gap-1 group" href="#">
+                            查看分析 
+                            <span class="material-symbols-outlined text-[14px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+</aside>
+<main class="flex-1 flex flex-col gap-6">
+<div class="flex flex-wrap items-center justify-between gap-4 bg-white p-3 rounded-lg border border-border-light shadow-sm">
+<p class="text-sm text-slate-500 pl-2">显示 <span class="text-slate-800 font-bold">156</span> 个案例中的 <span class="text-primary font-bold">12</span> 个</p>
+<div class="flex items-center gap-3">
+<select class="form-select bg-slate-50 border-border-light text-slate-700 text-sm rounded-lg focus:ring-primary focus:border-primary py-2 pl-3 pr-10 cursor-pointer hover:bg-white transition-colors">
+<option>排序：相关性</option>
+<option>最新添加</option>
+<option>最多浏览</option>
+</select>
+<div class="flex bg-slate-100 rounded-lg p-1 gap-1">
+<button class="p-1.5 rounded bg-white text-primary shadow-sm ring-1 ring-black/5">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+</button>
+<button class="p-1.5 rounded text-slate-500 hover:text-primary hover:bg-white transition-all">
+<span class="material-symbols-outlined text-[20px]">view_list</span>
+</button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<article class="group relative flex flex-col bg-white rounded-xl border border-border-light overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-sky-100/50 hover:-translate-y-1">
+<div class="p-5 flex flex-col gap-4 flex-1">
+<div class="flex justify-between items-start">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                                    关联规则
+                                </span>
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-800 mb-2 leading-snug group-hover:text-primary transition-colors">
+                                    中医药数据挖掘
+                                </h3>
+<p class="text-sm text-slate-600 line-clamp-3 leading-relaxed">
+                                    利用 Apriori 算法分析古代中医典籍中的处方配伍。本案例探索隐藏在传统文化中的科学原理，在培养技术技能的同时增强文化自信。
+                                </p>
+</div>
+<div class="flex flex-wrap gap-2 mt-auto">
+<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-50 text-slate-500 border border-slate-100 group-hover:bg-sky-50 group-hover:text-sky-600 group-hover:border-sky-100 transition-colors">
+                                    #文化自信
+                                </span>
+<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-50 text-slate-500 border border-slate-100 group-hover:bg-sky-50 group-hover:text-sky-600 group-hover:border-sky-100 transition-colors">
+                                    #传承
+                                </span>
+</div>
+</div>
+<div class="bg-slate-50/50 px-5 py-3 border-t border-slate-100 flex items-center justify-between">
+<div class="flex items-center gap-4 text-xs text-slate-500">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-sky-500">visibility</span>
+<span>2.4k</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-amber-500">star</span>
+<span>4.9</span>
+</div>
+</div>
+<button class="text-xs font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1">
+                                查看详情 <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+<div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+<div class="bg-gradient-to-r from-primary to-secondary text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">auto_awesome</span> AI 推荐
+                             </div>
+</div>
+</article>
+<article class="group relative flex flex-col bg-white rounded-xl border border-border-light overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-sky-100/50 hover:-translate-y-1">
+<div class="p-5 flex flex-col gap-4 flex-1">
+<div class="flex justify-between items-start">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                    决策树
+                                </span>
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-800 mb-2 leading-snug group-hover:text-primary transition-colors">
+                                    信用评分的公平性与偏见
+                                </h3>
+<p class="text-sm text-slate-600 line-clamp-3 leading-relaxed">
+                                    分析银行贷款数据集，识别针对特定人群的算法偏见。学生学习在决策树构建中实施“公平感知”约束，强调数据伦理。
+                                </p>
+</div>
+<div class="flex flex-wrap gap-2 mt-auto">
+<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-50 text-slate-500 border border-slate-100 group-hover:bg-sky-50 group-hover:text-sky-600 group-hover:border-sky-100 transition-colors">
+                                    #伦理
+                                </span>
+<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-50 text-slate-500 border border-slate-100 group-hover:bg-sky-50 group-hover:text-sky-600 group-hover:border-sky-100 transition-colors">
+                                    #社会正义
+                                </span>
+</div>
+</div>
+<div class="bg-slate-50/50 px-5 py-3 border-t border-slate-100 flex items-center justify-between">
+<div class="flex items-center gap-4 text-xs text-slate-500">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-sky-500">visibility</span>
+<span>1.8k</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-amber-500">star</span>
+<span>4.7</span>
+</div>
+</div>
+<button class="text-xs font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1">
+                                查看详情 <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<article class="group relative flex flex-col bg-white rounded-xl border border-border-light overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-sky-100/50 hover:-translate-y-1">
+<div class="p-5 flex flex-col gap-4 flex-1">
+<div class="flex justify-between items-start">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-purple-50 text-purple-600 border border-purple-100">
+                                    聚类
+                                </span>
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-800 mb-2 leading-snug group-hover:text-primary transition-colors">
+                                    网络流量异常检测
+                                </h3>
+<p class="text-sm text-slate-600 line-clamp-3 leading-relaxed">
+                                    利用 K-Means 聚类检测指示网络攻击的异常流量模式。强调数据挖掘在国家安全中的作用以及工程师保护基础设施的责任。
+                                </p>
+</div>
+<div class="flex flex-wrap gap-2 mt-auto">
+<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-50 text-slate-500 border border-slate-100 group-hover:bg-sky-50 group-hover:text-sky-600 group-hover:border-sky-100 transition-colors">
+                                    #国家安全
+                                </span>
+<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-50 text-slate-500 border border-slate-100 group-hover:bg-sky-50 group-hover:text-sky-600 group-hover:border-sky-100 transition-colors">
+                                    #网络安全
+                                </span>
+</div>
+</div>
+<div class="bg-slate-50/50 px-5 py-3 border-t border-slate-100 flex items-center justify-between">
+<div class="flex items-center gap-4 text-xs text-slate-500">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-sky-500">visibility</span>
+<span>3.1k</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-amber-500">star</span>
+<span>4.8</span>
+</div>
+</div>
+<button class="text-xs font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1">
+                                查看详情 <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<article class="group relative flex flex-col bg-white rounded-xl border border-border-light overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-sky-100/50 hover:-translate-y-1">
+<div class="p-5 flex flex-col gap-4 flex-1">
+<div class="flex justify-between items-start">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-orange-50 text-orange-600 border border-orange-100">
+                                    协同过滤
+                                </span>
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-800 mb-2 leading-snug group-hover:text-primary transition-colors">
+                                    电商推荐陷阱
+                                </h3>
+<p class="text-sm text-slate-600 line-clamp-3 leading-relaxed">
+                                    调查推荐系统如何制造信息茧房或利用用户弱点。讨论商业数据挖掘的伦理边界和消费者保护。
+                                </p>
+</div>
+<div class="flex flex-wrap gap-2 mt-auto">
+<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-50 text-slate-500 border border-slate-100 group-hover:bg-sky-50 group-hover:text-sky-600 group-hover:border-sky-100 transition-colors">
+                                    #消费者权益
+                                </span>
+<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-50 text-slate-500 border border-slate-100 group-hover:bg-sky-50 group-hover:text-sky-600 group-hover:border-sky-100 transition-colors">
+                                    #商业伦理
+                                </span>
+</div>
+</div>
+<div class="bg-slate-50/50 px-5 py-3 border-t border-slate-100 flex items-center justify-between">
+<div class="flex items-center gap-4 text-xs text-slate-500">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-sky-500">visibility</span>
+<span>1.2k</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-amber-500">star</span>
+<span>4.5</span>
+</div>
+</div>
+<button class="text-xs font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1">
+                                查看详情 <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<article class="group relative flex flex-col bg-white rounded-xl border border-border-light overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-sky-100/50 hover:-translate-y-1">
+<div class="p-5 flex flex-col gap-4 flex-1">
+<div class="flex justify-between items-start">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-pink-50 text-pink-600 border border-pink-100">
+                                    回归分析
+                                </span>
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-800 mb-2 leading-snug group-hover:text-primary transition-colors">
+                                    智慧城市空气质量预测
+                                </h3>
+<p class="text-sm text-slate-600 line-clamp-3 leading-relaxed">
+                                    利用多源传感器数据构建回归模型预测 PM2.5 水平。关注数据挖掘在环境保护和改善公共卫生中的应用。
+                                </p>
+</div>
+<div class="flex flex-wrap gap-2 mt-auto">
+<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-50 text-slate-500 border border-slate-100 group-hover:bg-sky-50 group-hover:text-sky-600 group-hover:border-sky-100 transition-colors">
+                                    #公共卫生
+                                </span>
+<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-50 text-slate-500 border border-slate-100 group-hover:bg-sky-50 group-hover:text-sky-600 group-hover:border-sky-100 transition-colors">
+                                    #可持续发展
+                                </span>
+</div>
+</div>
+<div class="bg-slate-50/50 px-5 py-3 border-t border-slate-100 flex items-center justify-between">
+<div class="flex items-center gap-4 text-xs text-slate-500">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-sky-500">visibility</span>
+<span>980</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-amber-500">star</span>
+<span>4.6</span>
+</div>
+</div>
+<button class="text-xs font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1">
+                                查看详情 <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<article class="group relative flex flex-col bg-white rounded-xl border border-border-light overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-sky-100/50 hover:-translate-y-1">
+<div class="p-5 flex flex-col gap-4 flex-1">
+<div class="flex justify-between items-start">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-teal-50 text-teal-600 border border-teal-100">
+                                    文本挖掘
+                                </span>
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-800 mb-2 leading-snug group-hover:text-primary transition-colors">
+                                    突发事件中的公众舆情
+                                </h3>
+<p class="text-sm text-slate-600 line-clamp-3 leading-relaxed">
+                                    挖掘社交媒体文本数据，了解救灾期间的公众需求。教导学生数据如何协助有效的资源分配和社会稳定。
+                                </p>
+</div>
+<div class="flex flex-wrap gap-2 mt-auto">
+<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-50 text-slate-500 border border-slate-100 group-hover:bg-sky-50 group-hover:text-sky-600 group-hover:border-sky-100 transition-colors">
+                                    #社会责任
+                                </span>
+<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-slate-50 text-slate-500 border border-slate-100 group-hover:bg-sky-50 group-hover:text-sky-600 group-hover:border-sky-100 transition-colors">
+                                    #公共服务
+                                </span>
+</div>
+</div>
+<div class="bg-slate-50/50 px-5 py-3 border-t border-slate-100 flex items-center justify-between">
+<div class="flex items-center gap-4 text-xs text-slate-500">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-sky-500">visibility</span>
+<span>2.1k</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-amber-500">star</span>
+<span>4.8</span>
+</div>
+</div>
+<button class="text-xs font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1">
+                                查看详情 <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</article>
+</div>
+<div class="flex justify-center mt-8 pb-8">
+<nav aria-label="Pagination" class="isolate inline-flex -space-x-px rounded-md shadow-sm bg-white">
+<a class="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-border-light hover:bg-slate-50 focus:z-20 focus:outline-offset-0" href="#">
+<span class="sr-only">Previous</span>
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</a>
+<a aria-current="page" class="relative z-10 inline-flex items-center bg-primary px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" href="#">1</a>
+<a class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-inset ring-border-light hover:bg-slate-50 focus:z-20 focus:outline-offset-0" href="#">2</a>
+<a class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-inset ring-border-light hover:bg-slate-50 focus:z-20 focus:outline-offset-0" href="#">3</a>
+<span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-500 ring-1 ring-inset ring-border-light focus:outline-offset-0">...</span>
+<a class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-inset ring-border-light hover:bg-slate-50 focus:z-20 focus:outline-offset-0" href="#">8</a>
+<a class="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-border-light hover:bg-slate-50 focus:z-20 focus:outline-offset-0" href="#">
+<span class="sr-only">Next</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</a>
+</nav>
+</div>
+</main>
+</div>
+<button class="fixed bottom-8 right-8 bg-gradient-to-br from-primary to-secondary hover:from-primary-dark hover:to-primary text-white p-4 rounded-full shadow-xl shadow-blue-500/30 z-50 flex items-center justify-center transition-transform hover:scale-105 group border-2 border-white/20">
+<span class="material-symbols-outlined text-2xl group-hover:rotate-12 transition-transform">smart_toy</span>
+<span class="absolute right-full mr-3 bg-slate-800 text-white text-xs py-1.5 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">咨询 AI 助手</span>
+</button>
+</div></body></html>

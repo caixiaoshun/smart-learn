@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>用户登录 - 混合式教学平台</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+            extend: {
+                colors: {
+                "primary": "#2563eb", // Adjusted to a brighter professional blue
+                "primary-dark": "#1d4ed8",
+                "background-light": "#f8fafc", // Very light slate blue-ish gray
+                "background-card": "#ffffff",
+                "text-main": "#0f172a",
+                "text-secondary": "#64748b",
+                "border-color": "#e2e8f0",
+                "input-bg": "#f1f5f9",
+                },
+                fontFamily: {
+                "display": ["Inter", "Noto Sans", "sans-serif"],
+                "body": ["Inter", "Noto Sans", "sans-serif"]
+                },
+                borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+            },
+        }
+    </script>
+<style>.custom-checkbox:checked {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDYnjutHZwKpJNnMcl7QJRia8JElIn1fV0uRZ1a22re_URtSkmGwPOHtsF62ZdICoGSaZ5Yyt16aedS_wsOygf_cNKkZFC7VgQvCyJZ55TRW6UtN5SLfjuWYVQCzFX1COOBvKAQeHD2P8pJUZs86bvDwMSULO0e_DlJ37u54qEWTi0kCARh8X3nGDJXgG5-vn_nXwLQKbdb3KdwNZQo2QGP_UafuundvMBnecYukKkv8IyiBJZGoqVJZLAjR9lmqZ3S98C9iNv2zz0)
+    }</style>
+</head>
+<body class="bg-background-light font-display text-text-main antialiased min-h-screen flex flex-col overflow-x-hidden selection:bg-primary/20 selection:text-primary">
+<header class="w-full flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 bg-white px-6 lg:px-10 py-3 z-20 shadow-sm">
+<div class="flex items-center gap-4 text-slate-800">
+<div class="size-6 text-primary">
+<svg class="w-full h-full text-current" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 4C25.7818 14.2173 33.7827 22.2182 44 24C33.7827 25.7818 25.7818 33.7827 24 44C22.2182 33.7827 14.2173 25.7818 4 24C14.2173 22.2182 22.2182 14.2173 24 4Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-slate-900 text-lg font-bold leading-tight tracking-[-0.015em]">混合式教学平台</h2>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-slate-500 text-sm hidden sm:block">还没有账号？</span>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-primary/10 border border-primary/20 text-primary hover:bg-primary hover:text-white transition-all text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">注册</span>
+</button>
+</div>
+</header>
+<main class="flex-1 flex items-center justify-center p-4 relative w-full bg-slate-50">
+<div class="absolute inset-0 z-0">
+<div class="absolute inset-0 bg-gradient-to-br from-blue-50 via-slate-50 to-white"></div>
+<div class="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#2563eb_1px,transparent_1px)] [background-size:20px_20px]" data-alt="Subtle dot matrix pattern background"></div>
+</div>
+<div class="relative z-10 w-full max-w-5xl bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-200/50 flex flex-col md:flex-row overflow-hidden min-h-[600px]">
+<div class="hidden md:flex md:w-5/12 relative flex-col justify-between p-10 bg-gradient-to-br from-primary to-blue-600">
+<div class="absolute inset-0 opacity-20 mix-blend-overlay bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC35MpWeCYUCfiKlXgiSns-3PBlBGawvPxGg3zeoL2mUSPdxBs6CRAq7yQ-jyow14DPso5W2wtzv934eF7H1PDIfEYA7-JKW_W4plsjf3juAxyhhb2Q7gyfLycZ2HDcHv0V4mPkYrBNS1ZiyGceb2_o8qfQoEadxrUpZ5cElWt4neyeCnS-aNMufx7jOapGhzVJpam5bQdE_29BX1PS-ctkJTyq32o_qD-feLgc92KzX_uOPJpvAdj4IHPZMMRaf8GSuzSGfOgl_yk');"></div>
+<div class="absolute inset-0 bg-gradient-to-b from-blue-600/50 via-transparent to-blue-900/60"></div>
+<div class="relative z-10">
+<div class="w-12 h-12 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center text-white mb-6 border border-white/20 shadow-lg">
+<span class="material-symbols-outlined text-2xl">auto_awesome</span>
+</div>
+<h3 class="text-2xl font-bold text-white mb-3 tracking-tight">赋能教育创新</h3>
+<p class="text-blue-50 text-sm leading-relaxed opacity-90 font-medium">
+                        依托现代教育技术与生成式 AI，构建 “案例资源 — 行为数据 — 积分评价 — 精准干预” 一体化支撑机制。
+                    </p>
+</div>
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-2">
+<div class="flex -space-x-3">
+<img alt="User Avatar" class="w-8 h-8 rounded-full border-2 border-white shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7oq1dgU3q7IOwxwCFXpM6F8uLCh8UJ-ZBZiiPt1RBMuPB4SsEonO43dp500SnAbaHPRXNPyx8aAHvhO-ZJRVzv2YPYU6Yqda2Tt17IYrXTSbwdy3t6CYQGu-hr5TTAzo27d36mR_8rrXzkj3P5eUmGxMVu97vK7FFjaM6OCBp3z_qaFbTaTQGTob7qdAkmD4io1TnNLAXHjmsneobUKeditGx30Hh1xR5Cbn11UadQPtD_-xNq138s0YN8rSXpFPHAKZ76REnkx4"/>
+<img alt="User Avatar" class="w-8 h-8 rounded-full border-2 border-white shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDquwaay6KAJKAl0JLKbT-L7ngEEzDRIGdGXuAF7TTkZeMVrQ8fKRD8TNXO6wqUWJ8wQzCkBKey5EyLK8z4aLIHUjuWH361Zm1DXnPPXJrZPNmN4OFrcl_WavqL8yDBfG1kJccUPhTfRm83D7rfel5JGM17j8pxz-94OXj-oUP8_l43T1p3_QWmZ_GUjcgacLbdK5GG6gBax1HAI-ncBQs4qB0syYuBKL_62DkgVz1YWVStgx1DxP8cWX3uPPRtV2jE58dgikH0F4w"/>
+<img alt="User Avatar" class="w-8 h-8 rounded-full border-2 border-white shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbaXIDJjEB8o3zhJIO3HMojZr3xr_QcvNygVjpfUbpKWEInrq01yQIfXL6E2lv41J6pIy8svbMjuwydfeowFeNBA3b_Yxl-VdShKib9ZkKs7wJSR-dJXdfWuznXqSlinngl6vuqLLtNufaab7KQS0_48QROEmgUSYNeT8WwLXZd6b8GGhrFPKS3jNW-M9anhoGmEJhlfQgPJqV8sXPHCBpU3Q7KiSseXlUDJZ4y3gzOTyHszwvZ9fTUDhMifNPAWA2-OxMvJ1yY50"/>
+</div>
+<div class="text-xs text-blue-100">
+<span class="text-white font-bold">5,000+</span> 师生正在使用
+                        </div>
+</div>
+</div>
+</div>
+<div class="flex-1 p-8 md:p-12 lg:p-16 flex flex-col justify-center bg-white">
+<div class="max-w-md mx-auto w-full">
+<div class="mb-8">
+<h1 class="text-slate-900 tracking-tight text-[32px] font-bold leading-tight mb-2">欢迎回来</h1>
+<p class="text-slate-500 text-sm font-normal">请输入您的账号信息以登录混合式教学平台</p>
+</div>
+<form class="flex flex-col gap-5">
+<div class="flex flex-col gap-2">
+<label class="text-slate-700 text-base font-medium leading-normal">用户名或邮箱</label>
+<div class="flex w-full flex-1 items-stretch rounded-lg group focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all shadow-sm">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-l-lg text-slate-900 focus:outline-0 focus:ring-0 border border-slate-300 bg-white border-r-0 h-12 px-4 placeholder:text-slate-400 text-base font-normal leading-normal transition-colors" placeholder="user@example.com"/>
+<div class="text-slate-400 flex border border-slate-300 bg-slate-50 items-center justify-center px-4 rounded-r-lg border-l-0">
+<span class="material-symbols-outlined">person</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<label class="text-slate-700 text-base font-medium leading-normal">密码</label>
+</div>
+<div class="flex w-full flex-1 items-stretch rounded-lg group focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all shadow-sm">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-l-lg text-slate-900 focus:outline-0 focus:ring-0 border border-slate-300 bg-white border-r-0 h-12 px-4 placeholder:text-slate-400 text-base font-normal leading-normal transition-colors" placeholder="••••••••" type="password"/>
+<div class="text-slate-400 hover:text-slate-600 cursor-pointer flex border border-slate-300 bg-slate-50 items-center justify-center px-4 rounded-r-lg border-l-0 transition-colors">
+<span class="material-symbols-outlined">visibility</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between mt-1">
+<label class="flex gap-x-3 items-center cursor-pointer group">
+<input class="custom-checkbox h-5 w-5 rounded border-slate-300 border-2 bg-white text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:ring-offset-0 focus:border-primary focus:outline-none transition-colors shadow-sm" type="checkbox"/>
+<span class="text-slate-600 group-hover:text-slate-800 text-sm font-normal leading-normal transition-colors">记住我</span>
+</label>
+<a class="text-sm font-medium text-primary hover:text-primary-dark transition-colors" href="#">忘记密码？</a>
+</div>
+<button class="mt-4 flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-primary hover:bg-primary-dark text-white text-base font-bold leading-normal tracking-[0.015em] transition-all shadow-md shadow-blue-500/30 active:scale-[0.99]" type="button">
+<span class="truncate">立即登录</span>
+</button>
+</form>
+<div class="relative mt-8">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-slate-200"></div>
+</div>
+<div class="relative flex justify-center text-sm">
+<span class="px-2 bg-white text-slate-400">或通过以下方式登录</span>
+</div>
+</div>
+<div class="mt-6 grid grid-cols-2 gap-3">
+<button class="flex items-center justify-center gap-2 h-10 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px] text-primary">school</span>
+<span class="text-sm font-medium">校园统一认证</span>
+</button>
+<button class="flex items-center justify-center gap-2 h-10 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px] text-green-600">qr_code_scanner</span>
+<span class="text-sm font-medium">微信扫码</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute bottom-4 text-center w-full pointer-events-none">
+<p class="text-slate-400 text-xs">© 2024 混合式教学平台 v2.0 | All Rights Reserved</p>
+</div>
+</main>
+
+</body></html>

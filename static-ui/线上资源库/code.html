@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>线上资源库 - 数据挖掘导论</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;family=Noto+Sans:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2563EB", // Blue-600 for primary actions
+                        "primary-dark": "#1D4ED8", // Blue-700
+                        "primary-light": "#EFF6FF", // Blue-50
+                        "accent": "#3B82F6", // Blue-500
+                        "background-base": "#F8FAFC", // Slate-50 - Very light background
+                        "background-card": "#FFFFFF", // White - Card background
+                        "surface-hover": "#F1F5F9", // Slate-100 - Hover state
+                        "text-main": "#0F172A", // Slate-900 - Main text
+                        "text-secondary": "#64748B", // Slate-500 - Secondary text
+                        "border-color": "#E2E8F0", // Slate-200 - Borders
+                        "border-hover": "#CBD5E1", // Slate-300
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Noto Sans", "sans-serif"],
+                        "body": ["Inter", "Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        "soft": "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)",
+                        "card": "0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)",
+                        "hover": "0 10px 15px -3px rgba(59, 130, 246, 0.1), 0 4px 6px -2px rgba(59, 130, 246, 0.05)",
+                        "glow": "0 0 15px rgba(37, 99, 235, 0.15)"
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1F5F9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8; 
+        }
+    </style>
+</head>
+<body class="bg-background-base text-text-main font-display min-h-screen flex flex-col overflow-hidden">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-border-color bg-white px-10 py-3 shrink-0 z-20 shadow-sm">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8 flex items-center justify-center bg-primary-light rounded-lg text-primary">
+<span class="material-symbols-outlined text-3xl">school</span>
+</div>
+<h2 class="text-text-main text-lg font-bold leading-tight tracking-[-0.015em]">数据挖掘导论</h2>
+</div>
+<label class="hidden md:flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full border border-border-color bg-surface-hover focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+<div class="text-text-secondary flex items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg bg-transparent border-none focus:outline-0 focus:ring-0 focus:border-none h-full placeholder:text-text-secondary px-4 rounded-l-none border-l-0 pl-2 text-sm font-normal leading-normal text-text-main" placeholder="全站搜索..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<div class="hidden lg:flex items-center gap-9">
+<a class="text-text-secondary hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">首页</a>
+<a class="text-primary text-sm font-bold leading-normal bg-primary-light px-3 py-1.5 rounded-full" href="#">资源库</a>
+<a class="text-text-secondary hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">我的实验</a>
+<a class="text-text-secondary hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">积分榜</a>
+<a class="flex items-center gap-1 text-primary text-sm font-medium leading-normal hover:text-primary-dark transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+                    AI助手
+                </a>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex flex-col items-end mr-2 hidden sm:flex">
+<span class="text-xs text-text-secondary">12级</span>
+<span class="text-sm font-bold text-primary">1,240 积分</span>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 ring-2 ring-white shadow-md" data-alt="学生头像，显示一位微笑的年轻人" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBJeb1VRnKyrZwj52nwO9cqUQps-QkmAb6QXh0ZM4SENd5ONxjuWROjldQCXfkcP8Hnvti84-4cobTzUJ-Ibzw5xYrNXUhxaeY3Q7l1HCVXaC5Txqerng4wrerK6wWOAnpOcytvuSfjH3kC8WMCQSa5kM-AwLtdTa_LCFJP569aWe1OUD2ID1TqkpsaF1h6FRmFfw8495eb9x9G8OeHqwYbdOHgly_8bkfBtJRHL35l0zVBSz3Pn-aUKoKxDJ9bAbx7B1Dl9ymwbpw");'></div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden relative">
+<nav class="w-64 hidden md:flex flex-col bg-white border-r border-border-color overflow-y-auto shrink-0 py-6 px-4">
+<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-2">
+<h3 class="text-text-secondary text-xs font-bold uppercase tracking-wider px-3 mb-2">资源分类导航</h3>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary text-white shadow-md shadow-primary/20 group transition-all" href="#">
+<span class="material-symbols-outlined fill">grid_view</span>
+<span class="text-sm font-medium">全部资源</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-primary-light hover:text-primary transition-all group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">play_circle</span>
+<span class="text-sm font-medium">基础知识微课</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-primary-light hover:text-primary transition-all group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">functions</span>
+<span class="text-sm font-medium">算法演示</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-primary-light hover:text-primary transition-all group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">menu_book</span>
+<span class="text-sm font-medium">典型案例</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-primary-light hover:text-primary transition-all group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">terminal</span>
+<span class="text-sm font-medium">Jupyter Notebook实验模板</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-purple-50 hover:text-purple-600 transition-all group mt-2" href="#">
+<span class="material-symbols-outlined text-purple-500 group-hover:text-purple-600 transition-colors">location_on</span>
+<span class="text-sm font-medium">区域特色案例库</span>
+</a>
+</div>
+<div class="h-px bg-border-color w-full mx-auto"></div>
+<div class="flex flex-col gap-2">
+<h3 class="text-text-secondary text-xs font-bold uppercase tracking-wider px-3 mb-2">学习状态</h3>
+<div class="flex items-center gap-3 px-3 py-2">
+<div class="relative size-5 flex items-center justify-center">
+<svg class="size-full -rotate-90" viewBox="0 0 36 36">
+<path class="text-gray-200" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="4"></path>
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="75, 100" stroke-width="4"></path>
+</svg>
+</div>
+<div class="flex flex-col">
+<span class="text-text-main text-sm font-medium">第3章进度</span>
+<span class="text-text-secondary text-xs">75% 完成</span>
+</div>
+</div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-green-50 hover:text-green-600 transition-all group" href="#">
+<span class="material-symbols-outlined group-hover:text-green-500 transition-colors">bookmark</span>
+<span class="text-sm font-medium">我的收藏</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-text-secondary hover:bg-yellow-50 hover:text-yellow-600 transition-all group" href="#">
+<span class="material-symbols-outlined group-hover:text-yellow-500 transition-colors">history</span>
+<span class="text-sm font-medium">最近浏览</span>
+</a>
+</div>
+</div>
+<div class="mt-auto pt-6">
+<div class="bg-gradient-to-br from-white to-primary-light p-4 rounded-xl border border-primary/20 shadow-sm">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-yellow-500">emoji_events</span>
+<span class="text-primary-dark font-bold text-sm">今日挑战</span>
+</div>
+<p class="text-text-secondary text-xs mb-3">完成"K-Means"实验可获得 +50 积分奖励。</p>
+<button class="w-full py-1.5 bg-primary hover:bg-primary-dark text-white text-xs font-bold rounded transition-colors shadow-sm">去完成</button>
+</div>
+</div>
+</nav>
+<main class="flex-1 overflow-y-auto bg-background-base p-6 lg:p-10 scroll-smooth">
+<div class="max-w-6xl mx-auto flex flex-col gap-10">
+<div class="@container w-full">
+<div class="relative overflow-hidden rounded-2xl bg-white border border-border-color shadow-card group">
+<div class="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary via-background-base to-white"></div>
+<div class="relative flex flex-col lg:flex-row gap-6 p-6 lg:p-10 items-center">
+<div class="flex-1 flex flex-col gap-4 text-left z-10">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-light border border-primary/20 w-fit">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+<span class="text-primary text-xs font-bold uppercase tracking-wider">特色实战专区</span>
+</div>
+<h1 class="text-text-main text-3xl lg:text-4xl font-black leading-tight tracking-tight">
+                                    区域特色数据挖掘案例库
+                                </h1>
+<p class="text-text-secondary text-base lg:text-lg max-w-xl">
+                                    结合本地化真实数据集（交通、零售、医疗），提供具有区域特色的数据挖掘实战案例，助力深度学习与应用。
+                                </p>
+<div class="flex flex-wrap gap-4 mt-2">
+<button class="flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-bold transition-all shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30">
+<span>立即探索</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<button class="flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-text-main border border-border-color px-6 py-3 rounded-lg font-medium transition-all shadow-sm">
+<span>查看案例列表</span>
+</button>
+</div>
+</div>
+<div class="w-full lg:w-1/2 relative">
+<div class="aspect-video w-full rounded-xl overflow-hidden shadow-2xl border border-gray-100 relative bg-gray-50">
+<div class="w-full h-full bg-cover bg-center" data-alt="城市地图的抽象可视化，数据节点连接不同区域" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDRBe_6cSsUxeFzo6-SuRgm9uNHoxWME5MpWG0t9GlnMZdKY09l6dEgJanJeQaBNH-vuTlkI6Nn1xB_DnIyBxXy2GZEXB2UT3Zsh312rbcusJtS8A-j91Alrke2_RBa8CqNb9yP8W6xdh2Q0RT9QgJfRm3UTl9fqDlTpPHcQmhTvTcH3nLbdT-iFDqgG7xUHERb11IHImwkG9O2FpeipQ0-cjwPCqazwxnmU5PXkdRTN_K-nRRfbD-U8ws4zS6lHdyh3ZgcwDyQww8');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4 flex gap-3">
+<div class="bg-white/90 backdrop-blur-sm p-3 rounded-lg border border-white/50 flex-1 shadow-sm">
+<div class="text-xs text-text-secondary mb-1">数据集</div>
+<div class="text-text-main font-bold text-sm">24个</div>
+</div>
+<div class="bg-white/90 backdrop-blur-sm p-3 rounded-lg border border-white/50 flex-1 shadow-sm">
+<div class="text-xs text-text-secondary mb-1">实战项目</div>
+<div class="text-text-main font-bold text-sm">12个</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-6 bg-white p-6 rounded-2xl border border-border-color shadow-card">
+<div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+<div>
+<h2 class="text-text-main text-xl font-bold">资源检索</h2>
+<p class="text-text-secondary text-sm mt-1">支持关键词、标签及类型组合筛选</p>
+</div>
+<div class="flex w-full lg:w-2/5 gap-2">
+<div class="flex flex-1 items-center bg-gray-50 rounded-lg px-3 py-2.5 border border-border-color focus-within:border-primary focus-within:ring-1 focus-within:ring-primary focus-within:bg-white transition-all">
+<span class="material-symbols-outlined text-text-secondary mr-2">search</span>
+<input class="bg-transparent border-none text-text-main text-sm focus:ring-0 w-full placeholder:text-text-secondary/70 p-0 leading-normal" placeholder="搜索知识点、算法或案例..." type="text"/>
+</div>
+<button class="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-lg font-medium text-sm transition-colors whitespace-nowrap shadow-md shadow-primary/20">
+                                搜索
+                            </button>
+</div>
+</div>
+<div class="h-px bg-gray-100 w-full"></div>
+<div class="flex flex-col gap-4">
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+<span class="text-text-main text-sm font-bold w-12 pt-1 sm:pt-0">类型:</span>
+<div class="flex flex-wrap gap-2">
+<button class="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-full transition-all shadow-sm">全部</button>
+<button class="bg-white hover:bg-gray-50 text-text-secondary hover:text-primary text-xs font-medium px-3 py-1.5 rounded-full border border-border-color transition-all">基础知识微课</button>
+<button class="bg-white hover:bg-gray-50 text-text-secondary hover:text-primary text-xs font-medium px-3 py-1.5 rounded-full border border-border-color transition-all">算法演示</button>
+<button class="bg-white hover:bg-gray-50 text-text-secondary hover:text-primary text-xs font-medium px-3 py-1.5 rounded-full border border-border-color transition-all">典型案例</button>
+<button class="bg-white hover:bg-gray-50 text-text-secondary hover:text-primary text-xs font-medium px-3 py-1.5 rounded-full border border-border-color transition-all">Jupyter Notebook</button>
+<button class="bg-white hover:bg-purple-50 text-purple-600 hover:text-purple-700 text-xs font-medium px-3 py-1.5 rounded-full border border-purple-100 transition-all">区域特色案例</button>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+<span class="text-text-main text-sm font-bold w-12 pt-1 sm:pt-0">标签:</span>
+<div class="flex flex-wrap gap-2">
+<button class="text-text-secondary hover:text-primary text-xs font-medium px-2 py-1.5 rounded hover:bg-gray-100 transition-all">不限</button>
+<button class="text-text-secondary hover:text-primary text-xs font-medium px-2 py-1.5 rounded hover:bg-gray-100 transition-all">预习必备</button>
+<button class="text-text-secondary hover:text-primary text-xs font-medium px-2 py-1.5 rounded hover:bg-gray-100 transition-all">期末复习</button>
+<button class="text-text-secondary hover:text-primary text-xs font-medium px-2 py-1.5 rounded hover:bg-gray-100 transition-all">高难度</button>
+<button class="text-text-secondary hover:text-primary text-xs font-medium px-2 py-1.5 rounded hover:bg-gray-100 transition-all">入门简单</button>
+<button class="flex items-center gap-1 text-red-500 hover:text-red-600 text-xs font-medium px-2 py-1.5 rounded hover:bg-red-50 transition-all">
+<span class="material-symbols-outlined text-[14px] fill">local_fire_department</span>
+                                    热门推荐
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-border-color hover:border-primary/40 hover:shadow-hover transition-all duration-300">
+<div class="relative aspect-video w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="数据预处理视频讲座截图，显示图表" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC49yDO81gm9ogNWo3CgUQyb74HzWXZ00Lz2UZ7X11ZBhaR4mu7_SzTHxWlkWDj7avjxMt3L3OAm8ACre4TopALFkmCoOID739ZNV3oVUypgubXXoYK5N0F2tATGUH_tyva2yb0I3Izl9imJC__CHA6Q097CS5APViLJPY7qjA8G_1nZvpMtRyHVz7LWlQLVzN203Ab43joOWUdztK_pIWlfB4uKt98j7Go0_jCSzmxvRBF34kmjtg5B6PuXQyEaRpFe6QJpBr_jrw');"></div>
+<div class="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
+<div class="absolute top-3 left-3 bg-blue-500/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[12px]">videocam</span> 微课
+                            </div>
+<div class="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-0.5 rounded font-mono backdrop-blur-sm">
+                                12:45
+                            </div>
+<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<div class="bg-primary text-white rounded-full p-2 shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+<span class="material-symbols-outlined text-3xl fill">play_arrow</span>
+</div>
+</div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-primary bg-primary-light px-2 py-0.5 rounded border border-primary/10">预习必备</span>
+<span class="text-xs text-yellow-600 font-medium flex items-center gap-0.5" title="积分奖励">+10 积分</span>
+</div>
+<h3 class="text-text-main text-base font-bold mb-2 line-clamp-2 group-hover:text-primary transition-colors">1.2 数据预处理：清洗与集成</h3>
+<p class="text-text-secondary text-xs line-clamp-2 mb-4">讲解缺失值处理、噪声过滤以及数据集成的主要方法和策略。</p>
+<div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-text-secondary text-sm">visibility</span>
+<span class="text-xs text-text-secondary">1.2k</span>
+</div>
+<span class="text-xs text-text-secondary">王博士</span>
+</div>
+</div>
+</div>
+<div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-border-color hover:border-purple-500/40 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300">
+<div class="relative aspect-video w-full overflow-hidden bg-gray-50">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="代表算法逻辑的抽象3D网络可视化" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBE9_9w6SqXM_Txo_UO_ClQELD8RNFFWvCguuVRuo--q7Ck7O1_DpXOzHNBf5-81LMT_feNvo72skzYLkEVDQYPSXEJbWlbUNRPFBeLe8rXMdcR_9N-gXiMTVCYz7auj7T3UeWfxKzhPjtp28uS2l04iJmxoVIGUazKkDd2V-db-7hS0Ydj8585rJle5EK0qhMHQV8CpB_fSaEL3VyXTy51FTTXW1f5UKopRmIHsBJuAXkh6R8WxZqDubIdk-1w4wppJYdHD3MJo3o');"></div>
+<div class="absolute top-3 left-3 bg-purple-500/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[12px]">code</span> 演示
+                            </div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-purple-600 bg-purple-50 px-2 py-0.5 rounded border border-purple-100">复盘重点</span>
+<span class="text-xs text-yellow-600 font-medium flex items-center gap-0.5">+15 积分</span>
+</div>
+<h3 class="text-text-main text-base font-bold mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">K-Means 聚类算法可视化演示</h3>
+<p class="text-text-secondary text-xs line-clamp-2 mb-4">通过动态交互演示，直观理解 K-Means 算法的迭代收敛过程。</p>
+<div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
+<button class="text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded w-full transition-colors shadow-sm">开始演示</button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-border-color hover:border-orange-500/40 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300">
+<div class="relative aspect-video w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="屏幕上显示数据科学的Python代码" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBtrHa3D4UOP5isqsUI8MD88k7z69Nhe9JQvX0tIoRmLcLZgk9SQtGQkOb5j8BVEknf2itU7UMC108nV-wfiKAV37sGwCelzUInKzM8b4FTxn8OQTCypay6YEEHtDdvmvhnNbK-fgiMjSzJBjCgbQWWfFjJOkbCNZakw-PLKSgbcBfLsOzjBl9das__o_tM-kh7H7EJ3w0gDfnDtGiUxSYX8_rHOqO9h0UHYkkziz6RhOrtS28NGNKNF3aVCde-8bZKO1j5O7QxKb0');"></div>
+<div class="absolute top-3 left-3 bg-orange-500/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[12px]">terminal</span> 实验
+                            </div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-100">高难度</span>
+<span class="text-xs text-yellow-600 font-medium flex items-center gap-0.5">+50 积分</span>
+</div>
+<h3 class="text-text-main text-base font-bold mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">实验三：基于决策树的信贷风险评估</h3>
+<p class="text-text-secondary text-xs line-clamp-2 mb-4">使用 Python sklearn 库构建决策树模型，并在真实信贷数据集上进行验证。</p>
+<div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
+<button class="text-xs font-bold text-white bg-orange-600 hover:bg-orange-700 px-3 py-1.5 rounded w-full transition-colors shadow-sm">打开 Jupyter Notebook</button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-border-color hover:border-green-500/40 hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300">
+<div class="relative aspect-video w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="代表购物篮分析的零售店过道模糊背景" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAFQrYIZSJO3097P2sL8kWjfGBJ6cO8CAQflv7ZXC2ucdyxTduZGYkHC_wytBHK8TCGqi0eUtsYYl0hI2f1WvGnjHSVPWmAeOBFF2jlAvD4_L47Y_RxtuI1hkS6kcftDzKY9BCv2J9soKiFuY8HNp87QZLCL0qPJ2du_I6drQbwRjNv526CjHr0vhaygl4TtjGjggKYVeXkQTDdXeqcepob6wTMpHJDeI9neKCfD2hOPZy-Om6-ZnGhMk1-sfbmJE9S9VvOGKJNJJQ');"></div>
+<div class="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
+<div class="absolute top-3 left-3 bg-green-500/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[12px]">menu_book</span> 案例
+                            </div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-100">典型案例</span>
+<span class="text-xs text-yellow-600 font-medium flex items-center gap-0.5">+30 积分</span>
+</div>
+<h3 class="text-text-main text-base font-bold mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">购物篮分析：关联规则挖掘实战</h3>
+<p class="text-text-secondary text-xs line-clamp-2 mb-4">深入剖析超市零售数据，发现商品间的关联购买模式（Apriori算法应用）。</p>
+<div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-text-secondary text-sm">visibility</span>
+<span class="text-xs text-text-secondary">856</span>
+</div>
+<span class="text-xs text-text-secondary">陈博士</span>
+</div>
+</div>
+</div>
+<div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-border-color hover:border-primary/40 hover:shadow-hover transition-all duration-300">
+<div class="relative aspect-video w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="显示神经网络架构图的屏幕" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAWcCk0NqNS7uUVUD4irP3Q_dINgw_Q6yWpVeti7_AWXQ2BflVRhMLPhHeHeLPofJZYN2F80ZO7zcvUjilDt3TQn-1XhDO8eV3418GQB-e42Bc24vYAYITxP3PrqDinhC0EnhkDIPRSCnteuahJf4WBn7t0wuR5wOaWhEo3Ge1L5jdoVLtY53wh7qTys75nFCuXYnAX1SQ5NjDsDeZCZn86btdh8dbJcoUKZfYYjFoC3p7exMMVQ3oRVUJmptGeRsaFS7WGfZR9AR4');"></div>
+<div class="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
+<div class="absolute top-3 left-3 bg-blue-500/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[12px]">videocam</span> 微课
+                            </div>
+<div class="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-0.5 rounded font-mono backdrop-blur-sm">
+                                08:30
+                            </div>
+<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<div class="bg-primary text-white rounded-full p-2 shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+<span class="material-symbols-outlined text-3xl fill">play_arrow</span>
+</div>
+</div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-text-secondary bg-gray-100 border border-border-color px-2 py-0.5 rounded">拓展知识</span>
+<span class="text-xs text-yellow-600 font-medium flex items-center gap-0.5">+10 积分</span>
+</div>
+<h3 class="text-text-main text-base font-bold mb-2 line-clamp-2 group-hover:text-primary transition-colors">神经网络基础与感知机</h3>
+<p class="text-text-secondary text-xs line-clamp-2 mb-4">介绍深度学习的基础单元——感知机的工作原理与数学推导。</p>
+<div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-text-secondary text-sm">visibility</span>
+<span class="text-xs text-text-secondary">432</span>
+</div>
+<span class="text-xs text-text-secondary">王博士</span>
+</div>
+</div>
+</div>
+<div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-border-color hover:border-orange-500/40 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300">
+<div class="relative aspect-video w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="显示数据图表的电脑屏幕特写" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCPqf7B5ggiBWMcndLHzYlUT16I8xTuiNPmiPALxMX2Td0jmf5W5BoSiCpFh6kfb8RGIqTuBf8R3EWGjRL39FPZqBO22noqNwuzKOK740EwJueSDlob4NOwhb5g5e2mLD9St86TOYpT_P2ExtQmNxpm6VtKhgL4S6DaA6vk0KgRnM56nU3lnCSVbrbqotYILcoEnLuJ9Jc5CLrA9xTzvAFRs63gfPBZOKETS6l_SNwLxDPG_FeUfF4yMdKnhN9Oadx8NaMBI9eZvpQ');"></div>
+<div class="absolute top-3 left-3 bg-orange-500/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[12px]">terminal</span> 实验
+                            </div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-100">高难度</span>
+<span class="text-xs text-yellow-600 font-medium flex items-center gap-0.5">+45 积分</span>
+</div>
+<h3 class="text-text-main text-base font-bold mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">实验四：SVM 分类器参数调优</h3>
+<p class="text-text-secondary text-xs line-clamp-2 mb-4">探究核函数选择对 SVM 性能的影响，并使用网格搜索进行参数调优。</p>
+<div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
+<button class="text-xs font-bold text-white bg-orange-600 hover:bg-orange-700 px-3 py-1.5 rounded w-full transition-colors shadow-sm">打开 Jupyter Notebook</button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-center pb-10">
+<button class="flex items-center gap-2 px-6 py-2.5 bg-white border border-border-color hover:bg-gray-50 text-text-secondary hover:text-text-main rounded-lg transition-colors font-medium text-sm shadow-sm">
+<span>加载更多资源</span>
+<span class="material-symbols-outlined text-base">expand_more</span>
+</button>
+</div>
+</div>
+</main>
+</div>
+<button class="fixed bottom-8 right-8 bg-primary hover:bg-primary-dark text-white rounded-full p-4 shadow-2xl z-50 group transition-all hover:scale-110 flex items-center gap-2 pr-6 shadow-blue-500/30">
+<span class="material-symbols-outlined text-2xl">smart_toy</span>
+<span class="text-sm font-bold">学习助手</span>
+<span class="absolute top-0 right-0 flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+</span>
+</button>
+
+</body></html>

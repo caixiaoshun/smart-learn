@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>案例详情 - 中医药数据挖掘 - EduTech AI</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#0ea5e9", // Sky Blue - brighter and friendlier
+              "primary-dark": "#0284c7", // Darker Sky Blue
+              "secondary": "#3b82f6", // Royal Blue
+              "accent": "#06b6d4", // Cyan
+              "background-light": "#f0f9ff", // Very light blue background
+              "background-dark": "#0f172a", // Slate 900
+              "surface-light": "#ffffff",
+              "surface-blue": "#e0f2fe", // Light blue surface
+              "border-light": "#bae6fd", // Light blue border
+              "text-primary": "#0c4a6e", // Dark Blue text
+              "text-secondary": "#475569", // Slate text
+              "header-bg": "#0284c7", // Professional Header Blue
+              "code-bg": "#f8fafc", // Very light slate for code block bg
+            },
+            fontFamily: {
+              "display": ["Inter", "Noto Sans SC", "sans-serif"],
+              "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"],
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .bg-gradient-blue {
+                background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%);
+            }
+            .text-gradient {
+                background-clip: text;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-image: linear-gradient(to right, #0ea5e9, #3b82f6);
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-light text-text-secondary font-display overflow-x-hidden min-h-screen flex flex-col">
+<header class="sticky top-0 z-50 bg-white border-b border-border-light w-full shadow-sm">
+<div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="text-primary bg-sky-50 p-2 rounded-lg">
+<span class="material-symbols-outlined text-3xl">school</span>
+</div>
+<h2 class="text-text-primary text-xl font-bold leading-tight tracking-tight">EduTech AI 平台</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-slate-600 text-sm font-medium hover:text-primary transition-colors" href="#">首页</a>
+<a class="text-slate-600 text-sm font-medium hover:text-primary transition-colors" href="#">我的课程</a>
+<a class="text-primary text-sm font-bold border-b-2 border-primary pb-0.5" href="#">资源库</a>
+<a class="text-slate-600 text-sm font-medium hover:text-primary transition-colors" href="#">行为分析</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:text-primary hover:bg-sky-50 rounded-full transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-9 ring-2 ring-primary/20" data-alt="用户头像占位符，抽象渐变" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAuytIn7n2JUdZ_HTmJzhNIcQ0v57LZmLpLqH5WCQyP1TjkR-QIe-qq3xB9v9KKU_unJd-kQGLB7-DWgwlgtNgMR2HX-Sv6qzIk1FOZnbeP_LSDfs7joqYi-vHHiShgZ1Hvo36P-u0vwqLnUwtXY_W15NgjPSl5oEs_WXn36W5Oz5ODpbosjtWb7QbUj135Teueo8l9dKdjOBEhqhE5KL59CNlpx80UbHRxOvujBtv5W2PNPIoVzH0BvsECFla0390d0UpsLQxNUnI");'>
+</div>
+</div>
+</div>
+</header>
+<div class="flex-1 max-w-[1440px] w-full mx-auto p-6 md:p-8 lg:px-12 flex flex-col gap-6">
+<div class="flex flex-wrap items-center gap-2 text-sm bg-white/50 backdrop-blur-sm p-3 rounded-lg border border-border-light/30">
+<a class="text-slate-500 hover:text-primary" href="#">首页</a>
+<span class="text-slate-400">/</span>
+<a class="text-slate-500 hover:text-primary" href="#">课程</a>
+<span class="text-slate-400">/</span>
+<a class="text-slate-500 hover:text-primary" href="#">数据挖掘导论</a>
+<span class="text-slate-400">/</span>
+<a class="text-slate-500 hover:text-primary" href="#">案例库</a>
+<span class="text-slate-400">/</span>
+<span class="text-primary font-semibold">中医药数据挖掘</span>
+</div>
+<div class="flex flex-col lg:flex-row gap-8">
+<main class="flex-1 flex flex-col gap-8">
+<div class="bg-white rounded-2xl border border-border-light shadow-sm p-6 md:p-8">
+<div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
+<div>
+<div class="flex items-center gap-3 mb-3">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                                    关联规则
+                                </span>
+<span class="text-xs text-slate-400 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 更新于 2023-10-24
+                                </span>
+</div>
+<h1 class="text-3xl font-black text-text-primary mb-3">中医药数据挖掘：古方今用中的智慧</h1>
+<p class="text-slate-600 text-lg">利用 Apriori 算法分析古代中医典籍中的处方配伍规律，探索隐藏在传统文化中的科学原理。</p>
+</div>
+<div class="flex gap-2 shrink-0">
+<button class="p-2 text-slate-400 hover:text-primary border border-border-light rounded-lg hover:bg-sky-50 transition-colors" title="收藏">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-primary border border-border-light rounded-lg hover:bg-sky-50 transition-colors" title="分享">
+<span class="material-symbols-outlined">share</span>
+</button>
+<button class="px-4 py-2 bg-primary text-white font-semibold rounded-lg shadow hover:bg-primary-dark transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined">download</span> 下载教案
+                            </button>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-xl border border-border-light/50">
+<div class="flex flex-col gap-1">
+<span class="text-xs text-slate-500 font-medium">浏览量</span>
+<span class="text-lg font-bold text-slate-800 flex items-center gap-1">
+                                2,431 <span class="material-symbols-outlined text-green-500 text-sm">trending_up</span>
+</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-slate-500 font-medium">评分</span>
+<span class="text-lg font-bold text-slate-800 flex items-center gap-1">
+                                4.9 <span class="material-symbols-outlined text-amber-400 text-sm">star</span>
+</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-slate-500 font-medium">难度等级</span>
+<span class="text-lg font-bold text-slate-800">中等</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-slate-500 font-medium">预计课时</span>
+<span class="text-lg font-bold text-slate-800">2 课时</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+<div class="xl:col-span-2 flex flex-col gap-8">
+<section class="bg-white rounded-2xl border border-border-light shadow-sm p-6 md:p-8">
+<h2 class="text-xl font-bold text-text-primary flex items-center gap-2 mb-6 pb-4 border-b border-slate-100">
+<span class="material-symbols-outlined text-primary">description</span> 案例背景与描述
+                            </h2>
+<div class="prose prose-slate max-w-none text-slate-700 space-y-4 leading-relaxed">
+<p>
+                                    中医药是中华民族的瑰宝，其中蕴含着丰富的经验智慧。然而，传统的传承方式往往依赖于口传心授，缺乏系统性的定量分析。随着大数据技术的发展，我们可以利用现代数据挖掘技术对海量的中医医案、处方进行分析，揭示药物之间的配伍规律，为现代新药研发提供启发。
+                                </p>
+<p>
+                                    本案例选取了著名的《伤寒杂病论》中的部分经典方剂作为数据集。学生将扮演数据分析师的角色，任务是利用关联规则挖掘算法（如 Apriori 或 FP-Growth），找出高频出现的药物组合（项集）以及强关联规则。
+                                </p>
+<div class="bg-blue-50/50 p-4 rounded-lg border-l-4 border-primary my-6">
+<h4 class="font-bold text-primary-dark mb-2">核心问题：</h4>
+<ul class="list-disc list-inside space-y-1 text-sm">
+<li>哪些中药材经常一起出现？（频繁项集挖掘）</li>
+<li>当出现“桂枝”时，有多大概率会出现“甘草”？（关联规则置信度分析）</li>
+<li>如何解释这些规则背后的药理学意义？（领域知识结合）</li>
+</ul>
+</div>
+<p>
+                                    通过本案例，学生不仅能掌握关联规则算法的原理与实现，还能深刻体会到“古为今用”的创新思维，增强对民族文化的认同感和自豪感。
+                                </p>
+</div>
+</section>
+<section class="bg-white rounded-2xl border border-border-light shadow-sm p-6 md:p-8">
+<h2 class="text-xl font-bold text-text-primary flex items-center gap-2 mb-4 pb-4 border-b border-slate-100">
+<span class="material-symbols-outlined text-primary">code_blocks</span> 核心代码实现 (Jupyter Notebook)
+                            </h2>
+<div class="text-sm text-slate-600 mb-4">
+                                下方代码展示了如何使用 Python 的 <code class="bg-slate-100 px-1 py-0.5 rounded text-primary-dark">mlxtend</code> 库进行频繁项集挖掘。你可以直接查看预运行的结果，理解 Apriori 算法的应用逻辑。
+                            </div>
+<div class="rounded-lg border border-slate-200 overflow-hidden bg-code-bg font-mono text-sm">
+<div class="flex items-center gap-2 px-4 py-2 bg-slate-100 border-b border-slate-200 text-xs text-slate-500">
+<div class="flex gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+</div>
+<span class="ml-2">TCM_Apriori_Analysis.ipynb</span>
+<span class="ml-auto flex items-center gap-1 cursor-pointer hover:text-primary">
+<span class="material-symbols-outlined text-sm">content_copy</span> 复制
+                                </span>
+</div>
+<div class="p-4 overflow-x-auto max-h-[500px] overflow-y-auto">
+<div class="flex gap-4 mb-6">
+<div class="flex-shrink-0 w-16 pt-1 text-right text-xs text-slate-400 select-none font-sans">
+                                        In [1]:
+                                    </div>
+<div class="flex-1 min-w-0">
+<div class="bg-white border border-slate-200 rounded p-3 shadow-sm">
+<pre class="whitespace-pre"><code class="language-python"><span class="text-pink-600">import</span> pandas <span class="text-pink-600">as</span> pd
+<span class="text-pink-600">from</span> mlxtend.preprocessing <span class="text-pink-600">import</span> TransactionEncoder
+<span class="text-pink-600">from</span> mlxtend.frequent_patterns <span class="text-pink-600">import</span> apriori, association_rules
+<span class="text-slate-500"># 1. 加载伤寒论方剂数据集（简化示例）</span>
+dataset = [
+    [<span class="text-green-600">'甘草'</span>, <span class="text-green-600">'桂枝'</span>, <span class="text-green-600">'麻黄'</span>, <span class="text-green-600">'杏仁'</span>],
+    [<span class="text-green-600">'大枣'</span>, <span class="text-green-600">'甘草'</span>, <span class="text-green-600">'桂枝'</span>, <span class="text-green-600">'生姜'</span>, <span class="text-green-600">'芍药'</span>],
+    [<span class="text-green-600">'甘草'</span>, <span class="text-green-600">'干姜'</span>, <span class="text-green-600">'附子'</span>],
+    [<span class="text-green-600">'桂枝'</span>, <span class="text-green-600">'芍药'</span>, <span class="text-green-600">'生姜'</span>, <span class="text-green-600">'大枣'</span>, <span class="text-green-600">'甘草'</span>, <span class="text-green-600">'饴糖'</span>],
+    [<span class="text-green-600">'大黄'</span>, <span class="text-green-600">'桂枝'</span>, <span class="text-green-600">'甘草'</span>, <span class="text-green-600">'桃仁'</span>, <span class="text-green-600">'芒硝'</span>]
+]
+<span class="text-slate-500"># 2. 数据转换：将列表转换为 One-Hot 编码格式</span>
+te = TransactionEncoder()
+te_ary = te.fit(dataset).transform(dataset)
+df = pd.DataFrame(te_ary, columns=te.columns_)
+<span class="text-slate-500"># 3. 使用 Apriori 算法挖掘频繁项集 (最小支持度 0.6)</span>
+frequent_itemsets = apriori(df, min_support=<span class="text-blue-600">0.6</span>, use_colnames=<span class="text-blue-600">True</span>)
+frequent_itemsets.sort_values(by=<span class="text-green-600">'support'</span>, ascending=<span class="text-blue-600">False</span>).head(<span class="text-blue-600">5</span>)</code></pre>
+</div>
+</div>
+</div>
+<div class="flex gap-4 mb-8">
+<div class="flex-shrink-0 w-16 pt-1 text-right text-xs text-red-400 select-none font-sans">
+                                        Out [1]:
+                                    </div>
+<div class="flex-1 min-w-0">
+<div class="overflow-x-auto">
+<table class="min-w-full text-xs text-left text-slate-600">
+<thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
+<tr>
+<th class="px-3 py-2"></th>
+<th class="px-3 py-2">support</th>
+<th class="px-3 py-2">itemsets</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<tr>
+<td class="px-3 py-1 font-mono text-slate-400">0</td>
+<td class="px-3 py-1">1.0</td>
+<td class="px-3 py-1">(甘草)</td>
+</tr>
+<tr>
+<td class="px-3 py-1 font-mono text-slate-400">1</td>
+<td class="px-3 py-1">0.8</td>
+<td class="px-3 py-1">(桂枝)</td>
+</tr>
+<tr>
+<td class="px-3 py-1 font-mono text-slate-400">2</td>
+<td class="px-3 py-1">0.8</td>
+<td class="px-3 py-1">(甘草, 桂枝)</td>
+</tr>
+<tr>
+<td class="px-3 py-1 font-mono text-slate-400">3</td>
+<td class="px-3 py-1">0.4</td>
+<td class="px-3 py-1">(大枣, 生姜)</td>
+</tr>
+<tr>
+<td class="px-3 py-1 font-mono text-slate-400">4</td>
+<td class="px-3 py-1">0.4</td>
+<td class="px-3 py-1">(芍药, 甘草)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="flex gap-4 mb-6">
+<div class="flex-shrink-0 w-16 pt-1 text-right text-xs text-slate-400 select-none font-sans">
+                                        In [2]:
+                                    </div>
+<div class="flex-1 min-w-0">
+<div class="bg-white border border-slate-200 rounded p-3 shadow-sm">
+<pre class="whitespace-pre"><code class="language-python"><span class="text-slate-500"># 4. 生成强关联规则 (最小置信度 0.8)</span>
+rules = association_rules(frequent_itemsets, metric=<span class="text-green-600">"confidence"</span>, min_threshold=<span class="text-blue-600">0.8</span>)
+rules[[<span class="text-green-600">'antecedents'</span>, <span class="text-green-600">'consequents'</span>, <span class="text-green-600">'support'</span>, <span class="text-green-600">'confidence'</span>]]</code></pre>
+</div>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="flex-shrink-0 w-16 pt-1 text-right text-xs text-red-400 select-none font-sans">
+                                        Out [2]:
+                                    </div>
+<div class="flex-1 min-w-0">
+<div class="overflow-x-auto">
+<table class="min-w-full text-xs text-left text-slate-600">
+<thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
+<tr>
+<th class="px-3 py-2"></th>
+<th class="px-3 py-2">antecedents</th>
+<th class="px-3 py-2">consequents</th>
+<th class="px-3 py-2">support</th>
+<th class="px-3 py-2">confidence</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<tr>
+<td class="px-3 py-1 font-mono text-slate-400">0</td>
+<td class="px-3 py-1">(桂枝)</td>
+<td class="px-3 py-1">(甘草)</td>
+<td class="px-3 py-1">0.8</td>
+<td class="px-3 py-1">1.0</td>
+</tr>
+<tr>
+<td class="px-3 py-1 font-mono text-slate-400">1</td>
+<td class="px-3 py-1">(甘草)</td>
+<td class="px-3 py-1">(桂枝)</td>
+<td class="px-3 py-1">0.8</td>
+<td class="px-3 py-1">0.8</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-2 text-xs text-slate-500 italic border-l-2 border-primary/30 pl-2">
+                                            注：Confidence=1.0 表示在本数据集中，只要出现“桂枝”，就一定伴随“甘草”。体现了中医“辛甘化阳”的经典配伍理论。
+                                        </div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-white rounded-2xl border border-border-light shadow-sm p-6 md:p-8">
+<h2 class="text-xl font-bold text-text-primary flex items-center gap-2 mb-6 pb-4 border-b border-slate-100">
+<span class="material-symbols-outlined text-primary">lightbulb</span> 教学启示与思政育人点
+                            </h2>
+<div class="space-y-6">
+<div class="flex gap-4">
+<div class="flex-shrink-0 size-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+<span class="material-symbols-outlined">flag</span>
+</div>
+<div>
+<h3 class="font-bold text-slate-800 text-lg">文化自信与科技传承</h3>
+<p class="text-slate-600 mt-1">引导学生认识到传统文化并非过时之物，利用现代科技手段可以焕发其新生。培养学生用科学的眼光审视传统，用技术的手段传承文明。</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="flex-shrink-0 size-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined">science</span>
+</div>
+<div>
+<h3 class="font-bold text-slate-800 text-lg">科学精神与严谨治学</h3>
+<p class="text-slate-600 mt-1">在挖掘过程中，强调数据的真实性和结果验证的重要性。避免“唯数据论”，教会学生结合领域知识（中医理论）对挖掘结果进行科学解释，培养严谨的科研态度。</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="flex-shrink-0 size-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+<span class="material-symbols-outlined">psychology</span>
+</div>
+<div>
+<h3 class="font-bold text-slate-800 text-lg">创新思维</h3>
+<p class="text-slate-600 mt-1">鼓励学生思考除了药物配伍，关联规则还能应用在哪些传统文化领域（如诗词格律分析、历史事件关联等），激发跨学科交叉创新的意识。</p>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-white rounded-2xl border border-border-light shadow-sm p-6 md:p-8">
+<div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+<h2 class="text-xl font-bold text-text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">forum</span> 教学研讨 (12)
+                                </h2>
+<button class="text-primary text-sm font-semibold hover:underline">查看全部</button>
+</div>
+<div class="flex gap-4 mb-8">
+<div class="size-10 rounded-full bg-slate-200 flex-shrink-0 overflow-hidden">
+<div class="w-full h-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAuytIn7n2JUdZ_HTmJzhNIcQ0v57LZmLpLqH5WCQyP1TjkR-QIe-qq3xB9v9KKU_unJd-kQGLB7-DWgwlgtNgMR2HX-Sv6qzIk1FOZnbeP_LSDfs7joqYi-vHHiShgZ1Hvo36P-u0vwqLnUwtXY_W15NgjPSl5oEs_WXn36W5Oz5ODpbosjtWb7QbUj135Teueo8l9dKdjOBEhqhE5KL59CNlpx80UbHRxOvujBtv5W2PNPIoVzH0BvsECFla0390d0UpsLQxNUnI");'></div>
+</div>
+<div class="flex-1">
+<textarea class="w-full rounded-xl border-border-light bg-slate-50 p-3 text-sm focus:border-primary focus:ring-primary h-24 resize-none" placeholder="分享您对该案例的教学心得或建议..."></textarea>
+<div class="flex justify-end mt-2">
+<button class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">发表评论</button>
+</div>
+</div>
+</div>
+<div class="space-y-6">
+<div class="flex gap-4">
+<div class="size-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-bold flex-shrink-0">
+                                        李
+                                    </div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-bold text-slate-800">李老师</span>
+<span class="text-xs text-slate-400">2天前</span>
+</div>
+<p class="text-slate-600 text-sm mb-2">这个案例非常好！我上周在课堂上使用了这个案例，学生们对于能够用代码分析中医方剂感到非常新奇，课堂活跃度很高。建议可以增加一些可视化的展示代码。</p>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-1 text-slate-400 hover:text-primary text-xs font-medium">
+<span class="material-symbols-outlined text-[16px]">thumb_up</span> 赞 (5)
+                                            </button>
+<button class="flex items-center gap-1 text-slate-400 hover:text-primary text-xs font-medium">
+<span class="material-symbols-outlined text-[16px]">reply</span> 回复
+                                            </button>
+</div>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="size-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold flex-shrink-0">
+                                        王
+                                    </div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-bold text-slate-800">王教授</span>
+<span class="text-xs text-slate-400">5天前</span>
+</div>
+<p class="text-slate-600 text-sm mb-2">思政融入点找得很准。不仅讲技术，更讲文化。特别是在“置信度”这个概念的讲解中，结合药对的“君臣佐使”理论，效果拔群。</p>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-1 text-slate-400 hover:text-primary text-xs font-medium">
+<span class="material-symbols-outlined text-[16px]">thumb_up</span> 赞 (12)
+                                            </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<aside class="flex flex-col gap-6">
+<div class="rounded-xl bg-gradient-to-br from-indigo-600 to-primary p-6 text-white shadow-xl shadow-indigo-200">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-yellow-300">auto_awesome</span>
+<h3 class="font-bold text-lg">AI 教学建议</h3>
+</div>
+<p class="text-indigo-100 text-sm mb-4 leading-relaxed">
+                                根据往期数据，学生在理解“频繁项集”概念时容易混淆支持度和置信度。建议在讲解本案例前，先通过简单的“超市购物篮”示例进行预热。
+                            </p>
+<div class="w-full bg-white/10 rounded-lg p-3 backdrop-blur-sm mb-4">
+<p class="text-xs font-medium text-white/80 mb-1">推荐前置知识点：</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-white/20 rounded text-[10px]">概率论基础</span>
+<span class="px-2 py-1 bg-white/20 rounded text-[10px]">Python 列表操作</span>
+</div>
+</div>
+<button class="w-full py-2 bg-white text-primary font-bold rounded-lg hover:bg-indigo-50 transition-colors text-sm">
+                                获取详细教案生成
+                            </button>
+</div>
+<div class="bg-white rounded-xl border border-border-light shadow-sm p-6">
+<h3 class="font-bold text-slate-800 mb-4 text-sm uppercase tracking-wide">标签与分类</h3>
+<div class="flex flex-col gap-4">
+<div>
+<span class="text-xs text-slate-500 mb-2 block">知识点标签</span>
+<div class="flex flex-wrap gap-2">
+<a class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs hover:bg-primary hover:text-white transition-colors" href="#">关联规则</a>
+<a class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs hover:bg-primary hover:text-white transition-colors" href="#">Apriori算法</a>
+<a class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs hover:bg-primary hover:text-white transition-colors" href="#">数据预处理</a>
+<a class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs hover:bg-primary hover:text-white transition-colors" href="#">可视化</a>
+</div>
+</div>
+<hr class="border-slate-100"/>
+<div>
+<span class="text-xs text-slate-500 mb-2 block">思政主题标签</span>
+<div class="flex flex-wrap gap-2">
+<a class="px-3 py-1 bg-sky-50 text-sky-700 border border-sky-100 rounded-full text-xs hover:bg-sky-100 transition-colors" href="#"># 文化自信</a>
+<a class="px-3 py-1 bg-sky-50 text-sky-700 border border-sky-100 rounded-full text-xs hover:bg-sky-100 transition-colors" href="#"># 传统文化传承</a>
+<a class="px-3 py-1 bg-sky-50 text-sky-700 border border-sky-100 rounded-full text-xs hover:bg-sky-100 transition-colors" href="#"># 科学创新</a>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-xl border border-border-light shadow-sm p-6">
+<h3 class="font-bold text-slate-800 mb-4 text-sm uppercase tracking-wide">相关案例推荐</h3>
+<div class="flex flex-col gap-4">
+<a class="group flex gap-3 items-start" href="#">
+<div class="size-16 rounded-lg bg-slate-100 border border-slate-200 flex-shrink-0 flex items-center justify-center group-hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary">analytics</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors line-clamp-2">基于聚类分析的唐诗风格流派划分</h4>
+<span class="text-xs text-slate-400 mt-1 block">文化传承 · 聚类</span>
+</div>
+</a>
+<a class="group flex gap-3 items-start" href="#">
+<div class="size-16 rounded-lg bg-slate-100 border border-slate-200 flex-shrink-0 flex items-center justify-center group-hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary">text_snippet</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors line-clamp-2">从《红楼梦》看社会网络分析</h4>
+<span class="text-xs text-slate-400 mt-1 block">复杂网络 · 人文社科</span>
+</div>
+</a>
+<a class="group flex gap-3 items-start" href="#">
+<div class="size-16 rounded-lg bg-slate-100 border border-slate-200 flex-shrink-0 flex items-center justify-center group-hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary">medication</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors line-clamp-2">药物分子结构与活性的回归预测</h4>
+<span class="text-xs text-slate-400 mt-1 block">生命科学 · 回归</span>
+</div>
+</a>
+</div>
+</div>
+<div class="bg-white rounded-xl border border-border-light shadow-sm p-6">
+<h3 class="font-bold text-slate-800 mb-4 text-sm uppercase tracking-wide">资源下载</h3>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-sky-50 transition-colors cursor-pointer group border border-transparent hover:border-sky-100">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-red-500">picture_as_pdf</span>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-700 group-hover:text-primary">案例讲义.pdf</span>
+<span class="text-[10px] text-slate-400">2.4 MB</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary text-sm">download</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-sky-50 transition-colors cursor-pointer group border border-transparent hover:border-sky-100">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-green-600">dataset</span>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-700 group-hover:text-primary">脱敏数据集.csv</span>
+<span class="text-[10px] text-slate-400">128 KB</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary text-sm">download</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-sky-50 transition-colors cursor-pointer group border border-transparent hover:border-sky-100">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-blue-600">code</span>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-700 group-hover:text-primary">参考代码.ipynb</span>
+<span class="text-[10px] text-slate-400">45 KB</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary text-sm">download</span>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+</div>
+</div>
+<button class="fixed bottom-8 right-8 bg-gradient-to-br from-primary to-secondary hover:from-primary-dark hover:to-primary text-white p-4 rounded-full shadow-xl shadow-blue-500/30 z-50 flex items-center justify-center transition-transform hover:scale-105 group border-2 border-white/20">
+<span class="material-symbols-outlined text-2xl group-hover:rotate-12 transition-transform">smart_toy</span>
+<span class="absolute right-full mr-3 bg-slate-800 text-white text-xs py-1.5 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">咨询 AI 助手</span>
+</button>
+</body></html>

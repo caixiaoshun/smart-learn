@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>学生加入班级页面 - 智学云平台</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#2b96ee",
+              "primary-dark": "#1a7bc9", // Manually added for hover states
+              "primary-light": "#eef7fe", // Very light tint for backgrounds
+              "background-light": "#f6f7f8",
+              "background-dark": "#101a22",
+              "neutral-surface": "#ffffff",
+              "neutral-dark-surface": "#1c2833",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            boxShadow: {
+              'soft': '0 4px 20px -2px rgba(43, 150, 238, 0.1)',
+              'glow': '0 0 15px rgba(43, 150, 238, 0.3)',
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom subtle pattern for background */
+        .bg-pattern {
+            background-color: #f6f7f8;
+            background-image: radial-gradient(#2b96ee 0.5px, transparent 0.5px), radial-gradient(#2b96ee 0.5px, #f6f7f8 0.5px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            opacity: 1;
+        }
+        .dark .bg-pattern {
+            background-color: #101a22;
+            background-image: radial-gradient(#2b96ee 0.5px, transparent 0.5px), radial-gradient(#2b96ee 0.5px, #101a22 0.5px);
+        }
+        /* Glass effect */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .dark .glass-panel {
+            background: rgba(16, 26, 34, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 font-display min-h-screen flex flex-col">
+<!-- Navbar -->
+<nav class="sticky top-0 z-50 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-primary/30">
+                        Z
+                    </div>
+<span class="font-bold text-xl tracking-tight text-slate-800 dark:text-white">智学<span class="text-primary">云</span></span>
+<div class="hidden md:flex ml-10 space-x-8">
+<a class="text-slate-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors" href="#">首页</a>
+<a class="text-primary border-b-2 border-primary px-3 py-2 text-sm font-medium" href="#">我的班级</a>
+<a class="text-slate-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors" href="#">资源中心</a>
+<a class="text-slate-500 hover:text-primary px-3 py-2 text-sm font-medium transition-colors" href="#">AI 助手</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors relative">
+<span class="material-icons text-xl">notifications</span>
+<span class="absolute top-2 right-2 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-background-dark"></span>
+</button>
+<div class="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-blue-300 p-[2px] cursor-pointer">
+<img alt="User Avatar" class="h-full w-full rounded-full object-cover bg-white" data-alt="Portrait of a young student user" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALdm7C-sHdqNNT1q64rZsClw4pCfP7-5IrIDd-nx4XoGuxU5k7tLQ0ZMfjASa3CQ_KsAITT7QTlr7pjsHbt8PqGJnCm3VfNyA8sGlEZDgA2SkG8M73wMv9Le7FfswxT-5cSlueQ34ZePy_Hrdne39W0SE1pRN1H8h2ghM1ItKAHsrFAcSufYTuNgDJTR9ZZD-Okp7aY0nWyMU77xtkYiJVCFNpv_ld4HsrDFUx_EAb3iMxNowQG4K6nErtKC6jeY6j9rv0H0SDqdc"/>
+</div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow">
+<!-- Hero / Join Section -->
+<section class="relative pt-16 pb-24 overflow-hidden">
+<!-- Decorative Background Elements -->
+<div class="absolute inset-0 bg-pattern opacity-[0.4] z-0"></div>
+<div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-primary/10 blur-3xl z-0"></div>
+<div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-blue-400/10 blur-3xl z-0"></div>
+<div class="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary mb-6 border border-primary/20">
+<span class="w-2 h-2 rounded-full bg-primary mr-2 animate-pulse"></span>
+                    新学期正在进行中
+                </span>
+<h1 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">
+                    加入您的 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">新班级</span>
+</h1>
+<p class="text-lg text-slate-600 dark:text-slate-300 mb-10 max-w-2xl mx-auto">
+                    请输入由任课教师提供的 6 位班级邀请码，开启您的个性化 AI 学习之旅。
+                </p>
+<!-- Join Form Card -->
+<div class="glass-panel rounded-2xl p-2 shadow-soft max-w-lg mx-auto transform transition-all hover:scale-[1.01]">
+<div class="bg-white dark:bg-neutral-dark-surface rounded-xl p-6 sm:p-8">
+<div class="flex flex-col sm:flex-row gap-4">
+<div class="flex-grow relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-icons text-slate-400">vpn_key</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 border border-slate-200 dark:border-slate-700 rounded-lg leading-5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm font-mono tracking-widest uppercase transition-shadow" maxlength="8" placeholder="输入邀请码 (如: X7Y2Z9)" type="text"/>
+</div>
+<button class="inline-flex justify-center items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg shadow-lg shadow-primary/30 text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all active:scale-95" type="button">
+<span>申请加入</span>
+<span class="material-icons text-sm ml-2">arrow_forward</span>
+</button>
+</div>
+<p class="mt-4 text-xs text-slate-400 flex items-center justify-center gap-1">
+<span class="material-icons text-sm">info</span>
+                            不知道邀请码？请询问您的任课老师或<a class="text-primary hover:underline" href="#">查看帮助</a>
+</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Current Classes List -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white">我加入的班级</h2>
+<p class="mt-1 text-sm text-slate-500 dark:text-slate-400">管理您的课程进度与学习数据</p>
+</div>
+<div class="flex gap-2">
+<button class="p-2 rounded-lg text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-icons">grid_view</span>
+</button>
+<button class="p-2 rounded-lg text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-icons">list</span>
+</button>
+</div>
+</div>
+<!-- Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Card 1: Active Course -->
+<div class="group bg-white dark:bg-neutral-dark-surface rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-soft hover:border-primary/30 transition-all duration-300 flex flex-col overflow-hidden">
+<!-- Card Top Decoration -->
+<div class="h-2 w-full bg-gradient-to-r from-primary to-blue-300"></div>
+<div class="p-6 flex-grow">
+<div class="flex justify-between items-start mb-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                进行中
+                            </span>
+<button class="text-slate-300 hover:text-primary transition-colors">
+<span class="material-icons text-lg">more_horiz</span>
+</button>
+</div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-primary transition-colors">计算机组成原理</h3>
+<p class="text-sm text-slate-500 mb-4">2024 春季学期 | 张伟教授</p>
+<!-- Data Visualization / Stats -->
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg text-center">
+<span class="block text-xs text-slate-400 uppercase">学习积分</span>
+<span class="block text-lg font-bold text-primary">850</span>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg text-center">
+<span class="block text-xs text-slate-400 uppercase">案例完成</span>
+<span class="block text-lg font-bold text-slate-700 dark:text-slate-200">12<span class="text-xs text-slate-400 font-normal">/15</span></span>
+</div>
+</div>
+<!-- Progress -->
+<div class="relative pt-1">
+<div class="flex mb-2 items-center justify-between">
+<div>
+<span class="text-xs font-semibold inline-block text-primary">
+                                        总体进度
+                                    </span>
+</div>
+<div class="text-right">
+<span class="text-xs font-semibold inline-block text-primary">
+                                        80%
+                                    </span>
+</div>
+</div>
+<div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-primary/20">
+<div class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary" style="width:80%"></div>
+</div>
+</div>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/80 px-6 py-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+<div class="flex -space-x-2 overflow-hidden">
+<img alt="Student" class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-800" data-alt="Small avatar of classmate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoV3VZHDA8xTius_Z__ClDGyyTURpkVm8AY-ZF6DW1BdVC3rIaRe9fpnVOkkHXqIjUlOXF2uLlg8qq3KThLI-FSX44dHHifjQFpXIZpnf6AGuBFjSnqKmw6nbxvBDoyu4mJrBlvSZZ6GzBpI4rZGtwvYOU-yiRhUNmbsiVwqkX1VshgZk2ZByoB9To6aNpTdCsXkak3ceS23sDN6QuewiGvZJ_kOiam7wFqgJwXKYliYq8igcr6R6aoJAAnW6pryPkZKp3Cw4sJ6g"/>
+<img alt="Student" class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-800" data-alt="Small avatar of classmate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUpg0hms2i10MXyCw3BpP9yG5f2uKR_CZQFHwEuvOjHv5LklL-byKtwHjMbupudETg6qfVGYWe7kW3B8iolGMeNGW4UmNMWY1WcE09K5PK181Ui7Gi0PxWmsngIigHiZKvGLP6THBD10YhIPVGfrc45U-qaS8X20rp22qjIkQq27qwq5V0JvXcpU5j2NHZobxn3B8WmUiBQamBxiR2AhTV6H1TXzLt0B_RZDJn60wg2LjwkEb61xexZbglrVPJ3vtXy25RzW_ZKrU"/>
+<img alt="Student" class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-800" data-alt="Small avatar of classmate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfpP6sNsATU958pZepiHyOOAHY8k_apScH0pF7GMRpxqfz_g4klOj2eCnSuQoMTcSf0TPchPat1T_PUQgQZcY9SWA_MVnmZ_gsbwkE8XYBzkGDmCWaEr5TFDCuBlyZxy_fLzzcadxuJaOJUnPod4i7Zv5KFC0NeJMZE8HneBKlLCXM4buCWa7LHZl7xnVtOldFvBGfQWw7g3IZLqX0d99GeuJei7Z1dOnhS_1_Nr2cmJzmMiJ7xYskN5MFG_GG2gTl63GebU-9UtQ"/>
+<span class="inline-flex items-center justify-center h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-800 bg-slate-200 dark:bg-slate-700 text-[10px] font-medium text-slate-500">
+                                +42
+                            </span>
+</div>
+<a class="text-xs font-medium text-primary hover:text-primary-dark flex items-center" href="#">
+                            进入班级 <span class="material-icons text-xs ml-1">chevron_right</span>
+</a>
+</div>
+</div>
+<!-- Card 2: AI Course -->
+<div class="group bg-white dark:bg-neutral-dark-surface rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-soft hover:border-purple-400/30 transition-all duration-300 flex flex-col overflow-hidden">
+<div class="h-2 w-full bg-gradient-to-r from-purple-500 to-indigo-400"></div>
+<div class="p-6 flex-grow">
+<div class="flex justify-between items-start mb-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                进行中
+                            </span>
+<button class="text-slate-300 hover:text-primary transition-colors">
+<span class="material-icons text-lg">more_horiz</span>
+</button>
+</div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-purple-600 transition-colors">人工智能基础</h3>
+<p class="text-sm text-slate-500 mb-4">2024 春季学期 | 李明博士</p>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg text-center">
+<span class="block text-xs text-slate-400 uppercase">学习积分</span>
+<span class="block text-lg font-bold text-purple-600">620</span>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg text-center">
+<span class="block text-xs text-slate-400 uppercase">AI干预</span>
+<span class="block text-lg font-bold text-slate-700 dark:text-slate-200">3<span class="text-xs text-slate-400 font-normal">次</span></span>
+</div>
+</div>
+<div class="relative pt-1">
+<div class="flex mb-2 items-center justify-between">
+<div>
+<span class="text-xs font-semibold inline-block text-purple-600">
+                                        总体进度
+                                    </span>
+</div>
+<div class="text-right">
+<span class="text-xs font-semibold inline-block text-purple-600">
+                                        45%
+                                    </span>
+</div>
+</div>
+<div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-purple-100">
+<div class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-purple-500" style="width:45%"></div>
+</div>
+</div>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/80 px-6 py-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+<div class="flex -space-x-2 overflow-hidden">
+<img alt="Student" class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-800" data-alt="Small avatar of classmate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiIIUJDJw7gDneoyZ_zaN-0RFlhVpdaOcaNsq8qsHdISwcowueJdTYP1zTVbLwH92FzNDH5wJJf2wd6ozu8I401o0Qas3Dj_K8mss5OisvSBpC5kPfvALk6De8aqJFnAAD7BK1bLzIpkr8tgZQU1uCOpD8nanausWblgD92YF8a2YZPZh7nUmAj7JD4CQgxsT3SGyCbr3jktF_wsJ80IkF9_WB8RC8XmIAOP-JshAGwcBi7ANk8nKBkZ6BWOfVSwUxDoE-oQZ5hH4"/>
+<span class="inline-flex items-center justify-center h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-800 bg-slate-200 dark:bg-slate-700 text-[10px] font-medium text-slate-500">
+                                +86
+                            </span>
+</div>
+<a class="text-xs font-medium text-purple-600 hover:text-purple-800 flex items-center" href="#">
+                            进入班级 <span class="material-icons text-xs ml-1">chevron_right</span>
+</a>
+</div>
+</div>
+<!-- Card 3: Data Structure -->
+<div class="group bg-white dark:bg-neutral-dark-surface rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-soft hover:border-primary/30 transition-all duration-300 flex flex-col overflow-hidden">
+<div class="h-2 w-full bg-gradient-to-r from-orange-400 to-amber-300"></div>
+<div class="p-6 flex-grow">
+<div class="flex justify-between items-start mb-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-200">
+                                待开始
+                            </span>
+<button class="text-slate-300 hover:text-primary transition-colors">
+<span class="material-icons text-lg">more_horiz</span>
+</button>
+</div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-orange-500 transition-colors">数据结构与算法</h3>
+<p class="text-sm text-slate-500 mb-4">2024 春季学期 | 王强副教授</p>
+<div class="flex flex-col items-center justify-center py-6 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">
+<span class="material-icons text-slate-300 text-3xl mb-2">lock_clock</span>
+<p class="text-xs text-slate-400">课程将于 3月1日 开启</p>
+</div>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/80 px-6 py-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+<div class="text-xs text-slate-400">
+                            已报名 128 人
+                        </div>
+<span class="text-xs font-medium text-slate-400 cursor-not-allowed flex items-center">
+                            暂未开放
+                        </span>
+</div>
+</div>
+<!-- Add New Placeholder -->
+<button class="group relative rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-primary bg-transparent p-6 flex flex-col items-center justify-center text-center hover:bg-primary/5 transition-all duration-300 h-full min-h-[300px]">
+<div class="h-14 w-14 rounded-full bg-slate-100 dark:bg-slate-800 group-hover:bg-primary/10 flex items-center justify-center mb-4 transition-colors">
+<span class="material-icons text-3xl text-slate-400 group-hover:text-primary">add</span>
+</div>
+<h3 class="text-lg font-medium text-slate-900 dark:text-white mb-1">加入更多班级</h3>
+<p class="text-sm text-slate-500 max-w-[150px]">输入邀请码获取更多课程资源</p>
+</button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-white dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 py-8 mt-auto">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="text-sm text-slate-500">© 2024 智学云平台 - 混合式教学一体化支撑系统</p>
+<div class="flex gap-6">
+<a class="text-sm text-slate-500 hover:text-primary" href="#">帮助中心</a>
+<a class="text-sm text-slate-500 hover:text-primary" href="#">隐私政策</a>
+<a class="text-sm text-slate-500 hover:text-primary" href="#">联系我们</a>
+</div>
+</div>
+</footer>
+</body></html>

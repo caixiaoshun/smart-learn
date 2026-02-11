@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>作业动态组队中心 - Smart-Learn</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b96ee",
+                        "primary-hover": "#2083d6",
+                        "primary-light": "#eaf5fe", // bg-primary/10 equivalent
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101a22",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a2632",
+                        "text-main": "#1e293b",
+                        "text-sub": "#64748b",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "system-ui", "-apple-system", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for chat area */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-main h-screen flex flex-col overflow-hidden">
+<!-- Navbar / Header -->
+<header class="h-16 bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 shrink-0 z-20">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold">SL</div>
+<nav class="flex items-center gap-2 text-sm text-text-sub">
+<span class="hover:text-primary cursor-pointer">课程中心</span>
+<span class="material-icons-round text-base">chevron_right</span>
+<span class="hover:text-primary cursor-pointer">Web 前端开发实战</span>
+<span class="material-icons-round text-base">chevron_right</span>
+<span class="text-text-main font-medium">期末大作业分组</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-3 px-3 py-1.5 rounded-full bg-primary-light text-primary text-sm font-medium">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                组队进行中
+            </div>
+<div class="h-8 w-[1px] bg-gray-200 dark:bg-gray-700 mx-2"></div>
+<div class="flex items-center gap-2">
+<img alt="用户头像" class="w-8 h-8 rounded-full border border-gray-200 object-cover" data-alt="User profile avatar smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_4ihK0q-jxGvWxjt0Ugj3oZV2e8TYgX3XZP4LTH2UoYtnU7HeSrGgcoBBBdMcVlgczw8oB0XAUd9lENybzQrvrUPISlqmLIr5B74CGCpJBIcJXxOgs_xiREhBP8qa0DcvZT1krUnF7OHLkFRpOwdEMi3l-Umz5CehOOnvNdXBkRbeilxmKdJ7apRTnywkH2Vb4MX1YBSbxHC5eZ6x7RcxdpUjJZ3CQ7q7SFp5NVm4My0l2lqHU2ZDdjIw8gMdUndKqgK7C5k7OdI"/>
+<span class="text-sm font-medium">张伟 (学生)</span>
+</div>
+</div>
+</header>
+<!-- Main Content Grid -->
+<main class="flex-1 overflow-hidden p-6">
+<div class="max-w-7xl mx-auto h-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column: Status & Group Management (4 cols) -->
+<div class="lg:col-span-4 flex flex-col gap-6 h-full overflow-y-auto custom-scrollbar pr-2">
+<!-- Countdown & Deadline Card -->
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
+<h2 class="text-lg font-bold mb-1">组队截止倒计时</h2>
+<p class="text-xs text-text-sub mb-4">截止时间: 2023-12-31 23:59</p>
+<div class="flex justify-between items-center gap-2 mb-4">
+<div class="flex flex-col items-center bg-background-light dark:bg-background-dark p-3 rounded-lg flex-1">
+<span class="text-2xl font-bold text-primary">02</span>
+<span class="text-xs text-text-sub">天</span>
+</div>
+<span class="text-gray-300 text-xl font-bold">:</span>
+<div class="flex flex-col items-center bg-background-light dark:bg-background-dark p-3 rounded-lg flex-1">
+<span class="text-2xl font-bold text-primary">04</span>
+<span class="text-xs text-text-sub">时</span>
+</div>
+<span class="text-gray-300 text-xl font-bold">:</span>
+<div class="flex flex-col items-center bg-background-light dark:bg-background-dark p-3 rounded-lg flex-1">
+<span class="text-2xl font-bold text-primary">15</span>
+<span class="text-xs text-text-sub">分</span>
+</div>
+</div>
+<div class="w-full bg-gray-100 rounded-full h-2 dark:bg-gray-700">
+<div class="bg-primary h-2 rounded-full" style="width: 70%"></div>
+</div>
+<div class="flex justify-between mt-2 text-xs text-text-sub">
+<span>已组队: 32人</span>
+<span>总人数: 45人</span>
+</div>
+</div>
+<!-- My Group Status Card -->
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h2 class="text-lg font-bold flex items-center gap-2">
+                                我的小组
+                                <span class="material-icons-round text-primary text-base">verified</span>
+</h2>
+<p class="text-sm text-text-sub mt-1">第七小组 - Web项目攻坚队</p>
+</div>
+<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded font-medium border border-green-200">成员未满</span>
+</div>
+<div class="bg-primary-light border border-blue-100 rounded-lg p-4 mb-6 relative overflow-hidden group">
+<div class="absolute right-0 top-0 opacity-10 pointer-events-none">
+<span class="material-icons-round text-9xl">groups</span>
+</div>
+<p class="text-xs text-primary font-semibold uppercase tracking-wider mb-1">小组邀请码</p>
+<div class="flex items-center gap-3">
+<span class="text-2xl font-mono font-bold text-primary tracking-widest">SL-8829</span>
+<button class="text-primary hover:text-primary-hover p-1 rounded hover:bg-white/50 transition-colors" title="复制邀请码">
+<span class="material-icons-round text-lg">content_copy</span>
+</button>
+</div>
+<p class="text-xs text-primary/70 mt-2">分享给同学加入小组</p>
+</div>
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-semibold text-sm">小组成员 (3/5)</h3>
+<button class="text-xs text-primary hover:underline font-medium">管理规则</button>
+</div>
+<!-- Member List -->
+<div class="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-1">
+<!-- Leader (Self) -->
+<div class="flex items-center p-3 rounded-lg border border-primary/30 bg-primary/5">
+<div class="relative">
+<img alt="Leader Avatar" class="w-10 h-10 rounded-full object-cover" data-alt="User avatar male student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZNeORwHdRvw2m4rw7jR6g-iT4_S1MhmhB9ryJilSXHR6HAC68oeMKiIsMrCj368e7jWNJ061Xy9Gu2MNR7H7A-nXaaeZ0WJMCW_Qhb9w397cF1i2SHI9iH0MvkrFsqjP492-MHgcENtzQEds0JsQJIJ5vxEOlSl9DzyLnIsiRiFcr-ujHsQGWQgLaiagX51VNMB_bAdiMzUUkL2vlvakRfHI48m6Af8i_MKIJOkUJtToIBdtqHeyNM_EUhoEtrRGDcKVXTko39OU"/>
+<div class="absolute -bottom-1 -right-1 bg-yellow-400 text-white rounded-full p-[2px] border-2 border-white flex items-center justify-center" title="组长">
+<span class="material-icons-round text-[10px]">star</span>
+</div>
+</div>
+<div class="ml-3 flex-1">
+<p class="text-sm font-semibold">张伟 (我)</p>
+<p class="text-xs text-text-sub">软件工程 2101班</p>
+</div>
+<span class="px-2 py-1 bg-primary text-white text-[10px] rounded font-medium">组长</span>
+</div>
+<!-- Member 1 -->
+<div class="flex items-center p-3 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
+<img alt="Member Avatar" class="w-10 h-10 rounded-full object-cover grayscale md:grayscale-0" data-alt="User avatar female student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXjfdS0deqx8mUcVcZF_4By5HbgV_oEyaNRm6vpDREgF3vTXFstCgzKc1_WK3cRrlDmoB15eHpLD71S8qF6f5brUjEdnhFMNXcOOZ4FYtt5yXtB-JLopaf-scPUyKnas0KzqDrkghB_A6N-mXJ8Zi-J5dDB5rbIJqObxCJirdzpBS3q9RV_J-LODdCLiq1cLitwGZvhkaCx8ug__21m20yU3a6ifsoDpx4vhSdB2oLVmJS5YYWFt3UakEbkJ9UUZXkKS1IR9q12QI"/>
+<div class="ml-3 flex-1">
+<p class="text-sm font-semibold">李小花</p>
+<p class="text-xs text-text-sub">软件工程 2101班</p>
+</div>
+<!-- Admin Actions (Hover) -->
+<div class="hidden group-hover:flex gap-1">
+<button class="p-1.5 text-gray-400 hover:text-red-500 rounded hover:bg-red-50 transition-colors" title="踢出成员">
+<span class="material-icons-round text-base">remove_circle_outline</span>
+</button>
+<button class="p-1.5 text-gray-400 hover:text-primary rounded hover:bg-blue-50 transition-colors" title="转让组长">
+<span class="material-icons-round text-base">manage_accounts</span>
+</button>
+</div>
+</div>
+<!-- Member 2 -->
+<div class="flex items-center p-3 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
+<img alt="Member Avatar" class="w-10 h-10 rounded-full object-cover" data-alt="User avatar male student glasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCd1_YhYHe7YOEzCaIm_-90FRDrh-R091f4Q59E8YnhJOmaHftqHGBMYkiIEXHzjeGO2pFETtBhWkqtNYxwNRndqR_scXJi4ysMdqJ-zJerJcWgS87hLoyzSA1HNoWAIHiPGerfxovo1QV7JE_491Fo_nXtx22kTzZM0Gn8-Mc9tYI02J5M4GCtkZwMfjP4JAy08XeME2unuCltPn_n3KEdESg-_El4jAwuCFwb3CguUY7-ZpG0kSjJyRVQO2PnJ-yyuZhdReflHd4"/>
+<div class="ml-3 flex-1">
+<p class="text-sm font-semibold">王大力</p>
+<p class="text-xs text-text-sub">软件工程 2102班</p>
+</div>
+<!-- Admin Actions (Hover) -->
+<div class="hidden group-hover:flex gap-1">
+<button class="p-1.5 text-gray-400 hover:text-red-500 rounded hover:bg-red-50 transition-colors" title="踢出成员">
+<span class="material-icons-round text-base">remove_circle_outline</span>
+</button>
+<button class="p-1.5 text-gray-400 hover:text-primary rounded hover:bg-blue-50 transition-colors" title="转让组长">
+<span class="material-icons-round text-base">manage_accounts</span>
+</button>
+</div>
+</div>
+<!-- Empty Slot -->
+<div class="flex items-center justify-center p-4 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 text-text-sub">
+<span class="text-xs flex items-center gap-1">
+<span class="material-icons-round text-sm">add</span> 
+                                待加入成员
+                            </span>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 grid grid-cols-2 gap-3">
+<button class="flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-gray-100 dark:bg-gray-800 text-text-sub text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+<span class="material-icons-round text-base">settings</span>
+                            小组设置
+                        </button>
+<button class="flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-red-50 text-red-600 text-sm hover:bg-red-100 transition-colors border border-red-100">
+<span class="material-icons-round text-base">logout</span>
+                            退出小组
+                        </button>
+</div>
+</div>
+</div>
+<!-- Right Column: Collaboration & Chat (8 cols) -->
+<div class="lg:col-span-8 h-full flex flex-col bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+<!-- Chat Header -->
+<div class="h-16 border-b border-gray-100 dark:border-gray-700 px-6 flex items-center justify-between bg-white dark:bg-surface-dark shrink-0">
+<div>
+<h2 class="font-bold text-lg text-text-main">组内讨论区</h2>
+<p class="text-xs text-text-sub">在此快速沟通任务分配与进度</p>
+</div>
+<div class="flex items-center gap-2">
+<div class="flex -space-x-2">
+<img alt="Avatar" class="w-8 h-8 rounded-full border-2 border-white dark:border-surface-dark" data-alt="Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4iWu7yCcbILMhb7rqbbjw0Z14JYRCpfHQcM7cV0b-IH7OyAcikp-wb3DOtarbqr7HQ39qhB-PSZI7Mz-gintcSTOKKqXRXFpgNkn1YxwRhZrfxT9VeeaAm0QU84mFm3IK-bh0QUQw7hbspog43t4VUXBCXKUakx5tdvRGFAr90CYnC9UtId7QcQcNN56yM-EIuiDSswk-waPKhzP7Zn5W3faJQrKGNH6feq0yAVCHme736aWhTfBAlhRXg-UF9S-WJUeJT8hRY7Q"/>
+<img alt="Avatar" class="w-8 h-8 rounded-full border-2 border-white dark:border-surface-dark" data-alt="Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwyV_BmA950WHP8LGV27oJXjiH-R2EzmxA46ZudfKl1osyFvCJZNRV_YECdck9NWiGbNoH7v1IUUW7fmMTZNmYgBXfIwQtNSfifPEH83E2SQjNCcDfLPYcJWgJBNjxkARMLBmMXQwPIHcbY2EK-_TdZCYT6ZtjjTuFu9oPsVaHT2S4UyixVhgiYMIDBLSEtnO8eMRu1evIoaEG_RBjHx3Wk1McTHjoQerpl0JrHXwDQs_f48jMWrL11yIh5DmpMEo5HrWzdpalpuY"/>
+<img alt="Avatar" class="w-8 h-8 rounded-full border-2 border-white dark:border-surface-dark" data-alt="Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxCb_7LkiNUTp8T9P-lJYog_AG0xGOtDRlyFyjZii2zlkkhttDdJFhcFasCB5r75u4pzpPb5vmly4GFIaoxJeQ_BcjNKBgoJJJpfsY5cJvYOH5ICDXn6tUwI4pZAg0FT6CEjHF9VhEFrbE6J0oQuvF05Hwlqp5jhfyOGaLwJ2tjXWweZv37w_jr9LzIsza6M76Xag-FwdTwQHV3xi5CqVmBCZUFb_ulYduk1L6KvXBWncez6yo89BHAAyDgoQUHWsGL0T_AFKkci8"/>
+</div>
+<button class="p-2 text-text-sub hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+<span class="material-icons-round">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Chat Messages Area -->
+<div class="flex-1 overflow-y-auto p-6 space-y-6 bg-background-light/50 dark:bg-background-dark/30 custom-scrollbar">
+<!-- System Message -->
+<div class="flex justify-center">
+<span class="bg-gray-200 dark:bg-gray-700 text-text-sub text-xs px-3 py-1 rounded-full">
+                            张伟 创建了小组 "Web项目攻坚队" - 12:30
+                        </span>
+</div>
+<!-- Message Left (Others) -->
+<div class="flex gap-4 group">
+<img alt="User Avatar" class="w-10 h-10 rounded-full object-cover mt-1" data-alt="Female user avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDA_oP9VIIcQ0UgAu3eRaNAMvbH-uJUxcVw4k8aUEJcQIIR2J6XkiTMLXuoc-aEza29fUhRzWWr0vFrHqLzXxgUKKCwneQUZRgmXF-XPhaj9U92W1ZP1zmuAWGgcvQH4Y3p28J_OdNJi5tMT9ErzVlsCmTF-q88QoEm6cNPtGWyhQwr2twYpkh-hcYCGTUZiYD1-CX9TV9CE7aSHWBh7pMcn4KUifyUWPMI9BBPSnfBW8hHwle6go9wxjJvuV0FqJ-2n98Bfyo7Qrc"/>
+<div class="max-w-[80%]">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-semibold text-sm">李小花</span>
+<span class="text-xs text-text-sub">12:35</span>
+</div>
+<div class="bg-white dark:bg-gray-700 p-3.5 rounded-2xl rounded-tl-none shadow-sm text-sm leading-relaxed border border-gray-100 dark:border-gray-600">
+<p>大家好！我擅长 UI 设计和前端 CSS，这次作业我可以负责界面的实现部分。</p>
+</div>
+</div>
+</div>
+<!-- Message Left (Others) -->
+<div class="flex gap-4 group">
+<img alt="User Avatar" class="w-10 h-10 rounded-full object-cover mt-1" data-alt="Male user avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIEqrcBBapWKvlK3MA7M2RTP3BAbUiiv4z-QlQeib15NHRbbhR5WxjJqE5JPmue8zAa0nN1RrtqDwYycMPY5i1Gt5OShvgVFDflqJgqm7DkNt9i_IWJWPp6CTLhvb4YRKK6ZDLYfJwwMsKhGcPA3-LVKkyqLyuenkC_46BJs4QKbVgYC-miZFEQ-LMJY9f4B6XNupGHImM0zwV-gb4jTnr6mOyoyk44j-IQOQFepa6uMfBQ_PBF-L6FhFx3IdI5fqsGf15xP_n-5k"/>
+<div class="max-w-[80%]">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-semibold text-sm">王大力</span>
+<span class="text-xs text-text-sub">12:38</span>
+</div>
+<div class="bg-white dark:bg-gray-700 p-3.5 rounded-2xl rounded-tl-none shadow-sm text-sm leading-relaxed border border-gray-100 dark:border-gray-600">
+<p>收到！我可以负责后端 API 接口对接，顺便写点文档。</p>
+</div>
+</div>
+</div>
+<!-- Message Right (Me) -->
+<div class="flex flex-row-reverse gap-4 group">
+<img alt="User Avatar" class="w-10 h-10 rounded-full object-cover mt-1" data-alt="My user avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHBbb3RWNl18rIRdIfZ1cIOMYTaOoXfs0SzoIXNengSiHp7f1uYK6xmySpe3k6OU6Su98wfElZaiEKcfDI-jesExii-4uH_6yvbpziRYTO_DeSXIIxs4MDgP5N3oMmhS4W5NmZmqdXNNkdH2sou86HB4HdsfpgQ7W6ZC4rvwHQNkMtEOhMeM5vZD8NlXfPS-FQWpEIoDq_l7QXm6sNtM2lZZgU0TCTkCGoj-ePUZSP8E1jH-kkgy_p_MmrCd-RpU9sKbmFdbddisY"/>
+<div class="max-w-[80%] flex flex-col items-end">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs text-text-sub">12:40</span>
+<span class="font-semibold text-sm">我</span>
+</div>
+<div class="bg-primary text-white p-3.5 rounded-2xl rounded-tr-none shadow-sm text-sm leading-relaxed">
+<p>太好了！那我负责项目统筹和核心逻辑代码。我们还缺两个人，我把邀请码发到班级群里看看。</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Chat Input Area -->
+<div class="p-4 bg-white dark:bg-surface-dark border-t border-gray-100 dark:border-gray-700 shrink-0">
+<div class="relative">
+<textarea class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl p-4 pr-12 text-sm focus:ring-2 focus:ring-primary/20 resize-none h-24 placeholder-gray-400" placeholder="按 Enter 发送消息，Shift + Enter 换行..."></textarea>
+<div class="absolute bottom-3 left-3 flex gap-2">
+<button class="p-1.5 text-gray-400 hover:text-primary transition-colors rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
+<span class="material-icons-round text-xl">image</span>
+</button>
+<button class="p-1.5 text-gray-400 hover:text-primary transition-colors rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
+<span class="material-icons-round text-xl">attach_file</span>
+</button>
+<button class="p-1.5 text-gray-400 hover:text-primary transition-colors rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
+<span class="material-icons-round text-xl">sentiment_satisfied_alt</span>
+</button>
+</div>
+<button class="absolute bottom-3 right-3 bg-primary hover:bg-primary-hover text-white p-2 rounded-lg shadow-sm transition-all flex items-center justify-center group">
+<span class="material-icons-round group-hover:translate-x-0.5 transition-transform">send</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Modals (Hidden by default for visual mockup purposes, but showing 'Join Group' component separately if needed for preview) -->
+<!-- Floating 'New User' State Example - positioned absolutely for design demonstration -->
+<div class="hidden absolute top-0 left-0 w-full h-full bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+<div class="bg-surface-light dark:bg-surface-dark w-[400px] rounded-2xl shadow-2xl p-8 border border-gray-100 dark:border-gray-700">
+<h3 class="text-xl font-bold mb-2 text-center">加入或创建小组</h3>
+<p class="text-text-sub text-center mb-6 text-sm">你还没有加入任何项目小组，请选择操作</p>
+<div class="space-y-4">
+<button class="w-full py-3 bg-primary hover:bg-primary-hover text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30">
+<span class="material-icons-round">add_circle</span>
+                    创建新小组
+                </button>
+<div class="relative flex py-2 items-center">
+<div class="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
+<span class="flex-shrink-0 mx-4 text-gray-400 text-xs">或者使用邀请码</span>
+<div class="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
+</div>
+<div class="flex gap-2">
+<input class="flex-1 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:border-primary focus:ring-primary" placeholder="输入邀请码 (如: SL-8829)" type="text"/>
+<button class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-text-main rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 font-medium transition-colors">
+                        加入
+                    </button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

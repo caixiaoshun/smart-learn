@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>学生作业提交（项目组版） - Smart-Learn 混合式教学平台</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b96ee",
+                        "primary-hover": "#2085d6",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101a22",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1c2a35",
+                        "border-light": "#e5e7eb",
+                        "border-dark": "#2d3a46",
+                        "text-main-light": "#1f2937",
+                        "text-main-dark": "#e5e7eb",
+                        "text-sub-light": "#6b7280",
+                        "text-sub-dark": "#9ca3af",
+                        "warning": "#f59e0b",
+                        "success": "#10b981",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark transition-colors duration-200 min-h-screen flex flex-col font-display">
+<nav class="bg-surface-light dark:bg-surface-dark border-b border-border-light dark:border-border-dark sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex">
+<div class="flex-shrink-0 flex items-center">
+<span class="material-icons text-primary mr-2" style="font-size: 32px;">school</span>
+<span class="font-bold text-xl tracking-tight text-primary">Smart-Learn | 混合教学</span>
+</div>
+<div class="hidden sm:ml-8 sm:flex sm:space-x-8">
+<a class="border-transparent text-text-sub-light dark:text-text-sub-dark hover:text-primary dark:hover:text-primary inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" href="#">首页</a>
+<a class="border-primary text-primary dark:text-primary inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" href="#">我的课程</a>
+<a class="border-transparent text-text-sub-light dark:text-text-sub-dark hover:text-primary dark:hover:text-primary inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" href="#">项目协作</a>
+</div>
+</div>
+<div class="flex items-center">
+<button class="p-2 rounded-full text-text-sub-light dark:text-text-sub-dark hover:bg-background-light dark:hover:bg-background-dark">
+<span class="material-icons">notifications</span>
+</button>
+<div class="ml-3 relative flex items-center gap-2">
+<div class="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">李</div>
+<span class="text-sm font-medium hidden md:block">李明同学</span>
+</div>
+</div>
+</div>
+</div>
+</nav>
+<main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+<div class="mb-8">
+<nav class="flex text-sm text-text-sub-light dark:text-text-sub-dark mb-4">
+<a class="hover:text-primary" href="#">我的课程</a>
+<span class="mx-2">/</span>
+<a class="hover:text-primary" href="#">数据挖掘与AI应用</a>
+<span class="mx-2">/</span>
+<span class="text-text-main-light dark:text-text-main-dark font-medium">期末项目：电商大数据分析</span>
+</nav>
+<div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+<div>
+<div class="flex items-center gap-3 mb-1">
+<h1 class="text-3xl font-bold text-text-main-light dark:text-text-main-dark">
+                        期末项目：电商大数据分析（小组作业）
+                    </h1>
+<span class="bg-primary/10 text-primary text-xs px-2.5 py-1 rounded-full border border-primary/20 font-medium flex items-center gap-1">
+<span class="material-icons text-sm">groups</span> 进行中
+                    </span>
+</div>
+<p class="mt-2 text-text-sub-light dark:text-text-sub-dark max-w-2xl">
+                    本作业为小组协作项目，需提交完整的代码实现、分工说明及数据分析报告。
+                </p>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-surface-light dark:bg-surface-dark px-4 py-2 rounded-lg border border-border-light dark:border-border-dark shadow-sm flex items-center gap-3">
+<div class="bg-warning/10 p-2 rounded-full text-warning">
+<span class="material-icons text-xl">pending_actions</span>
+</div>
+<div>
+<div class="text-xs text-text-sub-light dark:text-text-sub-dark uppercase tracking-wider font-semibold">评审状态</div>
+<div class="text-sm font-bold text-text-main-light dark:text-text-main-dark">待提交 / 未评审</div>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark px-4 py-2 rounded-lg border border-border-light dark:border-border-dark shadow-sm flex items-center gap-3">
+<div class="bg-primary/10 p-2 rounded-full text-primary">
+<span class="material-icons text-xl">timer</span>
+</div>
+<div>
+<div class="text-xs text-text-sub-light dark:text-text-sub-dark uppercase tracking-wider font-semibold">距离截止</div>
+<div class="text-lg font-bold text-text-main-light dark:text-text-main-dark tabular-nums text-primary">02天 14:35:20</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-2 space-y-6">
+<section class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark overflow-hidden">
+<div class="px-6 py-4 border-b border-border-light dark:border-border-dark bg-blue-50/50 dark:bg-blue-900/10 flex justify-between items-center">
+<h3 class="text-lg font-semibold text-text-main-light dark:text-text-main-dark flex items-center gap-2">
+<span class="material-icons text-primary text-sm">group</span> 小组状态：数据先锋队 (第3组)
+                    </h3>
+<button class="text-xs text-primary hover:text-primary-hover font-medium flex items-center gap-1">
+                        查看组队详情 <span class="material-icons text-xs">arrow_forward_ios</span>
+</button>
+</div>
+<div class="p-6">
+<div class="flex flex-col sm:flex-row gap-6">
+<div class="flex-1">
+<h4 class="text-xs uppercase tracking-wider text-text-sub-light dark:text-text-sub-dark font-semibold mb-3">小组成员</h4>
+<div class="flex -space-x-2 overflow-hidden mb-3">
+<div class="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-surface-dark bg-primary text-white flex items-center justify-center text-xs font-bold" title="李明 (组长)">李</div>
+<div class="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-surface-dark bg-indigo-500 text-white flex items-center justify-center text-xs font-bold" title="王强">王</div>
+<div class="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-surface-dark bg-purple-500 text-white flex items-center justify-center text-xs font-bold" title="张薇">张</div>
+<div class="inline-block h-10 w-10 rounded-full ring-2 ring-white dark:ring-surface-dark bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 flex items-center justify-center text-xs font-bold">+1</div>
+</div>
+<p class="text-sm text-text-sub-light dark:text-text-sub-dark">
+                                组长：<span class="text-text-main-light dark:text-text-main-dark font-medium">李明</span> (你)
+                            </p>
+</div>
+<div class="flex-[2] border-t sm:border-t-0 sm:border-l border-border-light dark:border-border-dark pt-4 sm:pt-0 sm:pl-6">
+<h4 class="text-xs uppercase tracking-wider text-text-sub-light dark:text-text-sub-dark font-semibold mb-3">系统建议分工</h4>
+<div class="space-y-2">
+<div class="flex items-start gap-2 text-sm">
+<span class="material-icons text-green-500 text-base mt-0.5">check_circle</span>
+<span class="text-text-main-light dark:text-text-main-dark">数据清洗与预处理 (负责: 李明, 王强)</span>
+</div>
+<div class="flex items-start gap-2 text-sm">
+<span class="material-icons text-green-500 text-base mt-0.5">check_circle</span>
+<span class="text-text-main-light dark:text-text-main-dark">模型构建与调优 (负责: 张薇)</span>
+</div>
+<div class="flex items-start gap-2 text-sm">
+<span class="material-icons text-gray-400 text-base mt-0.5">radio_button_unchecked</span>
+<span class="text-text-sub-light dark:text-text-sub-dark">结果可视化与报告撰写 (未开始)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark overflow-hidden">
+<div class="px-6 py-4 border-b border-border-light dark:border-border-dark bg-background-light/50 dark:bg-background-dark/50 flex justify-between items-center">
+<h3 class="text-lg font-semibold text-text-main-light dark:text-text-main-dark flex items-center gap-2">
+<span class="material-icons text-primary text-sm">assignment</span> 作业要求
+                    </h3>
+<span class="text-xs text-text-sub-light dark:text-text-sub-dark bg-white dark:bg-surface-dark px-2 py-1 rounded border border-border-light dark:border-border-dark">满分：100分</span>
+</div>
+<div class="p-6 prose dark:prose-invert max-w-none text-text-sub-light dark:text-text-sub-dark">
+<h4 class="text-text-main-light dark:text-text-main-dark font-medium mb-2">1. 项目背景</h4>
+<p class="mb-4">基于提供的真实电商脱敏数据，分析用户购买行为路径，识别高价值用户群体，并提出营销策略建议。</p>
+<h4 class="text-text-main-light dark:text-text-main-dark font-medium mb-2">2. 技术要求</h4>
+<ul class="list-disc pl-5 mb-4 space-y-1">
+<li>使用 PySpark 或 Pandas 进行大数据处理。</li>
+<li>至少使用两种聚类算法（如 K-Means, DBSCAN）进行用户分层。</li>
+<li>必须包含数据可视化图表至少 5 张。</li>
+</ul>
+<h4 class="text-text-main-light dark:text-text-main-dark font-medium mb-2">3. 提交规范</h4>
+<ul class="list-disc pl-5 space-y-1">
+<li><strong class="text-primary">分工明确</strong>：必须在提交表单中详细填写每位组员的贡献比例和具体工作。</li>
+<li>代码规范：需通过 AI 助手代码质量检查。</li>
+<li>文件格式：统一提交 ZIP 包，包含源码、数据样本及 PDF 报告。</li>
+</ul>
+</div>
+</section>
+<section class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark">
+<div class="px-6 py-4 border-b border-border-light dark:border-border-dark flex justify-between items-center">
+<h3 class="text-lg font-semibold text-text-main-light dark:text-text-main-dark flex items-center gap-2">
+<span class="material-icons text-primary text-sm">folder_open</span> 附件资源
+                    </h3>
+</div>
+<div class="p-4 space-y-3">
+<div class="flex items-center justify-between p-3 rounded-lg border border-border-light dark:border-border-dark hover:bg-background-light dark:hover:bg-background-dark transition-colors group">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+<span class="material-icons">dataset</span>
+</div>
+<div>
+<div class="font-medium text-text-main-light dark:text-text-main-dark group-hover:text-primary transition-colors">Ecommerce_Data_v2.csv</div>
+<div class="text-xs text-text-sub-light dark:text-text-sub-dark">25.4 MB • 上传于 5天前</div>
+</div>
+</div>
+<button class="text-text-sub-light dark:text-text-sub-dark hover:text-primary p-2">
+<span class="material-icons">download</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+<div class="lg:col-span-1 space-y-6">
+<div class="bg-gradient-to-br from-primary/10 via-background-light to-background-light dark:from-primary/20 dark:via-background-dark dark:to-background-dark rounded-xl shadow-md border border-primary/30 dark:border-primary/40 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-icons" style="font-size: 100px;">security</span>
+</div>
+<div class="p-6 relative z-10">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary">smart_toy</span>
+<h3 class="font-bold text-primary text-lg">AI 助手质量预检</h3>
+</div>
+<p class="text-sm text-text-sub-light dark:text-text-sub-dark mb-4 leading-relaxed">
+                        提交前必须通过 AI 质量预检。系统将自动检测代码重复率、AI 生成痕迹及逻辑完整性。
+                    </p>
+<div class="bg-surface-light dark:bg-surface-dark rounded-lg p-3 border border-border-light dark:border-border-dark mb-4">
+<div class="flex justify-between items-center mb-1">
+<span class="text-xs font-medium text-text-sub-light">代码规范性</span>
+<span class="text-xs font-bold text-green-500">通过</span>
+</div>
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-2">
+<div class="bg-green-500 h-1.5 rounded-full" style="width: 95%"></div>
+</div>
+<div class="flex justify-between items-center mb-1">
+<span class="text-xs font-medium text-text-sub-light">原创度检测</span>
+<span class="text-xs font-bold text-warning">待检测</span>
+</div>
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+<div class="bg-warning h-1.5 rounded-full" style="width: 0%"></div>
+</div>
+</div>
+<button class="w-full bg-surface-light dark:bg-surface-dark hover:bg-white dark:hover:bg-surface-dark/80 text-primary border border-primary/20 font-medium py-2.5 px-4 rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all hover:shadow-md group">
+<span>运行全面预检</span>
+<span class="material-icons text-sm group-hover:rotate-180 transition-transform">sync</span>
+</button>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg border border-border-light dark:border-border-dark flex flex-col h-fit">
+<div class="p-6 border-b border-border-light dark:border-border-dark">
+<h3 class="text-lg font-semibold text-text-main-light dark:text-text-main-dark">提交作业</h3>
+</div>
+<div class="p-6 space-y-6">
+<div>
+<label class="block text-sm font-medium text-text-main-light dark:text-text-main-dark mb-2 flex items-center gap-1">
+                            小组分工描述 <span class="text-red-500">*</span>
+<span class="material-icons text-text-sub-light text-xs cursor-help" title="请简要描述每位成员的具体贡献">help_outline</span>
+</label>
+<textarea class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-border-light dark:border-border-dark dark:bg-background-dark dark:text-white rounded-lg p-3 min-h-[100px]" placeholder="例如：
+李明：负责数据清洗 (30%)
+王强：负责模型训练 (30%)
+张薇：负责PPT制作与演示 (40%)" rows="4"></textarea>
+</div>
+<div>
+<label class="block text-sm font-medium text-text-sub-light dark:text-text-sub-dark mb-2">
+                            Notebook / GitHub 链接
+                        </label>
+<div class="relative rounded-md shadow-sm">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-icons text-gray-400 text-sm">link</span>
+</div>
+<input class="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-border-light dark:border-border-dark dark:bg-background-dark dark:text-white rounded-lg py-2.5" placeholder="https://github.com/..." type="text" value="https://github.com/team-3/ecommerce-analysis"/>
+<div class="absolute inset-y-0 right-0 pr-2 flex items-center">
+<span class="material-icons text-green-500 text-sm" title="链接有效">check_circle</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-text-sub-light dark:text-text-sub-dark mb-2">
+                            文件上传
+                        </label>
+<div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-primary/30 border-dashed rounded-xl hover:bg-primary/5 transition-colors cursor-pointer group bg-background-light dark:bg-background-dark/50">
+<div class="space-y-1 text-center">
+<span class="material-icons text-primary text-4xl mb-2 group-hover:scale-110 transition-transform">cloud_upload</span>
+<div class="flex text-sm text-text-sub-light dark:text-text-sub-dark justify-center">
+<label class="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary-hover focus-within:outline-none" for="file-upload">
+<span>点击上传</span>
+<input class="sr-only" id="file-upload" name="file-upload" type="file"/>
+</label>
+<p class="pl-1">或拖拽文件至此</p>
+</div>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark">
+                                    支持 PDF, ZIP, IPYNB (最大 50MB)
+                                </p>
+</div>
+</div>
+<div class="mt-4 space-y-2">
+<div class="flex items-center justify-between p-3 bg-background-light dark:bg-background-dark rounded-lg border border-border-light dark:border-border-dark">
+<div class="flex items-center gap-3 overflow-hidden">
+<span class="material-icons text-yellow-500">folder_zip</span>
+<div class="truncate">
+<p class="text-sm font-medium text-text-main-light dark:text-text-main-dark truncate">Team3_FinalProject.zip</p>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark">12.5 MB</p>
+</div>
+</div>
+<button class="text-text-sub-light dark:text-text-sub-dark hover:text-red-500">
+<span class="material-icons text-sm">close</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="px-6 py-4 bg-background-light/50 dark:bg-background-dark/50 border-t border-border-light dark:border-border-dark rounded-b-xl flex items-center justify-between gap-4">
+<button class="text-text-sub-light dark:text-text-sub-dark hover:text-text-main-light dark:hover:text-text-main-dark font-medium text-sm px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                        保存草稿
+                    </button>
+<button class="bg-primary hover:bg-primary-hover text-white font-medium py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
+<span class="material-icons text-sm">send</span>
+                        提交作业
+                    </button>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-4">
+<h4 class="text-sm font-bold text-text-main-light dark:text-text-main-dark mb-3">小组动态</h4>
+<div class="relative pl-4 border-l-2 border-border-light dark:border-border-dark space-y-4">
+<div class="relative">
+<div class="absolute -left-[21px] bg-primary h-3 w-3 rounded-full border-2 border-white dark:border-surface-dark"></div>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark mb-0.5">今天 10:23</p>
+<p class="text-sm text-text-main-light dark:text-text-main-dark">李明 更新了项目分工</p>
+</div>
+<div class="relative opacity-70">
+<div class="absolute -left-[21px] bg-gray-300 dark:bg-gray-600 h-3 w-3 rounded-full border-2 border-white dark:border-surface-dark"></div>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark mb-0.5">昨天 18:45</p>
+<p class="text-sm text-text-main-light dark:text-text-main-dark">王强 上传了初步分析代码</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="mt-auto py-8 text-center text-sm text-text-sub-light dark:text-text-sub-dark border-t border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">
+<p>© 2023 Smart-Learn 混合式教学生态平台. All rights reserved.</p>
+</footer>
+<script>
+    // No img tags used, but ensuring future compliance if added
+    // CRITICAL: For ALL images including <img> tags AND elements with background-image CSS styles... you MUST add a data-alt attribute
+</script>
+
+</body></html>

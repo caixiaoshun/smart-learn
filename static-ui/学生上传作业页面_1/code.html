@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>学生作业提交 - 混合式教学平台</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b96ee",
+                        "primary-hover": "#2085d6",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101a22",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1c2a35",
+                        "border-light": "#e5e7eb",
+                        "border-dark": "#2d3a46",
+                        "text-main-light": "#1f2937",
+                        "text-main-dark": "#e5e7eb",
+                        "text-sub-light": "#6b7280",
+                        "text-sub-dark": "#9ca3af",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark transition-colors duration-200 min-h-screen flex flex-col font-display">
+<!-- Top Navigation -->
+<nav class="bg-surface-light dark:bg-surface-dark border-b border-border-light dark:border-border-dark sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex">
+<div class="flex-shrink-0 flex items-center">
+<span class="material-icons text-primary mr-2" style="font-size: 32px;">school</span>
+<span class="font-bold text-xl tracking-tight text-primary">智教云 | AI混合教学</span>
+</div>
+<div class="hidden sm:ml-8 sm:flex sm:space-x-8">
+<a class="border-transparent text-text-sub-light dark:text-text-sub-dark hover:text-primary dark:hover:text-primary inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" href="#">首页</a>
+<a class="border-primary text-primary dark:text-primary inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" href="#">我的课程</a>
+<a class="border-transparent text-text-sub-light dark:text-text-sub-dark hover:text-primary dark:hover:text-primary inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" href="#">案例库</a>
+</div>
+</div>
+<div class="flex items-center">
+<button class="p-2 rounded-full text-text-sub-light dark:text-text-sub-dark hover:bg-background-light dark:hover:bg-background-dark">
+<span class="material-icons">notifications</span>
+</button>
+<div class="ml-3 relative flex items-center gap-2">
+<div class="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">李</div>
+<span class="text-sm font-medium hidden md:block">李明同学</span>
+</div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+<!-- Breadcrumb & Header -->
+<div class="mb-8">
+<nav class="flex text-sm text-text-sub-light dark:text-text-sub-dark mb-4">
+<a class="hover:text-primary" href="#">我的课程</a>
+<span class="mx-2">/</span>
+<a class="hover:text-primary" href="#">数据挖掘基础</a>
+<span class="mx-2">/</span>
+<span class="text-text-main-light dark:text-text-main-dark font-medium">第三周：客户流失预测分析</span>
+</nav>
+<div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+<div>
+<h1 class="text-3xl font-bold text-text-main-light dark:text-text-main-dark flex items-center gap-3">
+                        第三周：客户流失预测分析作业
+                        <span class="bg-primary/10 text-primary text-xs px-2.5 py-0.5 rounded-full border border-primary/20 font-medium">进行中</span>
+</h1>
+<p class="mt-2 text-text-sub-light dark:text-text-sub-dark max-w-2xl">
+                        结合本周学习的决策树与随机森林算法，完成电信客户流失数据集的分析报告。
+                    </p>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-surface-light dark:bg-surface-dark px-4 py-2 rounded-lg border border-border-light dark:border-border-dark shadow-sm flex items-center gap-3">
+<div class="bg-primary/10 p-2 rounded-full text-primary">
+<span class="material-icons text-xl">timer</span>
+</div>
+<div>
+<div class="text-xs text-text-sub-light dark:text-text-sub-dark uppercase tracking-wider font-semibold">距离截止</div>
+<div class="text-lg font-bold text-text-main-light dark:text-text-main-dark tabular-nums text-primary">02天 14:35:20</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Left Column: Assignment Details (2/3 width) -->
+<div class="lg:col-span-2 space-y-6">
+<!-- Requirements Card -->
+<section class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark overflow-hidden">
+<div class="px-6 py-4 border-b border-border-light dark:border-border-dark bg-background-light/50 dark:bg-background-dark/50 flex justify-between items-center">
+<h3 class="text-lg font-semibold text-text-main-light dark:text-text-main-dark flex items-center gap-2">
+<span class="material-icons text-primary text-sm">assignment</span> 作业要求
+                        </h3>
+<span class="text-xs text-text-sub-light dark:text-text-sub-dark bg-white dark:bg-surface-dark px-2 py-1 rounded border border-border-light dark:border-border-dark">满分：100分</span>
+</div>
+<div class="p-6 prose dark:prose-invert max-w-none text-text-sub-light dark:text-text-sub-dark">
+<h4 class="text-text-main-light dark:text-text-main-dark font-medium mb-2">1. 数据预处理</h4>
+<ul class="list-disc pl-5 mb-4 space-y-1">
+<li>处理缺失值，建议使用中位数填充。</li>
+<li>对分类变量进行One-Hot编码。</li>
+<li>数据集划分：训练集70%，测试集30%。</li>
+</ul>
+<h4 class="text-text-main-light dark:text-text-main-dark font-medium mb-2">2. 模型构建</h4>
+<ul class="list-disc pl-5 mb-4 space-y-1">
+<li>分别构建决策树与随机森林模型。</li>
+<li>使用网格搜索（Grid Search）进行超参数调优。</li>
+</ul>
+<h4 class="text-text-main-light dark:text-text-main-dark font-medium mb-2">3. 提交内容</h4>
+<p class="mb-2">请提交以下内容：</p>
+<ul class="list-disc pl-5 space-y-1">
+<li>完整的 Jupyter Notebook 文件 (.ipynb)。</li>
+<li>导出为 PDF 格式的分析报告，包含关键图表和结论。</li>
+</ul>
+</div>
+</section>
+<!-- Resources Card -->
+<section class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark">
+<div class="px-6 py-4 border-b border-border-light dark:border-border-dark flex justify-between items-center">
+<h3 class="text-lg font-semibold text-text-main-light dark:text-text-main-dark flex items-center gap-2">
+<span class="material-icons text-primary text-sm">folder_open</span> 附件资源
+                        </h3>
+</div>
+<div class="p-4 space-y-3">
+<div class="flex items-center justify-between p-3 rounded-lg border border-border-light dark:border-border-dark hover:bg-background-light dark:hover:bg-background-dark transition-colors group">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-icons">table_chart</span>
+</div>
+<div>
+<div class="font-medium text-text-main-light dark:text-text-main-dark group-hover:text-primary transition-colors">Telco_Customer_Churn.csv</div>
+<div class="text-xs text-text-sub-light dark:text-text-sub-dark">1.2 MB • 上传于 3天前</div>
+</div>
+</div>
+<button class="text-text-sub-light dark:text-text-sub-dark hover:text-primary p-2">
+<span class="material-icons">download</span>
+</button>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg border border-border-light dark:border-border-dark hover:bg-background-light dark:hover:bg-background-dark transition-colors group">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+<span class="material-icons">picture_as_pdf</span>
+</div>
+<div>
+<div class="font-medium text-text-main-light dark:text-text-main-dark group-hover:text-primary transition-colors">作业指导书_V1.2.pdf</div>
+<div class="text-xs text-text-sub-light dark:text-text-sub-dark">450 KB • 上传于 3天前</div>
+</div>
+</div>
+<button class="text-text-sub-light dark:text-text-sub-dark hover:text-primary p-2">
+<span class="material-icons">download</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Submission Actions (1/3 width) -->
+<div class="lg:col-span-1 space-y-6">
+<!-- AI Assistant Widget -->
+<div class="bg-gradient-to-br from-primary/10 via-background-light to-background-light dark:from-primary/20 dark:via-background-dark dark:to-background-dark rounded-xl shadow-md border border-primary/30 dark:border-primary/40 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-icons" style="font-size: 100px;">auto_awesome</span>
+</div>
+<div class="p-6 relative z-10">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-icons text-primary">auto_awesome</span>
+<h3 class="font-bold text-primary text-lg">AI 助手预检</h3>
+</div>
+<p class="text-sm text-text-sub-light dark:text-text-sub-dark mb-4 leading-relaxed">
+                            在提交前，使用 AI 助手分析你的代码规范性，并获得即时的优化建议。
+                        </p>
+<button class="w-full bg-surface-light dark:bg-surface-dark hover:bg-white dark:hover:bg-surface-dark/80 text-primary border border-primary/20 font-medium py-2.5 px-4 rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all hover:shadow-md group">
+<span>开始分析</span>
+<span class="material-icons text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Submission Box -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg border border-border-light dark:border-border-dark flex flex-col h-fit">
+<div class="p-6 border-b border-border-light dark:border-border-dark">
+<h3 class="text-lg font-semibold text-text-main-light dark:text-text-main-dark">提交作业</h3>
+</div>
+<div class="p-6 space-y-6">
+<!-- Link Input -->
+<div>
+<label class="block text-sm font-medium text-text-sub-light dark:text-text-sub-dark mb-2">
+                                Notebook / GitHub 链接
+                            </label>
+<div class="relative rounded-md shadow-sm">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-icons text-gray-400 text-sm">link</span>
+</div>
+<input class="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-border-light dark:border-border-dark dark:bg-background-dark dark:text-white rounded-lg py-2.5" placeholder="https://github.com/..." type="text" value="https://github.com/student/data-mining-hw3"/>
+<div class="absolute inset-y-0 right-0 pr-2 flex items-center">
+<span class="material-icons text-green-500 text-sm" title="链接有效">check_circle</span>
+</div>
+</div>
+</div>
+<!-- Drag & Drop Zone -->
+<div>
+<label class="block text-sm font-medium text-text-sub-light dark:text-text-sub-dark mb-2">
+                                文件上传
+                            </label>
+<div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-primary/30 border-dashed rounded-xl hover:bg-primary/5 transition-colors cursor-pointer group bg-background-light dark:bg-background-dark/50">
+<div class="space-y-1 text-center">
+<span class="material-icons text-primary text-4xl mb-2 group-hover:scale-110 transition-transform">cloud_upload</span>
+<div class="flex text-sm text-text-sub-light dark:text-text-sub-dark justify-center">
+<label class="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary-hover focus-within:outline-none" for="file-upload">
+<span>点击上传</span>
+<input class="sr-only" id="file-upload" name="file-upload" type="file"/>
+</label>
+<p class="pl-1">或拖拽文件至此</p>
+</div>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark">
+                                        支持 PDF, ZIP, IPYNB (最大 20MB)
+                                    </p>
+</div>
+</div>
+<!-- Uploaded File Preview -->
+<div class="mt-4 space-y-2">
+<div class="flex items-center justify-between p-3 bg-background-light dark:bg-background-dark rounded-lg border border-border-light dark:border-border-dark">
+<div class="flex items-center gap-3 overflow-hidden">
+<span class="material-icons text-red-500">picture_as_pdf</span>
+<div class="truncate">
+<p class="text-sm font-medium text-text-main-light dark:text-text-main-dark truncate">分析报告_李明.pdf</p>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark">1.8 MB</p>
+</div>
+</div>
+<button class="text-text-sub-light dark:text-text-sub-dark hover:text-red-500">
+<span class="material-icons text-sm">close</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Comments -->
+<div>
+<label class="block text-sm font-medium text-text-sub-light dark:text-text-sub-dark mb-2">
+                                备注 (可选)
+                            </label>
+<textarea class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-border-light dark:border-border-dark dark:bg-background-dark dark:text-white rounded-lg p-2.5" placeholder="在此处添加关于作业的特别说明..." rows="3"></textarea>
+</div>
+</div>
+<div class="px-6 py-4 bg-background-light/50 dark:bg-background-dark/50 border-t border-border-light dark:border-border-dark rounded-b-xl flex items-center justify-between gap-4">
+<button class="text-text-sub-light dark:text-text-sub-dark hover:text-text-main-light dark:hover:text-text-main-dark font-medium text-sm px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                            保存草稿
+                        </button>
+<button class="bg-primary hover:bg-primary-hover text-white font-medium py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
+<span class="material-icons text-sm">send</span>
+                            提交作业
+                        </button>
+</div>
+</div>
+<!-- History Widget (Optional Context) -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-4">
+<h4 class="text-sm font-bold text-text-main-light dark:text-text-main-dark mb-3">提交历史</h4>
+<div class="relative pl-4 border-l-2 border-border-light dark:border-border-dark space-y-4">
+<div class="relative">
+<div class="absolute -left-[21px] bg-primary h-3 w-3 rounded-full border-2 border-white dark:border-surface-dark"></div>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark mb-0.5">今天 10:23</p>
+<p class="text-sm text-text-main-light dark:text-text-main-dark">保存草稿 (V1)</p>
+</div>
+<div class="relative opacity-50">
+<div class="absolute -left-[21px] bg-gray-300 dark:bg-gray-600 h-3 w-3 rounded-full border-2 border-white dark:border-surface-dark"></div>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark mb-0.5">昨天 18:45</p>
+<p class="text-sm text-text-main-light dark:text-text-main-dark">开始作业</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Simple Footer -->
+<footer class="mt-auto py-8 text-center text-sm text-text-sub-light dark:text-text-sub-dark border-t border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">
+<p>© 2023 智教云混合式教学平台. All rights reserved.</p>
+</footer>
+<!-- Image Data Alt -->
+<script>
+        // No img tags used, but ensuring future compliance if added
+        // CRITICAL: For ALL images including <img> tags AND elements with background-image CSS styles... you MUST add a data-alt attribute
+    </script>
+</body></html>

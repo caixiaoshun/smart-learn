@@ -1,0 +1,692 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户表
+// 角色使用 String 类型存储: "STUDENT", "TEACHER", "ADMIN"
+model User {
+  id                String       @id @default(cuid())
+  email             String       @unique
+  password          String
+  name              String
+  role              String       @default("STUDENT") // STUDENT, TEACHER, ADMIN
+  avatar            String?
+  bio               String?      // 个人简介
+  preferences       String?      // JSON: notification/privacy preferences
+  verifyCode        String?      // 验证码
+  verifyCodeExpire  DateTime?    // 验证码过期时间
+
+  // 学生加入的班级（学生才有，可多个）
+  classMemberships  ClassStudent[] @relation("ClassStudents")
+
+  // 教师创建的班级（教师才有）
+  teachingClasses   Class[]      @relation("ClassTeacher")
+
+  // 教师创建的资源
+  resources         Resource[]
+  
+  // 学生提交的作业
+  submissions       Submission[]
+  
+  // AI 聊天消息
+  chatMessages      ChatMessage[]
+
+  // 学生行为日志
+  behaviorLogs      BehaviorLog[]
+
+  // 干预记录（学生被干预）
+  interventions     Intervention[] @relation("StudentInterventions")
+  // 干预记录（教师发起）
+  teacherInterventions Intervention[] @relation("TeacherInterventions")
+
+  // 资源浏览记录
+  resourceViews     ResourceView[]
+
+  // 资源评论
+  resourceComments  ResourceComment[]
+  
+  // 案例评论
+  caseComments      CaseComment[]
+  
+  // === 新增关系：动态组队与评价体系 ===
+  // 作为组长的小组
+  ledGroups         AssignmentGroup[] @relation("GroupLeader")
+  // 参与的小组（成员）
+  groupMemberships  AssignmentGroupMember[] @relation("GroupMembers")
+  // 个人成绩调整
+  scoreAdjustments  ScoreAdjustment[] @relation("ScoreAdjustments")
+  // 成绩审计日志（被改分）
+  scoreAuditLogs    ScoreAuditLog[] @relation("ScoreAuditLogs")
+  // 成绩审计日志（操作者）
+  scoreAuditOps     ScoreAuditLog[] @relation("ScoreAuditOperator")
+  // 自评记录
+  selfAssessments   SelfAssessment[] @relation("SelfAssessments")
+  // 互评分配（作为评审者）
+  peerReviewAssignments PeerReviewAssignment[] @relation("PeerReviewAssignments")
+  // 互评记录（给出的评审）
+  peerReviewsGiven  PeerReview[] @relation("PeerReviewsGiven")
+  // 平时表现记录
+  performanceRecords ClassPerformanceRecord[] @relation("PerformanceRecords")
+  // 平时表现记录（教师记录）
+  performanceRecordings ClassPerformanceRecord[] @relation("PerformanceRecorder")
+  // 知识点自评
+  knowledgeAssessments KnowledgePointAssessment[] @relation("KnowledgeAssessments")
+  
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([email])
+}
+
+// 班级表
+model Class {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  inviteCode  String     @unique // 邀请码，学生通过此码加入班级
+  
+  // 班级教师
+  teacherId   String
+  teacher     User       @relation("ClassTeacher", fields: [teacherId], references: [id])
+  
+  // 班级学生
+  students    ClassStudent[] @relation("ClassStudents")
+  
+  // 班级作业
+  homeworks   Homework[]
+  
+  // 平时表现记录
+  performanceRecords ClassPerformanceRecord[]
+  
+  // 知识点清单
+  knowledgePoints    KnowledgePoint[]
+
+  // 平时表现评分规则 JSON: { maxScore, qaWeight, shareWeight }
+  performanceScoringRules String?
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([teacherId])
+  @@index([inviteCode])
+}
+
+// 班级学生关系表（多对多）
+model ClassStudent {
+  studentId String
+  classId   String
+  student   User   @relation("ClassStudents", fields: [studentId], references: [id], onDelete: Cascade)
+  class     Class  @relation("ClassStudents", fields: [classId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([studentId, classId])
+  @@index([studentId])
+  @@index([classId])
+}
+
+// 作业表
+model Homework {
+  id            String       @id @default(cuid())
+  title         String
+  description   String
+  
+  // 作业形态: STANDARD(普通作业), GROUP_PROJECT(项目小组作业), SELF_PRACTICE(自主实践作业)
+  type          String       @default("STANDARD")
+  
+  // 所属班级
+  classId       String
+  class         Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  
+  // 时间设置
+  startTime     DateTime     // 开始时间
+  deadline      DateTime     // 截止时间
+  reminderTime  DateTime?    // 提醒时间
+  reminderSent  Boolean      @default(false) // 是否已发送提醒
+  
+  // 评分设置
+  maxScore      Int          @default(100) // 满分
+  allowLate     Boolean      @default(false) // 是否允许迟交
+  
+  // === 项目小组作业配置 (type=GROUP_PROJECT 时使用) ===
+  // JSON: { groupRequired, minSize, maxSize, groupDeadline, allowSwitch, allowTeacherAssign, lockTime, ungroupedPolicy, scoringModel }
+  groupConfig       String?  // JSON 存储组队配置
+  
+  // === 互评配置 (type=GROUP_PROJECT 时使用) ===
+  // JSON: { reviewersPerSubmission, reviewDeadline, penaltyLevel, anonymousMode, minReviewsRequired, coverageStrategy }
+  peerReviewConfig  String?  // JSON 存储互评配置
+  
+  // === 自主实践配置 (type=SELF_PRACTICE 时使用) ===
+  // JSON: { bonusCap, countLimit, qualityThreshold, scoringStrategy, antiCheatRules }
+  selfPracticeConfig String? // JSON 存储自主实践配置
+  
+  // 学生提交
+  submissions   Submission[]
+  
+  // 作业关联的小组
+  groups        AssignmentGroup[]
+  
+  // 自评记录
+  selfAssessments SelfAssessment[]
+  
+  // 互评分配
+  peerReviewAssignments PeerReviewAssignment[]
+  
+  // 互评记录
+  peerReviews   PeerReview[]
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([classId])
+  @@index([deadline])
+  @@index([reminderTime])
+  @@index([type])
+}
+
+// 作业提交表
+model Submission {
+  id          String    @id @default(cuid())
+  
+  // 提交学生（普通作业为个人，项目作业为组长代提交）
+  studentId   String
+  student     User      @relation(fields: [studentId], references: [id])
+  
+  // 所属作业
+  homeworkId  String
+  homework    Homework  @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  
+  // 关联小组 (type=GROUP_PROJECT 时使用)
+  groupId     String?
+  group       AssignmentGroup? @relation(fields: [groupId], references: [id])
+  
+  // 提交内容
+  files       String    // JSON 存储文件路径数组
+  
+  // 小组分工说明 (type=GROUP_PROJECT 时使用)
+  // JSON: [{ memberId, memberName, task, contributionPercent, description }]
+  laborDivision String? // JSON 存储分工说明
+  
+  // 批改结果
+  score       Int?
+  feedback    String?
+  
+  // 时间记录
+  submittedAt DateTime  @default(now())
+  gradedAt    DateTime?
+  
+  // 成绩调整记录
+  scoreAdjustments ScoreAdjustment[]
+  
+  // 互评记录
+  peerReviews      PeerReview[]
+  peerReviewAssignments PeerReviewAssignment[]
+  
+  // 学生每个作业只能有一个提交记录（更新提交）
+  @@unique([studentId, homeworkId])
+  @@index([studentId])
+  @@index([homeworkId])
+  @@index([groupId])
+}
+
+// ========== 动态组队模型 ==========
+
+// 作业小组表（每次作业独立组队）
+model AssignmentGroup {
+  id          String   @id @default(cuid())
+  
+  // 所属作业
+  homeworkId  String
+  homework    Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  
+  name        String   // 小组名称
+  
+  // 组长
+  leaderId    String
+  leader      User     @relation("GroupLeader", fields: [leaderId], references: [id])
+  
+  // 小组状态: FORMING(组建中), LOCKED(已锁定), SUBMITTED(已提交)
+  status      String   @default("FORMING")
+  
+  // 小组成员
+  members     AssignmentGroupMember[]
+  
+  // 小组提交
+  submissions Submission[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([homeworkId])
+  @@index([leaderId])
+}
+
+// 小组成员表
+model AssignmentGroupMember {
+  id        String   @id @default(cuid())
+  
+  groupId   String
+  group     AssignmentGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  studentId String
+  student   User     @relation("GroupMembers", fields: [studentId], references: [id])
+  
+  // 角色: LEADER(组长), MEMBER(成员)
+  role      String   @default("MEMBER")
+  
+  joinedAt  DateTime @default(now())
+
+  @@unique([groupId, studentId])
+  @@index([groupId])
+  @@index([studentId])
+}
+
+// ========== 成绩调整与审计 ==========
+
+// 个人成绩调整表 (项目小组作业：全组基础分 + 个人调整分)
+model ScoreAdjustment {
+  id            String   @id @default(cuid())
+  
+  submissionId  String
+  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  
+  // 被调整的学生
+  studentId     String
+  student       User     @relation("ScoreAdjustments", fields: [studentId], references: [id])
+  
+  baseScore     Int      // 全组基础分
+  adjustScore   Int      @default(0) // 个人调整分 (可正可负)
+  finalScore    Int      // 最终个人成绩 = baseScore + adjustScore
+  
+  reason        String?  // 调整原因
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([submissionId, studentId])
+  @@index([submissionId])
+  @@index([studentId])
+}
+
+// 成绩审计日志表（教师改分留痕）
+model ScoreAuditLog {
+  id          String   @id @default(cuid())
+  
+  // 关联提交
+  submissionId String
+  
+  // 被改分学生
+  studentId   String
+  student     User     @relation("ScoreAuditLogs", fields: [studentId], references: [id])
+  
+  oldScore    Int?     // 原分数
+  newScore    Int      // 新分数
+  reason      String   // 改分原因（必填）
+  
+  // 操作者（教师）
+  operatorId  String
+  operator    User     @relation("ScoreAuditOperator", fields: [operatorId], references: [id])
+  
+  createdAt   DateTime @default(now())
+
+  @@index([submissionId])
+  @@index([studentId])
+  @@index([operatorId])
+}
+
+// ========== 自评与互评模型 ==========
+
+// 自评表（项目小组作业，每人自评）
+model SelfAssessment {
+  id          String   @id @default(cuid())
+  
+  homeworkId  String
+  homework    Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  
+  studentId   String
+  student     User     @relation("SelfAssessments", fields: [studentId], references: [id])
+  
+  score       Int      // 自评分
+  description String   // 自评说明（必填）
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([homeworkId, studentId])
+  @@index([homeworkId])
+  @@index([studentId])
+}
+
+// 互评分配表（系统分配评审任务）
+model PeerReviewAssignment {
+  id          String   @id @default(cuid())
+  
+  homeworkId  String
+  homework    Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  
+  // 评审者
+  reviewerId  String
+  reviewer    User     @relation("PeerReviewAssignments", fields: [reviewerId], references: [id])
+  
+  // 被评审的提交
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  
+  // 状态: PENDING(待评审), COMPLETED(已完成), OVERDUE(逾期)
+  status      String   @default("PENDING")
+  
+  deadline    DateTime // 评审截止时间
+  
+  createdAt   DateTime @default(now())
+
+  @@unique([reviewerId, submissionId])
+  @@index([homeworkId])
+  @@index([reviewerId])
+  @@index([submissionId])
+  @@index([status])
+}
+
+// 互评记录表
+model PeerReview {
+  id          String   @id @default(cuid())
+  
+  homeworkId  String
+  homework    Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  
+  // 评审者
+  reviewerId  String
+  reviewer    User     @relation("PeerReviewsGiven", fields: [reviewerId], references: [id])
+  
+  // 被评审的提交
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  
+  score       Int      // 评分（必填）
+  comment     String?  // 评语（可选）
+  
+  // 匿名标识 (Double-Blind)
+  anonymousLabel String? // 如 "评审员#1", "评审员#2"
+  
+  // 标记: NORMAL, FLAGGED(被标记异常), ARBITRATED(已仲裁)
+  flag        String   @default("NORMAL")
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([reviewerId, submissionId])
+  @@index([homeworkId])
+  @@index([reviewerId])
+  @@index([submissionId])
+}
+
+// ========== 平时表现模型 ==========
+
+// 平时表现记录表
+model ClassPerformanceRecord {
+  id          String   @id @default(cuid())
+  
+  // 关联班级
+  classId     String
+  class       Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  
+  // 记录对象（学生）
+  studentId   String
+  student     User     @relation("PerformanceRecords", fields: [studentId], references: [id])
+  
+  // 记录类型: CLASSROOM_QA(课堂问答), KNOWLEDGE_SHARE(知识分享)
+  type        String
+  
+  // 通用字段
+  topic       String?  // 主题/知识点
+  score       Int?     // 得分或表现等级 (1-5)
+  notes       String?  // 备注
+  evidence    String?  // 佐证材料链接/附件路径 (JSON)
+  
+  // 知识分享额外字段
+  duration    Int?     // 分享时长（分钟）
+  
+  // 记录人（教师）
+  recordedById String
+  recordedBy   User   @relation("PerformanceRecorder", fields: [recordedById], references: [id])
+  
+  occurredAt  DateTime @default(now()) // 发生时间
+  createdAt   DateTime @default(now())
+
+  @@index([classId])
+  @@index([studentId])
+  @@index([type])
+  @@index([recordedById])
+}
+
+// 知识点清单表
+model KnowledgePoint {
+  id          String   @id @default(cuid())
+  
+  classId     String
+  class       Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String?
+  orderIndex  Int      @default(0) // 排序
+  
+  // 学生自评记录
+  assessments KnowledgePointAssessment[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([classId])
+}
+
+// 知识点自评表
+model KnowledgePointAssessment {
+  id               String   @id @default(cuid())
+  
+  knowledgePointId String
+  knowledgePoint   KnowledgePoint @relation(fields: [knowledgePointId], references: [id], onDelete: Cascade)
+  
+  studentId        String
+  student          User     @relation("KnowledgeAssessments", fields: [studentId], references: [id])
+  
+  // 掌握度等级: 1(完全不了解) 2(初步了解) 3(基本掌握) 4(熟练运用) 5(融会贯通)
+  masteryLevel     Int
+  selfNote         String?  // 简短自评
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([knowledgePointId, studentId])
+  @@index([knowledgePointId])
+  @@index([studentId])
+}
+
+// 课程资源表
+model Resource {
+  id          String     @id @default(cuid())
+  title       String
+  description String
+  type        String     // VIDEO, DEMONSTRATION, NOTEBOOK, CASE, HOMEWORK
+  thumbnail   String?
+  url         String?
+  filePath    String?    // 文件路径（用于上传的资源）
+  points      Int        @default(10)  // 完成可获得的积分
+  tags        String     // JSON 数组存储标签
+  duration    String?    // 视频时长等
+  author      String?
+  ownerId     String
+  owner       User       @relation(fields: [ownerId], references: [id])
+  views       Int        @default(0)
+  category    String?    // 知识点分类：分类算法、聚类分析、关联规则、数据预处理等
+  
+  // 收藏关系
+  bookmarks   ResourceBookmark[]
+  
+  // 浏览记录
+  resourceViews ResourceView[]
+  
+  // 评论
+  comments    ResourceComment[]
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([type])
+  @@index([category])
+  @@index([ownerId])
+}
+
+// 思政案例表
+model Case {
+  id          String     @id @default(cuid())
+  title       String
+  description String
+  content     String?    // 案例详细内容
+  category    String     // 知识点分类：关联规则、决策树、聚类、协同过滤、回归分析、文本挖掘等
+  theme       String     // JSON 数组存储思政主题
+  tags        String     // JSON 数组存储标签
+  difficulty  String     @default("MEDIUM") // EASY, MEDIUM, HARD
+  duration    Int        @default(2)  // 预计学习时长（小时）
+  rating      Float      @default(0)
+  views       Int        @default(0)
+  codeExample String?    // 代码示例
+  
+  // 收藏关系
+  bookmarks   CaseBookmark[]
+  
+  // 评论关系
+  comments    CaseComment[]
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([category])
+  @@index([difficulty])
+}
+
+// 资源收藏表
+model ResourceBookmark {
+  id          String    @id @default(cuid())
+  userId      String
+  resourceId  String
+  resource    Resource  @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, resourceId])
+  @@index([userId])
+  @@index([resourceId])
+}
+
+// AI 聊天消息表
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   // user, assistant, system
+  content   String
+  feedback  String?  // "up" or "down"
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// 案例收藏表
+model CaseBookmark {
+  id          String    @id @default(cuid())
+  userId      String
+  caseId      String
+  case        Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, caseId])
+  @@index([userId])
+  @@index([caseId])
+}
+
+// 资源评论表
+model ResourceComment {
+  id         String   @id @default(cuid())
+  content    String
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resourceId String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([resourceId])
+  @@index([userId])
+}
+
+// 案例评论表
+model CaseComment {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([caseId])
+  @@index([userId])
+}
+
+// 资源浏览记录表
+model ResourceView {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resourceId String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([resourceId])
+  @@index([userId, resourceId])
+}
+
+// 学生行为日志表
+model BehaviorLog {
+  id        String   @id @default(cuid())
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  type      String   // PAGE_VIEW, RESOURCE_VIEW, CASE_VIEW, HOMEWORK_SUBMIT, AI_CHAT
+  duration  Int      @default(0) // 停留时长（秒）
+  metadata  String?  // JSON 存储额外数据（如资源ID、页面路径等）
+  createdAt DateTime @default(now())
+
+  @@index([studentId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// 干预记录表
+model Intervention {
+  id               String    @id @default(cuid())
+  studentId        String
+  student          User      @relation("StudentInterventions", fields: [studentId], references: [id], onDelete: Cascade)
+  teacherId        String
+  teacher          User      @relation("TeacherInterventions", fields: [teacherId], references: [id])
+  type             String    // SUBMISSION_WARNING, ENGAGEMENT_WARNING, BEHAVIOR
+  status           String    @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  priority         String    @default("NORMAL") // URGENT, HIGH, NORMAL, LOW
+  description      String?
+  aiRecommendation String?
+  notes            String?
+  resolvedAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([studentId])
+  @@index([teacherId])
+  @@index([status])
+}

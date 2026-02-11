@@ -343,6 +343,7 @@ export interface AssignmentGroup {
   id: string;
   homeworkId: string;
   name: string;
+  inviteCode: string;
   leaderId: string;
   status: 'FORMING' | 'LOCKED' | 'SUBMITTED';
   leader: {
@@ -371,6 +372,22 @@ export interface AssignmentGroupMember {
     avatar?: string;
   };
   joinedAt: string;
+}
+
+// 小组消息
+export interface GroupMessage {
+  id: string;
+  groupId: string;
+  senderId: string;
+  content: string;
+  type: 'TEXT' | 'SYSTEM';
+  sender: {
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+  };
+  createdAt: string;
 }
 
 // 分工说明

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useHomeworkStore, type StudentHomework } from '@/stores/homeworkStore';
 import { useClassStore } from '@/stores/classStore';
@@ -27,6 +28,7 @@ import {
 } from 'lucide-react';
 
 export function StudentHomeworkPage() {
+  const navigate = useNavigate();
   const { user, fetchUser } = useAuthStore();
   const { studentHomeworks, isLoading, fetchStudentHomeworks, submitHomework, downloadFile } = useHomeworkStore();
   const { joinClass } = useClassStore();
@@ -386,6 +388,31 @@ export function StudentHomeworkPage() {
                   {homework.description}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* 小组作业 - 组队中心入口 */}
+          {homework.type === 'GROUP_PROJECT' && (
+            <div className="mb-4 p-4 bg-blue-50/50 rounded-lg border border-blue-100">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-blue-800">小组组队</p>
+                    <p className="text-xs text-blue-600">创建或加入小组，与队友协作完成作业</p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  className="gap-1.5 bg-blue-600 hover:bg-blue-700"
+                  onClick={() => navigate(`/homeworks/${homework.id}/group`)}
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  进入组队中心
+                </Button>
+              </div>
             </div>
           )}
 

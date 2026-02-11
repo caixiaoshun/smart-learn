@@ -136,6 +136,12 @@ test.describe('AI Assistant', () => {
     expect(pageContent).toBeTruthy();
   });
 
+  test('should not display global SmartLearn AI sidebar', async ({ page }) => {
+    // The global sidebar (MainLayout) should be hidden on AI assistant page
+    const globalSidebar = page.locator('aside').filter({ hasText: 'SmartLearn AI' });
+    await expect(globalSidebar).toHaveCount(0);
+  });
+
   test('should have chat input', async ({ page }) => {
     const chatInput = page.getByPlaceholder(AI_CHAT_INPUT_PLACEHOLDER);
     if (await chatInput.isVisible()) {

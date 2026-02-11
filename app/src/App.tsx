@@ -73,6 +73,16 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Route>
 
+        {/* AI 助手页面 - 独立布局，不使用全局侧边栏 */}
+        <Route
+          path="/ai-assistant"
+          element={
+            <ProtectedRoute>
+              <AIAssistantPage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* 学生端路由 */}
         <Route
           element={
@@ -87,7 +97,6 @@ function App() {
           <Route path="/homeworks/:homeworkId/group" element={<GroupFormationPage />} />
           <Route path="/resources" element={<ResourceLibraryPage />} />
           <Route path="/resources/:id" element={<CaseDetailPage />} />
-          <Route path="/ai-assistant" element={<AIAssistantPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/student/analytics" element={<StudentAnalyticsPage />} />
           <Route path="/courses/:id" element={<CourseDetailPage />} />

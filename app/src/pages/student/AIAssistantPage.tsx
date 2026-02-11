@@ -129,7 +129,7 @@ export function AIAssistantPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-64px)] flex -m-6">
+    <div className="h-screen flex">
       {/* 左侧边栏 */}
       <aside className="w-80 flex-shrink-0 flex flex-col border-r border-slate-200 bg-white h-full shadow-sm z-10">
         <div className="p-6 pb-2">

@@ -44,8 +44,9 @@ export function ClassManagementPage() {
   };
 
   const handleDeleteClass = async (classId: string) => {
-    if (!confirm('确定要删除这个班级吗？此操作不可恢复。')) return;
+    if (!confirm('确定要解散这个班级吗？解散后所有学生将被移出，此操作不可恢复。')) return;
     await deleteClass(classId);
+    toast.success('班级已解散');
   };
 
   const handleRemoveStudent = async (classId: string, studentId: string, studentName: string) => {

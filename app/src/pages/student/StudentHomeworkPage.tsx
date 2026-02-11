@@ -25,13 +25,15 @@ import {
   Download,
   KeyRound,
   BookOpen,
+  LogOut,
+  GraduationCap,
 } from 'lucide-react';
 
 export function StudentHomeworkPage() {
   const navigate = useNavigate();
   const { user, fetchUser } = useAuthStore();
   const { studentHomeworks, isLoading, fetchStudentHomeworks, submitHomework, downloadFile } = useHomeworkStore();
-  const { joinClass } = useClassStore();
+  const { joinClass, leaveClass, studentClasses, fetchStudentClasses } = useClassStore();
   
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedHomeworkId, setSelectedHomeworkId] = useState<string | null>(null);
@@ -43,9 +45,11 @@ export function StudentHomeworkPage() {
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
   const [joinLoading, setJoinLoading] = useState(false);
+  const [leaveLoading, setLeaveLoading] = useState<string | null>(null);
 
   useEffect(() => {
     fetchStudentHomeworks();
+    fetchStudentClasses();
   }, []);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, homeworkId: string) => {
@@ -102,10 +106,28 @@ export function StudentHomeworkPage() {
       setInviteCode('');
       toast.success('加入班级成功！');
       fetchStudentHomeworks(); // 刷新作业列表
+      fetchStudentClasses(); // 刷新班级列表
     } catch {
       // 错误已由全局拦截器处理并显示 Toast
     } finally {
       setJoinLoading(false);
+    }
+  };
+
+  const handleLeaveClass = async (classId: string, className: string) => {
+    if (!confirm(`确定要退出班级「${className}」吗？退出后将无法查看该班级的作业。`)) return;
+    
+    setLeaveLoading(classId);
+    try {
+      await leaveClass(classId);
+      await fetchUser();
+      toast.success('已退出班级');
+      fetchStudentHomeworks();
+      fetchStudentClasses();
+    } catch {
+      // 错误已由全局拦截器处理并显示 Toast
+    } finally {
+      setLeaveLoading(null);
     }
   };
 
@@ -175,6 +197,52 @@ export function StudentHomeworkPage() {
           加入班级
         </Button>
       </div>
+
+      {/* 我的班级 */}
+      {studentClasses.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+              <GraduationCap className="w-5 h-5 text-blue-600" />
+              我的班级
+            </h2>
+            <Button variant="ghost" size="sm" className="gap-1 text-slate-500" onClick={() => fetchStudentClasses()}>
+              <RefreshCw className="w-3.5 h-3.5" />
+              刷新
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {studentClasses.map((cls) => (
+              <Card key={cls.id} className="bg-white border-slate-200 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-slate-900 truncate">{cls.name}</p>
+                      {cls.teacher && (
+                        <p className="text-xs text-slate-500 mt-0.5">教师：{cls.teacher.name}</p>
+                      )}
+                      <div className="flex items-center gap-3 mt-2 text-xs text-slate-400">
+                        <span className="inline-flex items-center gap-1"><Users className="w-3 h-3" />{cls._count?.students || 0} 名同学</span>
+                        <span className="inline-flex items-center gap-1"><BookOpen className="w-3 h-3" />{cls._count?.homeworks || 0} 份作业</span>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-500 hover:text-red-600 hover:bg-red-50 shrink-0 gap-1 text-xs"
+                      onClick={() => handleLeaveClass(cls.id, cls.name)}
+                      disabled={leaveLoading === cls.id}
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      {leaveLoading === cls.id ? '退出中...' : '退出班级'}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 作业列表 */}
       {isLoading ? (

@@ -58,7 +58,6 @@ cd "$BACKEND_DIR"
 # 清理残留产物
 echo "🧹 [后端] 清理残留产物..."
 [ -d "dist" ] && rm -rf dist && echo "   - 删除 dist 目录"
-[ -d "node_modules" ] && rm -rf node_modules && echo "   - 删除 node_modules 目录"
 
 # 数据库处理
 if [ "$RESET_DB" = true ]; then
@@ -104,7 +103,6 @@ cd "$FRONTEND_DIR"
 # 清理残留产物
 echo "🧹 [前端] 清理残留产物..."
 [ -d "dist" ] && rm -rf dist && echo "   - 删除 dist 目录"
-[ -d "node_modules" ] && rm -rf node_modules && echo "   - 删除 node_modules 目录"
 
 # 安装依赖
 echo "📦 [前端] 安装依赖..."

@@ -20,7 +20,7 @@
 
 **Smart Learn** 是一个全栈 AI 智能教学平台，面向学生和教师双端，提供个性化学习辅助与精准教学管理。平台深度集成 AI 能力，涵盖班级管理、分层作业发布、AI 学习助手、学情分析与精准干预等核心功能。
 
-前端采用 React 19 + TypeScript + Vite 构建，后端基于 Node.js + Express + PostgreSQL (Prisma ORM)，通过 Playwright 进行 E2E 自动化测试，确保产品质量。
+前端采用 React 19 + TypeScript + Vite 构建，后端基于 Node.js + Express + PostgreSQL (Prisma ORM)，文件存储使用 MinIO (S3 兼容)，通过 Playwright 进行 E2E 自动化测试，确保产品质量。
 
 ## ✨ 核心功能清单
 
@@ -30,8 +30,10 @@
 |------|------|
 | **仪表盘** | 总积分/排名/课程进度/AI互动指数、近7天学习趋势、五维能力雷达、最近活动；支持导出学习报告、AI 诊断跳转 |
 | **AI 智能助手** | 基于 OpenAI 兼容 API 的 SSE 流式对话、多模型选择、聊天历史持久化、Socratic 引导式教学 |
-| **资源库** | 按类型/分类/标签搜索过滤教学资源，支持收藏、浏览量统计 |
+| **资源库** | 按类型/分类/标签搜索过滤教学资源，支持收藏、浏览量统计、评论 |
 | **作业提交** | 查看/提交作业（PDF/Notebook），文件预览（PDF 内联、IPYNB JSON），截止时间提醒 |
+| **同行互评** | 参与同行互评，匿名评审机制，评分反馈 |
+| **思政案例库** | 浏览/收藏/评分思政案例，案例评论 |
 | **学情分析** | 个人成绩趋势、得分走势统计 |
 | **个人设置** | 资料编辑、头像上传、密码修改、通知偏好、隐私权限 |
 
@@ -41,9 +43,12 @@
 |------|------|
 | **仪表盘** | 授课学生数/班级数/提交率/待关注学生、最近动态、待办任务、快捷入口 |
 | **班级管理** | 创建班级（自动邀请码）、成员管理、班级编辑/删除 |
-| **分层作业发布** | 发布作业（标题/描述/截止时间/满分/迟交设置）、AI 辅助生成分层作业（基础层/进阶层/挑战层） |
+| **分层作业发布** | 发布作业（标题/描述/截止时间/满分/迟交设置）、支持普通作业/项目小组作业/自主实践作业三种形态、AI 辅助批改 |
+| **作业动态组队** | 项目小组作业支持自动分组、手动拖拽调整、学生自由组队 |
+| **同行互评管理** | 配置评审人数、匿名模式、互评截止时间、覆盖策略 |
 | **学生行为分析** | 学生行为数据分析、导出报表、生成关注清单 |
 | **精准干预控制台** | 预警学生管理、行为评分筛选（全部/预警/高分）、AI 推荐方案、干预资源推送 |
+| **平时表现管理** | 课堂表现记录、知识点评估、成绩追踪 |
 | **数据分析** | 班级作业分析（提交率/分数分布）、成绩趋势、班级总览排名 |
 
 ### 🔐 通用功能
@@ -51,23 +56,25 @@
 - 邮箱验证码注册/登录/密码重置
 - JWT 鉴权 + 角色守卫（STUDENT / TEACHER）
 - 全局搜索、通知系统
-- 思政案例库（创建/浏览/评分/收藏）
+- 思政案例库（创建/浏览/评分/收藏/评论）
+- 教学资源管理（上传/浏览/收藏/评论）
 
 ## 🏗️ 技术栈详情
 
 | 层 | 技术 |
 |----|------|
 | **前端框架** | React 19, TypeScript, Vite 7 |
-| **UI 组件库** | Tailwind CSS, shadcn/ui (Radix UI), Lucide Icons |
-| **状态管理** | Zustand (with localStorage persist) |
+| **UI 组件库** | Tailwind CSS 3.4, shadcn/ui (Radix UI), Lucide Icons |
+| **状态管理** | Zustand 5 (with localStorage persist) |
 | **路由** | React Router 7 |
+| **动画** | Framer Motion |
 | **数据可视化** | Recharts |
 | **HTTP 客户端** | Axios |
 | **通知** | Sonner (Toast) |
 | **后端** | Node.js, Express, TypeScript, Prisma ORM, Zod |
 | **数据库** | PostgreSQL 15+ |
 | **认证** | JWT (jsonwebtoken), bcryptjs |
-| **文件上传** | Multer (本地磁盘 `uploads/`) |
+| **文件存储** | MinIO / S3 兼容对象存储 (AWS SDK) |
 | **邮件** | Nodemailer (SMTP) |
 | **AI** | OpenAI 兼容 API (SSE 流式) |
 | **定时任务** | node-cron |
@@ -78,6 +85,7 @@
 ```
 smart-learn/
 ├── app/                            # 前端 React 应用
+│   ├── public/                     # 静态资源 (favicon 等)
 │   ├── src/
 │   │   ├── App.tsx                 # 路由定义 + 角色守卫
 │   │   ├── main.tsx                # 入口
@@ -91,6 +99,20 @@ smart-learn/
 │   │   │   ├── student/            # 学生端所有页面
 │   │   │   └── teacher/            # 教师端所有页面
 │   │   ├── stores/                 # Zustand 状态管理
+│   │   │   ├── authStore.ts        # 认证状态
+│   │   │   ├── classStore.ts       # 班级管理
+│   │   │   ├── homeworkStore.ts    # 作业管理
+│   │   │   ├── resourceStore.ts    # 资源中心
+│   │   │   ├── caseStore.ts        # 案例库
+│   │   │   ├── chatStore.ts        # AI 聊天
+│   │   │   ├── courseStore.ts       # 课程信息
+│   │   │   ├── groupStore.ts       # 作业分组
+│   │   │   ├── peerReviewStore.ts  # 同行互评
+│   │   │   ├── analyticsStore.ts   # 数据分析
+│   │   │   ├── behaviorStore.ts    # 行为分析
+│   │   │   ├── dashboardStore.ts   # 仪表盘
+│   │   │   ├── teacherStore.ts     # 教师数据
+│   │   │   └── classPerformanceStore.ts # 平时表现
 │   │   ├── hooks/                  # 自定义 Hooks
 │   │   ├── lib/                    # API 客户端 (Axios)、工具函数
 │   │   └── types/                  # TypeScript 类型定义
@@ -99,30 +121,43 @@ smart-learn/
 ├── backend/                        # 后端 Express 应用
 │   ├── src/
 │   │   ├── index.ts                # 入口 + 路由注册
-│   │   ├── routes/                 # API 路由 (auth, class, homework, resource, case, ai, analytics, dashboard)
+│   │   ├── routes/                 # API 路由
+│   │   │   ├── auth.ts             # 认证
+│   │   │   ├── class.ts            # 班级管理
+│   │   │   ├── homework.ts         # 作业管理
+│   │   │   ├── resource.ts         # 资源中心
+│   │   │   ├── case.ts             # 案例库
+│   │   │   ├── course.ts           # 课程信息
+│   │   │   ├── ai.ts               # AI 助手
+│   │   │   ├── analytics.ts        # 数据分析
+│   │   │   ├── dashboard.ts        # 仪表盘
+│   │   │   ├── behavior.ts         # 行为数据
+│   │   │   ├── group.ts            # 作业分组
+│   │   │   ├── peerReview.ts       # 同行互评
+│   │   │   ├── classPerformance.ts # 平时表现
+│   │   │   └── public.ts           # 公共路由
 │   │   ├── middleware/             # JWT 认证、文件上传、限流
-│   │   ├── services/               # 业务服务 (作业提醒 cron)
+│   │   ├── services/
+│   │   │   └── storage/            # MinIO / S3 存储服务
 │   │   └── utils/                  # 工具 (JWT, 邮件)
 │   ├── prisma/schema.prisma        # 数据库模型定义
-│   ├── uploads/                    # 上传文件目录
 │   └── .env.example                # 环境变量示例
 ├── e2e/                            # E2E 自动化测试 (Playwright)
 │   ├── tests/
-│   │   ├── auth.spec.ts            # 认证模块测试 (登录/注册/权限/登出)
-│   │   ├── student.spec.ts         # 学生端测试 (仪表盘/作业/资源/AI/设置)
-│   │   ├── teacher.spec.ts         # 教师端测试 (仪表盘/班级/作业/分析)
-│   │   ├── teacher-intervention.spec.ts  # 干预控制台深度交互测试
-│   │   ├── student-homework.spec.ts      # 学生作业深度交互 + 文件上传测试
-│   │   ├── routing.spec.ts         # 路由、重定向、404 测试
+│   │   ├── auth.spec.ts            # 认证模块测试
+│   │   ├── student.spec.ts         # 学生端测试
+│   │   ├── teacher.spec.ts         # 教师端测试
+│   │   ├── teacher-intervention.spec.ts  # 干预控制台测试
+│   │   ├── student-homework.spec.ts      # 学生作业测试
+│   │   ├── routing.spec.ts         # 路由测试
 │   │   ├── mobile.spec.ts          # 移动端适配测试
-│   │   ├── fixtures.spec.ts        # 测试 Fixture 验证
-│   │   └── helpers/
-│   │       └── generate-fixtures.ts  # PDF/Notebook 测试文件生成
-│   ├── fixtures/                   # 生成的测试文件
+│   │   └── fixtures.spec.ts        # 测试 Fixture 验证
 │   └── playwright.config.ts
 ├── scripts/
 │   ├── start-dev.sh                # 开发环境一键启动
-│   └── start-prod.sh               # 生产环境启动
+│   ├── start-prod.sh               # 生产环境启动
+│   └── reset-db.sh                 # 数据库重置
+├── static-ui/                      # 静态 UI 设计稿
 ├── DEPLOY.md                       # 部署文档
 ├── LICENSE
 └── README.md
@@ -134,6 +169,7 @@ smart-learn/
 
 - **Node.js** 20.x+
 - **PostgreSQL** 15+
+- **MinIO**（可选，不配置则使用本地文件存储回退）
 - **npm**
 
 ### 方式一：一键启动（推荐）
@@ -221,6 +257,8 @@ SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=""
 SMTP_PASS=""
+SMTP_FROM_NAME="智慧教育AI平台"
+SMTP_FROM_EMAIL="noreply@edu-platform.com"
 
 # 服务器
 PORT=3001
@@ -230,6 +268,12 @@ FRONTEND_URL="http://localhost:5173"
 # AI (可选，不配置则 AI 助手不可用)
 AI_BASE_URL="https://api.openai.com"
 AI_API_KEY=""
+
+# MinIO / S3 对象存储 (可选，不配置则使用本地文件存储)
+S3_ENDPOINT="http://127.0.0.1:9000"
+S3_ACCESS_KEY="minioadmin"
+S3_SECRET_KEY="minioadmin"
+S3_BUCKET_NAME="smart-learn"
 ```
 
 ## 🔗 API 端点总览
@@ -238,19 +282,23 @@ AI_API_KEY=""
 |------|------|------|
 | `/api/auth` | 认证（注册/登录/密码重置/个人资料/偏好/头像/注销） | 部分需要 |
 | `/api/classes` | 班级管理 | 需要 |
-| `/api/homeworks` | 作业管理 | 需要 |
-| `/api/resources` | 资源中心 | 列表公开，CRUD 需教师 |
-| `/api/cases` | 案例库 | 列表公开，CRUD 需教师 |
+| `/api/homeworks` | 作业管理（发布/批改/导出/AI辅助批改） | 需要 |
+| `/api/resources` | 资源中心（浏览/收藏/评论） | 列表公开，CRUD 需教师 |
+| `/api/cases` | 案例库（浏览/收藏/评分/评论） | 列表公开，CRUD 需教师 |
+| `/api/courses` | 课程信息 | 需要 |
 | `/api/ai` | AI 助手（聊天/历史/删除） | 需要 |
 | `/api/analytics` | 数据分析 | 需要 |
 | `/api/dashboard` | 仪表盘聚合 | 需要 |
 | `/api/behavior` | 学生行为数据 | 需要 |
-| `/api/courses` | 课程信息 | 需要 |
+| `/api/groups` | 作业分组管理 | 需要 |
+| `/api/peer-reviews` | 同行互评 | 需要 |
+| `/api/class-performance` | 平时表现管理 | 需要 |
+| `/api/public` | 公共数据接口 | 无 |
 | `/api/health` | 健康检查 | 无 |
 
 ## ⚠️ 已知限制
 
-- 文件上传仅支持 PDF 和 IPYNB 格式，存储在本地 `uploads/` 目录，无对象存储集成
+- 文件上传支持 PDF 和 IPYNB 格式，通过 MinIO（S3 兼容）对象存储管理
 - AI 助手需配置外部 OpenAI 兼容 API（支持自定义 `AI_BASE_URL`）
 - 邮件提醒需配置 SMTP 服务
 

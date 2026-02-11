@@ -108,6 +108,15 @@ export function HomeworkManagementPage() {
   const [editDeadline, setEditDeadline] = useState('');
   const [editMaxScore, setEditMaxScore] = useState('100');
   const [editAllowLate, setEditAllowLate] = useState(false);
+  // 编辑 - 小组作业配置
+  const [editGroupMinSize, setEditGroupMinSize] = useState('2');
+  const [editGroupMaxSize, setEditGroupMaxSize] = useState('6');
+  const [editGroupDeadline, setEditGroupDeadline] = useState('');
+  const [editReviewersCount, setEditReviewersCount] = useState('3');
+  const [editReviewDeadline, setEditReviewDeadline] = useState('');
+  // 编辑 - 自主实践配置
+  const [editBonusCap, setEditBonusCap] = useState('10');
+  const [editCountLimit, setEditCountLimit] = useState('5');
 
   // 批改状态
   const [gradeScore, setGradeScore] = useState('');
@@ -386,21 +395,88 @@ export function HomeworkManagementPage() {
     setEditDeadline(toLocalDatetimeString(homework.deadline));
     setEditMaxScore(homework.maxScore.toString());
     setEditAllowLate(homework.allowLate);
+
+    // 解析小组作业配置
+    if (homework.type === 'GROUP_PROJECT' && homework.groupConfig) {
+      try {
+        const gc = typeof homework.groupConfig === 'string' ? JSON.parse(homework.groupConfig) : homework.groupConfig;
+        setEditGroupMinSize(gc.minSize?.toString() || '2');
+        setEditGroupMaxSize(gc.maxSize?.toString() || '6');
+        setEditGroupDeadline(gc.groupDeadline ? toLocalDatetimeString(gc.groupDeadline) : '');
+      } catch { setEditGroupMinSize('2'); setEditGroupMaxSize('6'); setEditGroupDeadline(''); }
+      try {
+        const pr = typeof homework.peerReviewConfig === 'string' ? JSON.parse(homework.peerReviewConfig) : homework.peerReviewConfig;
+        setEditReviewersCount(pr?.reviewersPerSubmission?.toString() || '3');
+        setEditReviewDeadline(pr?.reviewDeadline ? toLocalDatetimeString(pr.reviewDeadline) : '');
+      } catch { setEditReviewersCount('3'); setEditReviewDeadline(''); }
+    }
+
+    // 解析自主实践配置
+    if (homework.type === 'SELF_PRACTICE' && homework.selfPracticeConfig) {
+      try {
+        const sp = typeof homework.selfPracticeConfig === 'string' ? JSON.parse(homework.selfPracticeConfig) : homework.selfPracticeConfig;
+        setEditBonusCap(sp.bonusCap?.toString() || '10');
+        setEditCountLimit(sp.countLimit?.toString() || '5');
+      } catch { setEditBonusCap('10'); setEditCountLimit('5'); }
+    }
+
     setIsEditDialogOpen(true);
   };
 
   const handleEditHomework = async () => {
     if (!editingHomework || !editTitle.trim() || !editDeadline) return;
 
+    if (editingHomework.type === 'GROUP_PROJECT') {
+      const min = parseInt(editGroupMinSize) || 2;
+      const max = parseInt(editGroupMaxSize) || 6;
+      if (min > max) {
+        toast.error('小组最小人数不能大于最大人数');
+        return;
+      }
+    }
+
     try {
-      await updateHomework(editingHomework.id, {
+      const updateData: Partial<CreateHomeworkData> = {
         title: editTitle,
         description: editDescription,
         startTime: editStartTime ? new Date(editStartTime).toISOString() : undefined,
         deadline: new Date(editDeadline).toISOString(),
         maxScore: parseInt(editMaxScore) || 100,
         allowLate: editAllowLate,
-      });
+      };
+
+      if (editingHomework.type === 'GROUP_PROJECT') {
+        updateData.groupConfig = {
+          groupRequired: true,
+          minSize: parseInt(editGroupMinSize) || 2,
+          maxSize: parseInt(editGroupMaxSize) || 6,
+          groupDeadline: editGroupDeadline ? new Date(editGroupDeadline).toISOString() : undefined,
+          allowSwitch: true,
+          allowTeacherAssign: true,
+          ungroupedPolicy: 'TEACHER_ASSIGN',
+          scoringModel: 'BASE_PLUS_ADJUST',
+        };
+        updateData.peerReviewConfig = {
+          reviewersPerSubmission: parseInt(editReviewersCount) || 3,
+          reviewDeadline: editReviewDeadline ? new Date(editReviewDeadline).toISOString() : undefined,
+          penaltyLevel: 'MEDIUM',
+          anonymousMode: 'DOUBLE_BLIND',
+          minReviewsRequired: parseInt(editReviewersCount) || 3,
+          coverageStrategy: 'AUTO_SUPPLEMENT',
+        };
+      }
+
+      if (editingHomework.type === 'SELF_PRACTICE') {
+        updateData.selfPracticeConfig = {
+          bonusCap: parseInt(editBonusCap) || 10,
+          countLimit: parseInt(editCountLimit) || 5,
+          qualityThreshold: 60,
+          scoringStrategy: 'BONUS',
+          antiCheatRules: ['每日提交上限3次', '需通过质量门槛审查', '教师可抽检'],
+        };
+      }
+
+      await updateHomework(editingHomework.id, updateData);
 
       setIsEditDialogOpen(false);
       setEditingHomework(null);
@@ -1232,6 +1308,53 @@ export function HomeworkManagementPage() {
               />
               <label htmlFor="editAllowLate" className="text-sm">允许迟交</label>
             </div>
+
+            {editingHomework?.type === 'GROUP_PROJECT' && (
+              <div className="p-3 bg-blue-50 rounded-lg space-y-3">
+                <p className="text-sm font-medium text-blue-700">项目小组配置</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-600">最小人数</label>
+                    <Input type="number" value={editGroupMinSize} onChange={(e) => setEditGroupMinSize(e.target.value)} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-600">最大人数</label>
+                    <Input type="number" value={editGroupMaxSize} onChange={(e) => setEditGroupMaxSize(e.target.value)} />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-gray-600">组队截止时间</label>
+                  <Input type="datetime-local" value={editGroupDeadline} onChange={(e) => setEditGroupDeadline(e.target.value)} />
+                </div>
+                <p className="text-sm font-medium text-blue-700 mt-2">互评配置</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-600">每份作业评审人数</label>
+                    <Input type="number" value={editReviewersCount} onChange={(e) => setEditReviewersCount(e.target.value)} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-600">互评截止时间</label>
+                    <Input type="datetime-local" value={editReviewDeadline} onChange={(e) => setEditReviewDeadline(e.target.value)} />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {editingHomework?.type === 'SELF_PRACTICE' && (
+              <div className="p-3 bg-green-50 rounded-lg space-y-3">
+                <p className="text-sm font-medium text-green-700">自主实践配置</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-600">加分上限</label>
+                    <Input type="number" value={editBonusCap} onChange={(e) => setEditBonusCap(e.target.value)} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-gray-600">提交次数上限</label>
+                    <Input type="number" value={editCountLimit} onChange={(e) => setEditCountLimit(e.target.value)} />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {editingHomework && (editingHomework._count?.submissions ?? 0) > 0 && (
               <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded">

@@ -353,16 +353,16 @@ router.get('/student/radar', authenticate, requireStudent, async (req, res) => {
     const scoredSubmissions = allSubmissions.filter(s => s.score !== null);
 
     // ===== 1) 知识掌握: 近期加权得分率 =====
-    // 按时间排序, 越新的作业权重越高 (线性递增权重)
+    // 按截止日期升序排序, 索引越大=越新的作业, 权重越高 (线性递增)
     let knowledgeScore = 0;
     if (scoredSubmissions.length > 0) {
-      const sorted = [...scoredSubmissions].sort(
+      const submissionsByDeadline = [...scoredSubmissions].sort(
         (a, b) => new Date(a.homework.deadline).getTime() - new Date(b.homework.deadline).getTime()
       );
       let weightSum = 0;
       let weightedScore = 0;
-      sorted.forEach((s, i) => {
-        const weight = 1 + i * 0.5; // later homework gets more weight
+      submissionsByDeadline.forEach((s, i) => {
+        const weight = 1 + i * 0.5;
         const pct = s.homework.maxScore > 0 ? ((s.score ?? 0) / s.homework.maxScore) * 100 : 0;
         weightedScore += pct * weight;
         weightSum += weight;

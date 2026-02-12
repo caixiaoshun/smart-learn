@@ -458,6 +458,7 @@ export function AnalyticsPage() {
                 <YAxis domain={[0, 100]} />
                 <Tooltip />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
+                {/* Limit to 10 students to maintain chart readability and color distinction */}
                 {studentTrends.studentNames.slice(0, 10).map((name, i) => {
                   const areaColors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316', '#ec4899', '#14b8a6', '#6366f1'];
                   return (

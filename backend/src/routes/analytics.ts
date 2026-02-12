@@ -674,9 +674,7 @@ router.get('/class/:classId/engagement-bubble', authenticate, requireTeacher, as
     if (!classData) return res.status(404).json({ error: '班级不存在' });
 
     const studentIds = classData.students.map(cs => cs.studentId);
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now);
-    thirtyDaysAgo.setDate(now.getDate() - 30);
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
     const behaviorLogs = await prisma.behaviorLog.findMany({
       where: { studentId: { in: studentIds }, createdAt: { gte: thirtyDaysAgo } },
@@ -830,11 +828,9 @@ router.get('/class/:classId/competency-keywords', authenticate, requireTeacher, 
     const groupMemberCount = await prisma.assignmentGroupMember.count({ where: { studentId: { in: studentIds } } });
 
     // Behavior logs
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now);
-    thirtyDaysAgo.setDate(now.getDate() - 30);
+    const thirtyDaysAgoKw = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const behaviorLogs = await prisma.behaviorLog.findMany({
-      where: { studentId: { in: studentIds }, createdAt: { gte: thirtyDaysAgo } },
+      where: { studentId: { in: studentIds }, createdAt: { gte: thirtyDaysAgoKw } },
       select: { type: true, duration: true },
     });
 
@@ -865,9 +861,15 @@ router.get('/class/:classId/competency-keywords', authenticate, requireTeacher, 
       { name: '案例学习', value: Math.min(100, Math.round(caseViews / Math.max(studentCount, 1) * 10)) },
       { name: 'AI互动', value: Math.min(100, Math.round(aiChats / Math.max(studentCount, 1) * 10)) },
       { name: '学习活跃度', value: Math.min(100, Math.round(totalActivity / Math.max(studentCount, 1) / 60)) },
-      { name: '成绩优秀率', value: totalScored > 0 ? Math.round((totalScore / totalMaxScore) * 100 >= 90 ? 100 : (totalScore / totalMaxScore) * 100) : 0 },
+      { name: '成绩优秀率', value: (() => {
+        const rate = totalMaxScore > 0 ? Math.round((totalScore / totalMaxScore) * 100) : 0;
+        return rate >= 90 ? 100 : rate;
+      })() },
       { name: '自主学习', value: Math.min(100, Math.round((resourceViews + caseViews + aiChats) / Math.max(studentCount, 1) * 8)) },
-      { name: '迟交管理', value: lateCount > 0 ? Math.max(10, 100 - Math.round(lateCount / Math.max(totalSubmissions, 1) * 100)) : submissionRate > 0 ? 90 : 0 },
+      { name: '迟交管理', value: (() => {
+        if (lateCount > 0) return Math.max(10, 100 - Math.round(lateCount / Math.max(totalSubmissions, 1) * 100));
+        return submissionRate > 0 ? 90 : 0;
+      })() },
     ];
 
     res.json({ keywords });

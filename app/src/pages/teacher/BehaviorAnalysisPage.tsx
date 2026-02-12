@@ -88,7 +88,7 @@ export function BehaviorAnalysisPage() {
     if (student.quizAvg < 60) parts.push(`测验均分仅${student.quizAvg}%，建议加强知识点复习`);
     if (student.codingHours < 1) parts.push('近期编程实践时长不足，请增加动手练习');
     if (student.discussionPosts < 3) parts.push('课程讨论参与较少，建议多与同学和AI助手交流');
-    if (parts.length === 0) parts.push('请继续保持良好的学习状态');
+    if (parts.length === 0) return `${student.studentName}同学，请继续保持良好的学习状态，期待你更优异的表现！`;
     return `${student.studentName}同学，${parts.join('；')}。请及时调整学习计划并联系任课教师获得支持。`;
   };
 

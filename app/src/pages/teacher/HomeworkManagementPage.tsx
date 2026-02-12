@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useHomeworkStore, type Homework, type Submission, type CreateHomeworkData, type GroupMember, type ScoreAdjustment } from '@/stores/homeworkStore';
+import { useHomeworkStore, type Homework, type Submission, type CreateHomeworkData, type GroupMember, type ScoreAdjustment, type LaborDivisionItem, type HomeworkSelfAssessment } from '@/stores/homeworkStore';
 import { useClassStore } from '@/stores/classStore';
 import { useGroupStore } from '@/stores/groupStore';
 import { toast } from 'sonner';
@@ -39,6 +39,7 @@ import {
   Target,
   Crown,
   User,
+  ClipboardList,
 } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Label } from '@/components/ui/label';
@@ -1303,6 +1304,10 @@ export function HomeworkManagementPage() {
                       </div>
                       {selectedSubmission.group.members.map((member) => {
                         const isLeader = member.role === 'LEADER';
+                        const laborItem = Array.isArray(selectedSubmission.laborDivision)
+                          ? selectedSubmission.laborDivision.find((d: LaborDivisionItem) => d.memberId === member.studentId)
+                          : null;
+                        const selfAssessment = selectedHomework?.selfAssessments?.find(sa => sa.studentId === member.studentId);
                         return (
                           <div key={member.studentId} className={`p-3 rounded-lg border transition-colors ${isLeader ? 'bg-amber-50/60 border-amber-200' : 'bg-gray-50 border-gray-200'}`}>
                             <div className="flex items-center gap-2.5 mb-2">
@@ -1337,6 +1342,35 @@ export function HomeworkManagementPage() {
                                 className="w-20 h-8 text-sm text-center"
                               />
                             </div>
+                            {/* 成员贡献信息 */}
+                            {(laborItem || selfAssessment) && (
+                              <div className="bg-white/80 dark:bg-slate-800/50 p-2.5 rounded-md mb-1.5 space-y-1.5 border border-gray-100">
+                                {laborItem && (
+                                  <div>
+                                    <div className="flex items-center gap-1 mb-1">
+                                      <ClipboardList className="w-3 h-3 text-blue-500" />
+                                      <span className="text-[10px] font-medium text-gray-500">分工说明</span>
+                                      {laborItem.contributionPercent > 0 && (
+                                        <Badge variant="outline" className="text-[10px] px-1 py-0 ml-auto">
+                                          贡献 {laborItem.contributionPercent}%
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-gray-700 line-clamp-2">{laborItem.task}{laborItem.description ? ` — ${laborItem.description}` : ''}</p>
+                                  </div>
+                                )}
+                                {selfAssessment && (
+                                  <div>
+                                    <div className="flex items-center gap-1 mb-1">
+                                      <Star className="w-3 h-3 text-amber-500" />
+                                      <span className="text-[10px] font-medium text-gray-500">自评</span>
+                                      <span className="text-[10px] font-bold text-amber-600 ml-auto">{selfAssessment.score}分</span>
+                                    </div>
+                                    <p className="text-xs text-gray-700 line-clamp-2">{selfAssessment.description}</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                             {/* 个人评语（可选，折叠展示） */}
                             <Input
                               value={groupMemberFeedbacks[member.studentId] || ''}

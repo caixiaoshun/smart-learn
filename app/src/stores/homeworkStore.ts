@@ -13,6 +13,21 @@ function triggerBlobDownload(blob: Blob, filename: string) {
   document.body.removeChild(a);
 }
 
+export interface HomeworkSelfAssessment {
+  id: string;
+  homeworkId: string;
+  studentId: string;
+  score: number;
+  description: string;
+  student?: {
+    id: string;
+    name: string;
+    email: string;
+    avatar: string | null;
+  };
+  createdAt: string;
+}
+
 export interface Homework {
   id: string;
   title: string;
@@ -38,6 +53,7 @@ export interface Homework {
     submissions: number;
   };
   submissions?: Submission[];
+  selfAssessments?: HomeworkSelfAssessment[];
 }
 
 export interface ScoreAdjustment {
@@ -76,13 +92,21 @@ export interface SubmissionGroup {
   members: GroupMember[];
 }
 
+export interface LaborDivisionItem {
+  memberId: string;
+  memberName: string;
+  task: string;
+  contributionPercent: number;
+  description?: string;
+}
+
 export interface Submission {
   id: string;
   studentId: string;
   homeworkId: string;
   groupId?: string | null;
   files: string[];
-  laborDivision?: string | null;
+  laborDivision?: LaborDivisionItem[] | null;
   score: number | null;
   feedback: string | null;
   submittedAt: string;

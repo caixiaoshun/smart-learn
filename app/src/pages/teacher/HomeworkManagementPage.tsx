@@ -47,6 +47,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { NotebookPreview } from '@/components/NotebookPreview';
 
+interface LaborDivisionEntry {
+  memberId?: string;
+  memberName?: string;
+  task?: string;
+  contributionPercent?: number;
+  description?: string;
+}
+
+function parseLaborDivision(raw: string | null | undefined): LaborDivisionEntry[] {
+  if (!raw) return [];
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function getFileName(filePath: string): string {
   return filePath.split('/').pop() || filePath;
 }
@@ -1277,13 +1295,7 @@ export function HomeworkManagementPage() {
 
                   {/* 小组分工说明（仅小组提交且存在分工数据时显示） */}
                   {selectedSubmission?.groupId && selectedSubmission?.laborDivision && (() => {
-                    let divisionItems: { memberId?: string; memberName?: string; task?: string; contributionPercent?: number; description?: string }[] = [];
-                    try {
-                      const parsed = typeof selectedSubmission.laborDivision === 'string'
-                        ? JSON.parse(selectedSubmission.laborDivision)
-                        : selectedSubmission.laborDivision;
-                      if (Array.isArray(parsed)) divisionItems = parsed;
-                    } catch { /* ignore parse error */ }
+                    const divisionItems = parseLaborDivision(selectedSubmission.laborDivision);
                     if (divisionItems.length === 0) return null;
                     return (
                       <div className="p-3 bg-blue-50/70 rounded-lg border border-blue-100 space-y-2">
@@ -1293,7 +1305,7 @@ export function HomeworkManagementPage() {
                         </div>
                         {divisionItems.map((item, idx) => (
                           <div key={idx} className="flex items-start gap-2 text-xs text-blue-700">
-                            <span className="font-medium shrink-0">{item.memberName || '成员'}:</span>
+                            <span className="font-medium shrink-0">{item.memberName || '未知成员'}:</span>
                             <span className="flex-1">{item.task || '-'}{item.description ? ` — ${item.description}` : ''}</span>
                             {item.contributionPercent != null && (
                               <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
@@ -1334,17 +1346,8 @@ export function HomeworkManagementPage() {
                       </div>
                       {selectedSubmission.group.members.map((member) => {
                         const isLeader = member.role === 'LEADER';
-                        let memberDivision: { task?: string; contributionPercent?: number; description?: string } | undefined;
-                        if (selectedSubmission.laborDivision) {
-                          try {
-                            const parsed = typeof selectedSubmission.laborDivision === 'string'
-                              ? JSON.parse(selectedSubmission.laborDivision)
-                              : selectedSubmission.laborDivision;
-                            if (Array.isArray(parsed)) {
-                              memberDivision = parsed.find((d: { memberId?: string }) => d.memberId === member.studentId);
-                            }
-                          } catch { /* ignore */ }
-                        }
+                        const divisionItems = parseLaborDivision(selectedSubmission.laborDivision);
+                        const memberDivision = divisionItems.find(d => d.memberId === member.studentId);
                         return (
                           <div key={member.studentId} className={`p-3 rounded-lg border transition-colors ${isLeader ? 'bg-amber-50/60 border-amber-200' : 'bg-gray-50 border-gray-200'}`}>
                             <div className="flex items-center gap-2.5 mb-2">

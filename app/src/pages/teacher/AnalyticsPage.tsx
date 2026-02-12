@@ -31,7 +31,8 @@ export function AnalyticsPage() {
 
   const [selectedClassId, setSelectedClassId] = useState('');
   const [selectedHomeworkId, setSelectedHomeworkId] = useState('');
-  const [activeTab, setActiveTab] = useState<TabKey>((searchParams.get('tab') as TabKey) || 'overview');
+  const initialTab = TAB_KEYS.includes(searchParams.get('tab') as TabKey) ? (searchParams.get('tab') as TabKey) : 'overview';
+  const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
   const [loadedTabs, setLoadedTabs] = useState<Set<string>>(new Set(['overview']));
   const [aiReport, setAiReport] = useState<AIReport | null>(null);
   const [trendCompare, setTrendCompare] = useState<Array<{ homeworkTitle: string; averagePercentage: number }>>([]);
@@ -42,24 +43,28 @@ export function AnalyticsPage() {
 
   const loadTabData = useCallback(async (tab: string, classId: string, hwId?: string) => {
     if (!classId) return;
-    switch (tab) {
-      case 'overview':
-        await Promise.all([store.fetchComprehensiveStats(classId), store.fetchGradeComposition(classId), store.fetchIndicatorRadar(classId), store.fetchClassOverview(classId)]);
-        break;
-      case 'homework': {
-        const trendRes = await api.get(`/analytics/class/${classId}/trend-compare`);
-        setTrendCompare((trendRes.data.trend || []).map((t: any) => ({ homeworkTitle: t.homeworkTitle, averagePercentage: t.averagePercentage })));
-        if (hwId) {
-          const groupRes = await api.get(`/analytics/homework/${hwId}/group-compare`);
-          setGroupCompare((groupRes.data.groups || []).map((g: any) => ({ groupName: g.groupName, averagePercentage: g.averagePercentage })));
+    try {
+      switch (tab) {
+        case 'overview':
+          await Promise.all([store.fetchComprehensiveStats(classId), store.fetchGradeComposition(classId), store.fetchIndicatorRadar(classId), store.fetchClassOverview(classId)]);
+          break;
+        case 'homework': {
+          const trendRes = await api.get(`/analytics/class/${classId}/trend-compare`);
+          setTrendCompare((trendRes.data.trend || []).map((t: any) => ({ homeworkTitle: t.homeworkTitle, averagePercentage: t.averagePercentage })));
+          if (hwId) {
+            const groupRes = await api.get(`/analytics/homework/${hwId}/group-compare`);
+            setGroupCompare((groupRes.data.groups || []).map((g: any) => ({ groupName: g.groupName, averagePercentage: g.averagePercentage })));
+          }
+          break;
         }
-        break;
+        case 'students':
+          await Promise.all([store.fetchStudentClusters(classId, clusterMethod, clusterK), store.fetchPerformanceScatter(classId), store.fetchPerformanceHeatmap(classId)]);
+          break;
+        case 'evaluation': await store.fetchPeerReviewStats(classId); break;
+        case 'ai': { const r = await api.get(`/analytics/class/${classId}/ai-report`); setAiReport(r.data.report || null); break; }
       }
-      case 'students':
-        await Promise.all([store.fetchStudentClusters(classId, clusterMethod, clusterK), store.fetchPerformanceScatter(classId), store.fetchPerformanceHeatmap(classId)]);
-        break;
-      case 'evaluation': await store.fetchPeerReviewStats(classId); break;
-      case 'ai': { const r = await api.get(`/analytics/class/${classId}/ai-report`); setAiReport(r.data.report || null); break; }
+    } catch (err) {
+      console.error(`加载 ${tab} 数据失败:`, err);
     }
   }, [store, clusterMethod, clusterK]);
 
@@ -73,7 +78,8 @@ export function AnalyticsPage() {
     store.fetchClassHomeworkStats(selectedClassId);
     const initial = new Set([activeTab]);
     setLoadedTabs(initial);
-    loadTabData(activeTab, selectedClassId, selectedHomeworkId);
+    setSelectedHomeworkId('');
+    loadTabData(activeTab, selectedClassId);
   }, [selectedClassId]);
 
   const handleTabChange = (tab: string) => {
@@ -93,6 +99,18 @@ export function AnalyticsPage() {
   };
 
   const homeworkOptions = useMemo(() => store.homeworkStats.map((h) => ({ id: h.id, title: h.title })), [store.homeworkStats]);
+
+  const handleClusterMethodChange = (m: 'threshold' | 'kmeans') => {
+    setClusterMethod(m);
+    if (selectedClassId) store.fetchStudentClusters(selectedClassId, m, clusterK);
+  };
+  const handleClusterKChange = (k: number) => {
+    setClusterK(k);
+    if (selectedClassId) store.fetchStudentClusters(selectedClassId, 'kmeans', k);
+  };
+  const handleStudentClick = (sid: string) => {
+    if (selectedClassId) { store.fetchStudentProfile(selectedClassId, sid); setProfileDialogOpen(true); }
+  };
 
   return (
     <div className="space-y-6">
@@ -128,7 +146,7 @@ export function AnalyticsPage() {
           <HomeworkAnalyticsTab homeworkStats={store.homeworkStats} scoreDistribution={store.scoreDistribution} comprehensiveStats={store.comprehensiveStats} trendCompare={trendCompare} groupCompare={groupCompare} />
         </TabsContent>
         <TabsContent value="students">
-          <StudentProfilesTab studentClusters={store.studentClusters} scatterData={store.scatterData} heatmapData={store.heatmapData} clusterMethod={clusterMethod} clusterK={clusterK} onClusterMethodChange={(m) => { setClusterMethod(m); if (selectedClassId) store.fetchStudentClusters(selectedClassId, m, clusterK); }} onClusterKChange={(k) => { setClusterK(k); if (selectedClassId) store.fetchStudentClusters(selectedClassId, 'kmeans', k); }} onStudentClick={(sid) => { if (selectedClassId) { store.fetchStudentProfile(selectedClassId, sid); setProfileDialogOpen(true); } }} />
+          <StudentProfilesTab studentClusters={store.studentClusters} scatterData={store.scatterData} heatmapData={store.heatmapData} clusterMethod={clusterMethod} clusterK={clusterK} onClusterMethodChange={handleClusterMethodChange} onClusterKChange={handleClusterKChange} onStudentClick={handleStudentClick} />
         </TabsContent>
         <TabsContent value="evaluation">
           <EvaluationAnalyticsTab peerReviewStats={store.peerReviewStats} />

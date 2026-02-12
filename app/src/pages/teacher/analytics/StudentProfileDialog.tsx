@@ -2,17 +2,12 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { StudentProfile } from '@/stores/analyticsStore';
 import { User } from 'lucide-react';
+import { clusterBadge } from './clusterBadge';
 
 interface StudentProfileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   studentProfile: StudentProfile | null;
-}
-
-function clusterBadge(cluster: string) {
-  if (cluster === 'HIGH') return <Badge className="bg-green-100 text-green-700">优秀</Badge>;
-  if (cluster === 'MEDIUM') return <Badge className="bg-yellow-100 text-yellow-700">中等</Badge>;
-  return <Badge className="bg-red-100 text-red-700">待关注</Badge>;
 }
 
 export function StudentProfileDialog({ open, onOpenChange, studentProfile }: StudentProfileDialogProps) {

@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import type { StudentClusterItem, ClusterSummary, HeatmapData } from '@/stores/analyticsStore';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, CartesianGrid, XAxis, YAxis, ZAxis, ScatterChart, Scatter } from 'recharts';
 import { Users, Target, User } from 'lucide-react';
+import { clusterBadge } from './clusterBadge';
 
 interface StudentProfilesTabProps {
   studentClusters: {
@@ -19,12 +20,6 @@ interface StudentProfilesTabProps {
   onClusterMethodChange: (method: 'threshold' | 'kmeans') => void;
   onClusterKChange: (k: number) => void;
   onStudentClick: (studentId: string) => void;
-}
-
-function clusterBadge(cluster: string) {
-  if (cluster === 'HIGH') return <Badge className="bg-green-100 text-green-700">优秀</Badge>;
-  if (cluster === 'MEDIUM') return <Badge className="bg-yellow-100 text-yellow-700">中等</Badge>;
-  return <Badge className="bg-red-100 text-red-700">待关注</Badge>;
 }
 
 export function StudentProfilesTab({ studentClusters, scatterData, heatmapData, clusterMethod, clusterK, onClusterMethodChange, onClusterKChange, onStudentClick }: StudentProfilesTabProps) {

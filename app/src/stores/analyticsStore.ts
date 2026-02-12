@@ -102,6 +102,30 @@ export interface ClassOverview {
   }[];
 }
 
+export interface ScoreHeatmapData {
+  homeworks: { id: string; title: string }[];
+  students: { id: string; name: string; scores: (number | null)[] }[];
+}
+
+export interface EngagementBubble {
+  name: string;
+  studentId: string;
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface StudentTrendsData {
+  homeworks: { id: string; title: string }[];
+  trendData: Record<string, string | number>[];
+  studentNames: string[];
+}
+
+export interface CompetencyKeyword {
+  name: string;
+  value: number;
+}
+
 interface AnalyticsState {
   homeworkStats: HomeworkStats[];
   scoreDistribution: ScoreDistribution[] | null;
@@ -110,6 +134,10 @@ interface AnalyticsState {
   studentClusters: { clusters: { HIGH: StudentClusterItem[]; MEDIUM: StudentClusterItem[]; AT_RISK: StudentClusterItem[] }; summary: ClusterSummary; totalStudents: number } | null;
   scatterData: { points: ScatterPoint[]; xLabel: string; yLabel: string } | null;
   comprehensiveStats: ComprehensiveStats | null;
+  scoreHeatmap: ScoreHeatmapData | null;
+  engagementBubbles: { bubbles: EngagementBubble[]; xLabel: string; yLabel: string; zLabel: string } | null;
+  studentTrends: StudentTrendsData | null;
+  competencyKeywords: CompetencyKeyword[] | null;
   isLoading: boolean;
   
   // 教师方法
@@ -119,6 +147,10 @@ interface AnalyticsState {
   fetchStudentClusters: (classId: string) => Promise<void>;
   fetchPerformanceScatter: (classId: string) => Promise<void>;
   fetchComprehensiveStats: (classId: string) => Promise<void>;
+  fetchScoreHeatmap: (classId: string) => Promise<void>;
+  fetchEngagementBubbles: (classId: string) => Promise<void>;
+  fetchStudentTrends: (classId: string) => Promise<void>;
+  fetchCompetencyKeywords: (classId: string) => Promise<void>;
   
   // 学生方法
   fetchStudentGradeTrend: () => Promise<void>;
@@ -133,6 +165,10 @@ export const useAnalyticsStore = create<AnalyticsState>((set) => ({
   studentClusters: null,
   scatterData: null,
   comprehensiveStats: null,
+  scoreHeatmap: null,
+  engagementBubbles: null,
+  studentTrends: null,
+  competencyKeywords: null,
   isLoading: false,
 
   // 获取班级作业统计
@@ -195,6 +231,46 @@ export const useAnalyticsStore = create<AnalyticsState>((set) => ({
       set({ comprehensiveStats: data });
     } catch (error) {
       console.error('获取综合成绩统计失败:', error);
+    }
+  },
+
+  // 获取成绩热力图
+  fetchScoreHeatmap: async (classId) => {
+    try {
+      const { data } = await api.get(`/analytics/class/${classId}/score-heatmap`);
+      set({ scoreHeatmap: data });
+    } catch (error) {
+      console.error('获取成绩热力图失败:', error);
+    }
+  },
+
+  // 获取学习参与度气泡图
+  fetchEngagementBubbles: async (classId) => {
+    try {
+      const { data } = await api.get(`/analytics/class/${classId}/engagement-bubble`);
+      set({ engagementBubbles: data });
+    } catch (error) {
+      console.error('获取学习参与度气泡图失败:', error);
+    }
+  },
+
+  // 获取多学生成绩趋势
+  fetchStudentTrends: async (classId) => {
+    try {
+      const { data } = await api.get(`/analytics/class/${classId}/student-trends`);
+      set({ studentTrends: data });
+    } catch (error) {
+      console.error('获取多学生成绩趋势失败:', error);
+    }
+  },
+
+  // 获取能力关键词词云
+  fetchCompetencyKeywords: async (classId) => {
+    try {
+      const { data } = await api.get(`/analytics/class/${classId}/competency-keywords`);
+      set({ competencyKeywords: data.keywords });
+    } catch (error) {
+      console.error('获取能力关键词失败:', error);
     }
   },
 

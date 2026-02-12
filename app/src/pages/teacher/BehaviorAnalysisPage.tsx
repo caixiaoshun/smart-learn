@@ -81,6 +81,17 @@ export function BehaviorAnalysisPage() {
     }
   };
 
+  const buildInterventionMessage = (student: typeof students[0]) => {
+    const parts: string[] = [];
+    if (student.behaviorScore < 50) parts.push(`您当前的学习行为评分为${student.behaviorScore.toFixed(1)}分，处于高风险区间`);
+    else if (student.behaviorScore < 80) parts.push(`您当前的学习行为评分为${student.behaviorScore.toFixed(1)}分，存在下滑趋势`);
+    if (student.quizAvg < 60) parts.push(`测验均分仅${student.quizAvg}%，建议加强知识点复习`);
+    if (student.codingHours < 1) parts.push('近期编程实践时长不足，请增加动手练习');
+    if (student.discussionPosts < 3) parts.push('课程讨论参与较少，建议多与同学和AI助手交流');
+    if (parts.length === 0) return `${student.studentName}同学，请继续保持良好的学习状态，期待你更优异的表现！`;
+    return `${student.studentName}同学，${parts.join('；')}。请及时调整学习计划并联系任课教师获得支持。`;
+  };
+
   const handleApplyIntervention = async () => {
     const target = students.find((s) => s.riskLevel === 'HIGH') || students[0];
     if (!target) {
@@ -90,7 +101,7 @@ export function BehaviorAnalysisPage() {
     setIsApplying(true);
     try {
       await api.post(`/behavior/teacher/interventions/${target.id}/remind`, {
-        message: `系统检测到您近期学习活跃度下降，请及时完成本周学习任务并联系任课教师获得支持。`,
+        message: buildInterventionMessage(target),
       });
       toast.success(`已向 ${target.studentName} 发送提醒`);
     } finally {

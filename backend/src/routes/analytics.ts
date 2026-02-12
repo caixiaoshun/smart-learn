@@ -4,6 +4,20 @@ import { authenticate, requireTeacher, requireStudent } from '../middleware/auth
 
 const router = Router();
 
+// Clustering composite score weights
+const CLUSTER_SCORE_WEIGHT = 0.5;
+const CLUSTER_SUBMISSION_WEIGHT = 0.3;
+const CLUSTER_ONTIME_WEIGHT = 0.2;
+
+// Score range boundaries for comprehensive stats
+const SCORE_RANGES = [
+  { label: '优秀 (90-100)', min: 90, max: 100, color: '#22c55e' },
+  { label: '良好 (80-89)', min: 80, max: 89, color: '#3b82f6' },
+  { label: '中等 (70-79)', min: 70, max: 79, color: '#f59e0b' },
+  { label: '及格 (60-69)', min: 60, max: 69, color: '#f97316' },
+  { label: '不及格 (<60)', min: 0, max: 59, color: '#ef4444' },
+] as const;
+
 async function ensureClassOwner(classId: string, teacherId: string) {
   const classData = await prisma.class.findUnique({ where: { id: classId } });
   if (!classData) return { ok: false, code: 404, error: '班级不存在' };
@@ -371,6 +385,239 @@ router.get('/student/:studentId/trend', authenticate, requireTeacher, async (req
   } catch (error) {
     console.error('获取学生成绩走势失败:', error);
     res.status(500).json({ error: '获取学生成绩走势失败' });
+  }
+});
+
+// 学生聚类分析 (inspired by EduAnalytics studentCluster)
+router.get('/class/:classId/student-clusters', authenticate, requireTeacher, async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const permission = await ensureClassOwner(classId, req.user!.userId);
+    if (!permission.ok) return rejectPermission(res, permission as { code: number; error: string });
+
+    const classData = await prisma.class.findUnique({
+      where: { id: classId },
+      include: {
+        students: { include: { student: { select: { id: true, name: true, email: true, avatar: true } } } },
+        homeworks: { include: { submissions: true } },
+      },
+    });
+
+    if (!classData) return res.status(404).json({ error: '班级不存在' });
+
+    const studentCount = classData.students.length;
+    const homeworkCount = classData.homeworks.length;
+
+    // Build per-student metrics
+    const studentMetrics = classData.students.map((cs) => {
+      let totalScore = 0;
+      let totalMaxScore = 0;
+      let submittedCount = 0;
+      let onTimeCount = 0;
+
+      for (const hw of classData.homeworks) {
+        const sub = hw.submissions.find((s) => s.studentId === cs.studentId);
+        if (sub) {
+          submittedCount++;
+          if (sub.score !== null) {
+            totalScore += sub.score;
+            totalMaxScore += hw.maxScore;
+          }
+          if (new Date(sub.submittedAt) <= new Date(hw.deadline)) {
+            onTimeCount++;
+          }
+        }
+      }
+
+      const avgScoreRate = totalMaxScore > 0 ? Math.round((totalScore / totalMaxScore) * 100) : 0;
+      const submissionRate = homeworkCount > 0 ? Math.round((submittedCount / homeworkCount) * 100) : 0;
+      const onTimeRate = submittedCount > 0 ? Math.round((onTimeCount / submittedCount) * 100) : 0;
+
+      // Simple clustering based on composite score
+      const composite = avgScoreRate * CLUSTER_SCORE_WEIGHT + submissionRate * CLUSTER_SUBMISSION_WEIGHT + onTimeRate * CLUSTER_ONTIME_WEIGHT;
+      let cluster: 'HIGH' | 'MEDIUM' | 'AT_RISK';
+      if (composite >= 80) cluster = 'HIGH';
+      else if (composite >= 50) cluster = 'MEDIUM';
+      else cluster = 'AT_RISK';
+
+      return {
+        student: cs.student,
+        avgScoreRate,
+        submissionRate,
+        onTimeRate,
+        composite: Math.round(composite),
+        cluster,
+      };
+    });
+
+    // Group by cluster
+    const clusters = {
+      HIGH: studentMetrics.filter((s) => s.cluster === 'HIGH'),
+      MEDIUM: studentMetrics.filter((s) => s.cluster === 'MEDIUM'),
+      AT_RISK: studentMetrics.filter((s) => s.cluster === 'AT_RISK'),
+    };
+
+    const clusterSummary = {
+      highCount: clusters.HIGH.length,
+      mediumCount: clusters.MEDIUM.length,
+      atRiskCount: clusters.AT_RISK.length,
+      highPercentage: studentCount > 0 ? Math.round((clusters.HIGH.length / studentCount) * 100) : 0,
+      mediumPercentage: studentCount > 0 ? Math.round((clusters.MEDIUM.length / studentCount) * 100) : 0,
+      atRiskPercentage: studentCount > 0 ? Math.round((clusters.AT_RISK.length / studentCount) * 100) : 0,
+    };
+
+    res.json({ clusters, summary: clusterSummary, totalStudents: studentCount });
+  } catch (error) {
+    console.error('获取学生聚类分析失败:', error);
+    res.status(500).json({ error: '获取学生聚类分析失败' });
+  }
+});
+
+// 学生表现二维散点图 (inspired by EduAnalytics studentPerformance2D)
+router.get('/class/:classId/performance-scatter', authenticate, requireTeacher, async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const permission = await ensureClassOwner(classId, req.user!.userId);
+    if (!permission.ok) return rejectPermission(res, permission as { code: number; error: string });
+
+    const classData = await prisma.class.findUnique({
+      where: { id: classId },
+      include: {
+        students: { include: { student: { select: { id: true, name: true } } } },
+        homeworks: { include: { submissions: true } },
+      },
+    });
+
+    if (!classData) return res.status(404).json({ error: '班级不存在' });
+
+    const homeworkCount = classData.homeworks.length;
+    const points = classData.students.map((cs) => {
+      let totalScore = 0;
+      let totalMaxScore = 0;
+      let submittedCount = 0;
+
+      for (const hw of classData.homeworks) {
+        const sub = hw.submissions.find((s) => s.studentId === cs.studentId);
+        if (sub) {
+          submittedCount++;
+          if (sub.score !== null) {
+            totalScore += sub.score;
+            totalMaxScore += hw.maxScore;
+          }
+        }
+      }
+
+      const avgScoreRate = totalMaxScore > 0 ? Math.round((totalScore / totalMaxScore) * 100) : 0;
+      const submissionRate = homeworkCount > 0 ? Math.round((submittedCount / homeworkCount) * 100) : 0;
+
+      return {
+        name: cs.student.name,
+        studentId: cs.student.id,
+        x: submissionRate,   // x-axis: submission rate
+        y: avgScoreRate,     // y-axis: average score rate
+      };
+    });
+
+    res.json({
+      points,
+      xLabel: '提交率 (%)',
+      yLabel: '平均得分率 (%)',
+    });
+  } catch (error) {
+    console.error('获取学生表现散点图失败:', error);
+    res.status(500).json({ error: '获取学生表现散点图失败' });
+  }
+});
+
+// 班级综合成绩统计 (inspired by EduAnalytics resultAnalysic)
+router.get('/class/:classId/comprehensive-stats', authenticate, requireTeacher, async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const permission = await ensureClassOwner(classId, req.user!.userId);
+    if (!permission.ok) return rejectPermission(res, permission as { code: number; error: string });
+
+    const classData = await prisma.class.findUnique({
+      where: { id: classId },
+      include: {
+        students: { include: { student: { select: { id: true, name: true } } } },
+        homeworks: {
+          include: { submissions: true },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+
+    if (!classData) return res.status(404).json({ error: '班级不存在' });
+
+    const studentCount = classData.students.length;
+    const homeworkCount = classData.homeworks.length;
+
+    // Overall score distribution (ring chart)
+    const allScores: number[] = [];
+    for (const hw of classData.homeworks) {
+      for (const sub of hw.submissions) {
+        if (sub.score !== null) {
+          const pct = hw.maxScore > 0 ? Math.round((sub.score / hw.maxScore) * 100) : 0;
+          allScores.push(pct);
+        }
+      }
+    }
+
+    const scoreRangeCounts = SCORE_RANGES.map(r => ({ ...r, count: 0 }));
+
+    for (const score of allScores) {
+      const range = scoreRangeCounts.find((r) => score >= r.min && score <= r.max);
+      if (range) range.count++;
+    }
+
+    const totalScored = allScores.length;
+    const avgScore = totalScored > 0 ? Math.round(allScores.reduce((a, b) => a + b, 0) / totalScored) : 0;
+    const medianScore = totalScored > 0 ? (() => {
+      const sorted = [...allScores].sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      return sorted.length % 2 !== 0 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+    })() : 0;
+    const stdDev = totalScored > 0 ? Math.round(Math.sqrt(allScores.reduce((sum, s) => sum + Math.pow(s - avgScore, 2), 0) / totalScored)) : 0;
+    const passRate = totalScored > 0 ? Math.round((allScores.filter((s) => s >= 60).length / totalScored) * 100) : 0;
+    const excellentRate = totalScored > 0 ? Math.round((allScores.filter((s) => s >= 90).length / totalScored) * 100) : 0;
+
+    // Homework-by-homework trend
+    const homeworkTrend = classData.homeworks.map((hw) => {
+      const scored = hw.submissions.filter((s) => s.score !== null).map((s) => s.score as number);
+      const avg = scored.length > 0 ? Math.round((scored.reduce((a, b) => a + b, 0) / scored.length / hw.maxScore) * 100) : 0;
+      const highest = scored.length > 0 ? Math.round((Math.max(...scored) / hw.maxScore) * 100) : 0;
+      const lowest = scored.length > 0 ? Math.round((Math.min(...scored) / hw.maxScore) * 100) : 0;
+      return {
+        title: hw.title,
+        avg,
+        highest,
+        lowest,
+        submissionRate: studentCount > 0 ? Math.round((hw.submissions.length / studentCount) * 100) : 0,
+      };
+    });
+
+    res.json({
+      overview: {
+        studentCount,
+        homeworkCount,
+        totalScored,
+        avgScore,
+        medianScore,
+        stdDev,
+        passRate,
+        excellentRate,
+      },
+      scoreDistribution: scoreRangeCounts.map((r) => ({
+        label: r.label,
+        count: r.count,
+        percentage: totalScored > 0 ? Math.round((r.count / totalScored) * 100) : 0,
+        color: r.color,
+      })),
+      homeworkTrend,
+    });
+  } catch (error) {
+    console.error('获取综合成绩统计失败:', error);
+    res.status(500).json({ error: '获取综合成绩统计失败' });
   }
 });
 

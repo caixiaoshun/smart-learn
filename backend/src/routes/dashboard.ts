@@ -159,24 +159,36 @@ router.get('/student/modules', authenticate, requireStudent, async (req, res) =>
     else if (labProgress >= 60) codeQuality = 'B';
     const labStatus = latestLab && latestLab.submissions.length > 0 && latestLab.submissions[0].score != null ? '已完成' : '进行中';
 
-    // --- 在线讨论: 基于 AI 聊天消息推算 ---
+    // --- 课堂表现: 基于平时表现记录 ---
     const now = new Date();
     const fourWeeksAgo = new Date(now);
     fourWeeksAgo.setDate(now.getDate() - 28);
-    const chatMessages = await prisma.chatMessage.findMany({
-      where: { userId, role: 'user', createdAt: { gte: fourWeeksAgo } },
-      select: { createdAt: true },
+    const performanceRecords = await prisma.classPerformanceRecord.findMany({
+      where: { studentId: userId, classId: { in: classIds }, occurredAt: { gte: fourWeeksAgo } },
+      select: { type: true, score: true, occurredAt: true },
     });
     // 按周分组统计
-    const weeklyChats = [0, 0, 0, 0];
-    for (const msg of chatMessages) {
-      const daysAgo = Math.floor((now.getTime() - new Date(msg.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+    const weeklyPerformance = [0, 0, 0, 0];
+    for (const rec of performanceRecords) {
+      const daysAgo = Math.floor((now.getTime() - new Date(rec.occurredAt).getTime()) / (1000 * 60 * 60 * 24));
       const weekIdx = Math.min(3, Math.floor(daysAgo / 7));
-      weeklyChats[3 - weekIdx]++;
+      weeklyPerformance[3 - weekIdx]++;
     }
-    const thisWeekPosts = weeklyChats[3];
-    const totalPosts = chatMessages.length;
-    const discussionPoints = Math.min(20, thisWeekPosts * 2);
+    const qaRecords = performanceRecords.filter(r => r.type === 'CLASSROOM_QA');
+    const shareRecords = performanceRecords.filter(r => r.type === 'KNOWLEDGE_SHARE');
+    const allScoresPerf = performanceRecords.filter(r => r.score != null).map(r => r.score as number);
+    const avgPerfScore = allScoresPerf.length > 0
+      ? Math.round((allScoresPerf.reduce((s, v) => s + v, 0) / allScoresPerf.length) * 10) / 10
+      : 0;
+    const qaScoredRecords = qaRecords.filter(r => r.score != null);
+    const qaAvg = qaScoredRecords.length > 0
+      ? qaScoredRecords.reduce((s, r) => s + (r.score as number), 0) / qaScoredRecords.length
+      : 0;
+    const shareScoredRecords = shareRecords.filter(r => r.score != null);
+    const shareAvg = shareScoredRecords.length > 0
+      ? shareScoredRecords.reduce((s, r) => s + (r.score as number), 0) / shareScoredRecords.length
+      : 0;
+    const compositeScore = Math.round((qaAvg * 0.5 + shareAvg * 0.5) * 10) / 10;
 
     // --- 小组项目: 基于班级同学生成 ---
     const classmates = await prisma.classStudent.findMany({
@@ -211,11 +223,13 @@ router.get('/student/modules', authenticate, requireStudent, async (req, res) =>
         total: labHws.length,
         codeQuality,
       },
-      discussion: {
-        points: discussionPoints,
-        weeklyData: weeklyChats,
-        thisWeekPosts,
-        totalPosts,
+      classPerformance: {
+        totalScore: compositeScore,
+        totalRecords: performanceRecords.length,
+        weeklyData: weeklyPerformance,
+        qaCount: qaRecords.length,
+        shareCount: shareRecords.length,
+        avgScore: avgPerfScore,
       },
       groupProject: {
         members,
@@ -283,7 +297,14 @@ router.get('/student/radar', authenticate, requireStudent, async (req, res) => {
   try {
     const userId = req.user!.userId;
 
-    // 知识维度：平均作业得分率
+    // 获取学生班级
+    const memberships = await prisma.classStudent.findMany({
+      where: { studentId: userId },
+      select: { classId: true },
+    });
+    const classIds = memberships.map(m => m.classId);
+
+    // 1) 知识掌握：作业得分率（已评分作业的平均得分百分比）
     const submissions = await prisma.submission.findMany({
       where: { studentId: userId, score: { not: null } },
       include: { homework: { select: { maxScore: true } } },
@@ -292,63 +313,94 @@ router.get('/student/radar', authenticate, requireStudent, async (req, res) => {
       ? Math.round(submissions.reduce((sum, s) => sum + ((s.score ?? 0) / s.homework.maxScore) * 100, 0) / submissions.length)
       : 0;
 
-    // 实践维度：提交率
-    const memberships = await prisma.classStudent.findMany({
-      where: { studentId: userId },
-      select: { classId: true },
-    });
-    const classIds = memberships.map(m => m.classId);
-    const totalHomeworks = await prisma.homework.count({
-      where: { classId: { in: classIds } },
-    });
+    // 2) 实践能力：综合提交率(60%) + 编程实验通过率(40%)
+    const totalHomeworks = await prisma.homework.count({ where: { classId: { in: classIds } } });
     const submittedCount = await prisma.submission.count({ where: { studentId: userId } });
-    const practiceScore = totalHomeworks > 0
-      ? Math.round((submittedCount / totalHomeworks) * 100)
+    const submissionRate = totalHomeworks > 0 ? (submittedCount / totalHomeworks) * 100 : 0;
+
+    const allHomeworks = await prisma.homework.findMany({
+      where: { classId: { in: classIds } },
+      include: { submissions: { where: { studentId: userId } } },
+    });
+    const labHws = allHomeworks.filter(h => /实验|lab|编程|代码|coding/i.test(h.title));
+    const labPassed = labHws.filter(h => (h.submissions[0]?.score ?? 0) >= h.maxScore * 0.6).length;
+    const labPassRate = labHws.length > 0 ? (labPassed / labHws.length) * 100 : submissionRate;
+    const practiceScore = Math.round(submissionRate * 0.6 + labPassRate * 0.4);
+
+    // 3) 课堂表现：平时表现综合评分（基于教师给的ClassPerformanceRecord）
+    const performanceRecords = await prisma.classPerformanceRecord.findMany({
+      where: { studentId: userId, classId: { in: classIds } },
+      select: { type: true, score: true },
+    });
+    let classPerformanceScore = 0;
+    if (performanceRecords.length > 0) {
+      const scoredRecords = performanceRecords.filter(r => r.score != null);
+      if (scoredRecords.length > 0) {
+        const avgScore = scoredRecords.reduce((sum, r) => sum + (r.score as number), 0) / scoredRecords.length;
+        // Score is 1-5, normalize to 0-100
+        classPerformanceScore = Math.round((avgScore / 5) * 100);
+      }
+      // Bonus for participation (up to 20 points for having 10+ records)
+      const participationBonus = Math.min(20, performanceRecords.length * 2);
+      classPerformanceScore = Math.min(100, classPerformanceScore + participationBonus);
+    }
+
+    // 4) 协作能力：互评参与(50%) + 小组项目参与(50%)
+    const peerReviewCount = await prisma.peerReview.count({ where: { reviewerId: userId } });
+    const peerReviewAssignments = await prisma.peerReviewAssignment.count({ where: { reviewerId: userId } });
+    const peerReviewRate = peerReviewAssignments > 0
+      ? Math.min(100, Math.round((peerReviewCount / peerReviewAssignments) * 100))
       : 0;
 
-    // 沟通维度：AI 对话数
-    const chatCount = await prisma.chatMessage.count({
-      where: { userId, role: 'user' },
-    });
-    const communicationScore = Math.min(100, Math.round(Math.log2(chatCount + 1) * 15));
+    const groupMemberships = await prisma.assignmentGroupMember.count({ where: { studentId: userId } });
+    const groupScore = Math.min(100, groupMemberships * 25);
+    const collaborationScore = Math.round(peerReviewRate * 0.5 + groupScore * 0.5);
 
-    // 创新维度：on-time 提交率（在截止时间前提交的比例）
+    // 5) 创新思维：按时提交率(40%) + 自主实践作业完成(30%) + 代码质量(30%)
     const onTimeSubs = await prisma.submission.findMany({
       where: { studentId: userId },
-      include: { homework: { select: { deadline: true } } },
+      include: { homework: { select: { deadline: true, type: true, maxScore: true } } },
     });
     const onTimeCount = onTimeSubs.filter(s => new Date(s.submittedAt) <= new Date(s.homework.deadline)).length;
-    const innovationScore = onTimeSubs.length > 0
-      ? Math.round((onTimeCount / onTimeSubs.length) * 100)
+    const onTimeRate = onTimeSubs.length > 0 ? (onTimeCount / onTimeSubs.length) * 100 : 0;
+
+    const selfPracticeSubs = onTimeSubs.filter(s => s.homework.type === 'SELF_PRACTICE');
+    const selfPracticeScore = selfPracticeSubs.length > 0
+      ? Math.min(100, selfPracticeSubs.length * 20)
       : 0;
 
-    // 协作维度：加入班级数
-    const classCount = memberships.length;
-    const collaborationScore = Math.min(100, classCount * 50);
+    // Code quality approximation: avg score percentage on lab homeworks
+    const labScored = labHws.filter(h => h.submissions[0]?.score != null);
+    const codeQualityScore = labScored.length > 0
+      ? Math.round(labScored.reduce((sum, h) => sum + ((h.submissions[0].score ?? 0) / h.maxScore) * 100, 0) / labScored.length)
+      : knowledgeScore;
 
-    // 动态生成 AI 诊断文本
-    const labels = ['知识', '创新', '协作', '实践', '沟通'];
-    const scores = [knowledgeScore, innovationScore, collaborationScore, practiceScore, communicationScore];
+    const innovationScore = Math.round(onTimeRate * 0.4 + selfPracticeScore * 0.3 + codeQualityScore * 0.3);
+
+    // 组装结果
+    const labels = ['知识掌握', '实践能力', '课堂表现', '协作能力', '创新思维'];
+    const scores = [knowledgeScore, practiceScore, classPerformanceScore, collaborationScore, innovationScore];
+
+    // 找到最强和最弱维度
     const maxIdx = scores.indexOf(Math.max(...scores));
     const minIdx = scores.indexOf(Math.min(...scores));
     const strongLabel = labels[maxIdx];
     const weakLabel = labels[minIdx];
 
-    // 获取学生姓名
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } });
     const studentName = user?.name || '同学';
 
     const suggestionMap: Record<string, string> = {
-      '知识': '建议多复习课程材料，巩固薄弱知识点。',
-      '创新': '建议按时完成作业，保持良好的学习节奏。',
-      '协作': '建议多参与讨论和小组互动，提升协作能力。',
-      '实践': '建议多提交作业和编程实验，积累实践经验。',
-      '沟通': '建议多与 AI 助手互动，锻炼表达和提问能力。',
+      '知识掌握': '建议多复习课程材料，认真完成每次作业以巩固知识点。',
+      '实践能力': '建议按时提交作业和编程实验，多动手实践积累经验。',
+      '课堂表现': '建议积极参与课堂问答和知识分享，提升课堂参与度。',
+      '协作能力': '建议积极参与同行互评和小组项目，加强团队协作。',
+      '创新思维': '建议尝试自主实践作业，按时完成任务并注重代码质量。',
     };
 
     const aiDiagnosis = {
-      summary: `${studentName}，你的${strongLabel}能力很强，但在"${weakLabel}"板块的表现还有提升空间。`,
-      suggestion: `💡 ${suggestionMap[weakLabel] || '继续保持当前学习节奏。'}`,
+      summary: `${studentName}，你的「${strongLabel}」能力很强（${scores[maxIdx]}分），但在「${weakLabel}」板块（${scores[minIdx]}分）还有提升空间。`,
+      suggestion: suggestionMap[weakLabel] || '继续保持当前学习节奏。',
     };
 
     res.json({

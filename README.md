@@ -28,7 +28,7 @@
 
 | 功能 | 说明 |
 |------|------|
-| **仪表盘** | 总积分/排名/课程进度/AI互动指数、近7天学习趋势、五维能力雷达、最近活动；支持导出学习报告、AI 诊断跳转 |
+| **仪表盘** | 总积分/排名/课程进度/AI互动指数、近7天学习趋势、五维能力雷达（知识掌握/实践能力/课堂表现/协作能力/创新思维）、课堂表现模块、最近活动；支持导出学习报告、AI 诊断跳转 |
 | **AI 智能助手** | 基于 OpenAI 兼容 API 的 SSE 流式对话、多模型选择、聊天历史持久化、Socratic 引导式教学 |
 | **资源库** | 按类型/分类/标签搜索过滤教学资源，支持收藏、浏览量统计、评论 |
 | **作业提交** | 查看/提交作业（PDF/Notebook），文件预览（PDF 内联、IPYNB JSON），截止时间提醒 |
@@ -49,7 +49,7 @@
 | **学生行为分析** | 学生行为数据分析、导出报表、生成关注清单 |
 | **精准干预控制台** | 预警学生管理、行为评分筛选（全部/预警/高分）、AI 推荐方案、干预资源推送 |
 | **平时表现管理** | 课堂表现记录、知识点评估、成绩追踪 |
-| **数据分析** | 班级作业分析（提交率/分数分布）、成绩趋势、班级总览排名 |
+| **数据分析** | 班级作业分析（提交率/分数分布）、学生聚类分析、学生表现散点图、综合成绩统计（均分/中位数/标准差/及格率/优秀率）、作业成绩趋势（均分/最高/最低）、成绩趋势对比、分组对比、AI 学情报告 |
 
 ### 🔐 通用功能
 
@@ -310,6 +310,62 @@ S3_BUCKET_NAME="smart-learn"
 - 文件上传支持 PDF 和 IPYNB 格式，通过 MinIO（S3 兼容）对象存储管理
 - AI 助手需配置外部 OpenAI 兼容 API（支持自定义 `AI_BASE_URL`）
 - 邮件提醒需配置 SMTP 服务
+
+## 📊 图表数据来源与计算方式
+
+以下是系统中所有图表和数据指标的数据来源及计算方式说明。所有数据均来自数据库实时查询，不使用 mock 数据。
+
+### 学生端仪表盘
+
+| 指标/图表 | 数据来源 | 计算方式 | API |
+|-----------|----------|----------|-----|
+| **总积分** | `Submission.score` | 所有已评分提交的分数之和 | `/api/dashboard/student/stats` |
+| **班级排名** | `Submission.score` | 同班同学总分排序，计算百分位排名 | `/api/dashboard/student/stats` |
+| **课程进度** | `Submission`, `Homework` | 已提交作业数 / 所在班级全部作业数 × 100% | `/api/dashboard/student/stats` |
+| **AI 互动指数** | `ChatMessage` (role=user) | `min(100, log₂(消息数+1) × 15)` | `/api/dashboard/student/stats` |
+| **学习行为趋势** | `Submission` | 近7天每天的得分总和，按日期分组 | `/api/dashboard/student/trend` |
+| **随堂测验** | `Homework`, `Submission` | 标题匹配"测验/quiz/考试/test"的作业，计算平均正确率 | `/api/dashboard/student/modules` |
+| **编程实验** | `Homework`, `Submission` | 标题匹配"实验/lab/编程/代码/coding"的作业，计算通过率（≥60%为通过） | `/api/dashboard/student/modules` |
+| **课堂表现** | `ClassPerformanceRecord` | 近4周课堂问答+知识分享记录，按周分组，计算综合评分（QA×0.5 + 分享×0.5） | `/api/dashboard/student/modules` |
+| **小组项目** | `ClassStudent`, `Homework` | 同班同学列表 + 最近截止的作业作为项目 | `/api/dashboard/student/modules` |
+| **最近动态** | `Submission`, `Homework` | 最近10次作业提交记录，含评分状态 | `/api/dashboard/student/activities` |
+
+### 五维能力雷达
+
+| 维度 | 数据来源 | 计算方式 |
+|------|----------|----------|
+| **知识掌握** | `Submission`, `Homework` | 所有已评分作业的平均得分率：`Σ(score/maxScore×100) / 作业数` |
+| **实践能力** | `Submission`, `Homework` | 提交率×0.6 + 编程实验通过率×0.4 |
+| **课堂表现** | `ClassPerformanceRecord` | 教师打分（1-5分）标准化到0-100 + 参与度加分（每条记录+2分，上限20分） |
+| **协作能力** | `PeerReview`, `AssignmentGroupMember` | 互评完成率×0.5 + 小组参与度(每组25分上限100)×0.5 |
+| **创新思维** | `Submission`, `Homework` | 按时提交率×0.4 + 自主实践完成数×0.3 + 编程实验得分率×0.3 |
+
+> API: `/api/dashboard/student/radar` — AI 诊断文本基于最强/最弱维度动态生成。
+
+### 教师端数据分析
+
+| 图表 | 数据来源 | 计算方式 | API |
+|------|----------|----------|-----|
+| **综合统计卡片** | `Submission`, `Homework`, `ClassStudent` | 平均分、中位数、标准差、及格率（≥60%）、优秀率（≥90%） | `/api/analytics/class/:id/comprehensive-stats` |
+| **学生聚类分析** | `Submission`, `Homework` | 综合分 = 得分率×0.5 + 提交率×0.3 + 按时率×0.2；≥80为优秀，50-79为中等，<50为待关注 | `/api/analytics/class/:id/student-clusters` |
+| **学生表现散点图** | `Submission`, `Homework` | X轴=提交率(%)，Y轴=平均得分率(%) | `/api/analytics/class/:id/performance-scatter` |
+| **综合成绩分布** | `Submission`, `Homework` | 按分数段(90-100/80-89/70-79/60-69/<60)统计环形图 | `/api/analytics/class/:id/comprehensive-stats` |
+| **作业成绩趋势** | `Submission`, `Homework` | 每次作业的平均分/最高分/最低分折线图 | `/api/analytics/class/:id/comprehensive-stats` |
+| **作业提交率** | `Submission`, `Homework`, `ClassStudent` | 每次作业提交数 / 班级学生数 × 100% | `/api/analytics/class/:id/homeworks` |
+| **单次作业成绩分布** | `Submission`, `Homework` | 按分数段统计饼图 | `/api/analytics/homework/:id/distribution` |
+| **成绩趋势对比** | `Submission`, `Homework` | 各次作业的班级平均得分率 | `/api/analytics/class/:id/trend-compare` |
+| **分组成绩对比** | `AssignmentGroup`, `Submission` | 各小组的平均得分率 | `/api/analytics/homework/:id/group-compare` |
+| **AI 学情报告** | `Submission`, `Homework`, `ClassStudent` | 基于提交率和平均分生成建议文本 | `/api/analytics/class/:id/ai-report` |
+
+### 教师端行为分析
+
+| 指标/图表 | 数据来源 | 计算方式 | API |
+|-----------|----------|----------|-----|
+| **行为评分** | `Submission`, `BehaviorLog`, `ChatMessage` | `提交率×55 + AI互动分×25 + 编程时长分×20` | `/api/behavior/teacher/overview` |
+| **风险等级** | 行为评分 | <50=高风险，50-80=中风险，>80=低风险 | `/api/behavior/teacher/overview` |
+| **近10天活动趋势** | `BehaviorLog` | 近10天每天的行为日志时长归一化 | `/api/behavior/teacher/overview` |
+| **能力维度分布** | 行为数据聚合 | 编程=编程时长×10，协作=讨论次数×5，逻辑=测验均分，表达=(逻辑+协作)/2，活跃=(行为分+协作)/2 | `/api/behavior/teacher/overview` |
+| **AI 洞察** | 行为数据统计 | 基于高/中/低风险学生数量和行为评分动态生成文本 | 前端动态计算 |
 
 ## 📦 部署
 

@@ -25,6 +25,46 @@ export interface ScoreDistribution {
   percentage: number;
 }
 
+export interface StudentClusterItem {
+  student: { id: string; name: string; email: string; avatar?: string };
+  avgScoreRate: number;
+  submissionRate: number;
+  onTimeRate: number;
+  composite: number;
+  cluster: 'HIGH' | 'MEDIUM' | 'AT_RISK';
+}
+
+export interface ClusterSummary {
+  highCount: number;
+  mediumCount: number;
+  atRiskCount: number;
+  highPercentage: number;
+  mediumPercentage: number;
+  atRiskPercentage: number;
+}
+
+export interface ScatterPoint {
+  name: string;
+  studentId: string;
+  x: number;
+  y: number;
+}
+
+export interface ComprehensiveStats {
+  overview: {
+    studentCount: number;
+    homeworkCount: number;
+    totalScored: number;
+    avgScore: number;
+    medianScore: number;
+    stdDev: number;
+    passRate: number;
+    excellentRate: number;
+  };
+  scoreDistribution: { label: string; count: number; percentage: number; color: string }[];
+  homeworkTrend: { title: string; avg: number; highest: number; lowest: number; submissionRate: number }[];
+}
+
 export interface GradeTrend {
   homeworkId: string;
   homeworkTitle: string;
@@ -67,12 +107,18 @@ interface AnalyticsState {
   scoreDistribution: ScoreDistribution[] | null;
   gradeTrend: GradeTrend[];
   classOverview: ClassOverview | null;
+  studentClusters: { clusters: { HIGH: StudentClusterItem[]; MEDIUM: StudentClusterItem[]; AT_RISK: StudentClusterItem[] }; summary: ClusterSummary; totalStudents: number } | null;
+  scatterData: { points: ScatterPoint[]; xLabel: string; yLabel: string } | null;
+  comprehensiveStats: ComprehensiveStats | null;
   isLoading: boolean;
   
   // 教师方法
   fetchClassHomeworkStats: (classId: string) => Promise<void>;
   fetchScoreDistribution: (homeworkId: string) => Promise<void>;
   fetchClassOverview: (classId: string) => Promise<void>;
+  fetchStudentClusters: (classId: string) => Promise<void>;
+  fetchPerformanceScatter: (classId: string) => Promise<void>;
+  fetchComprehensiveStats: (classId: string) => Promise<void>;
   
   // 学生方法
   fetchStudentGradeTrend: () => Promise<void>;
@@ -84,6 +130,9 @@ export const useAnalyticsStore = create<AnalyticsState>((set) => ({
   scoreDistribution: null,
   gradeTrend: [],
   classOverview: null,
+  studentClusters: null,
+  scatterData: null,
+  comprehensiveStats: null,
   isLoading: false,
 
   // 获取班级作业统计
@@ -116,6 +165,36 @@ export const useAnalyticsStore = create<AnalyticsState>((set) => ({
       set({ classOverview: data });
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  // 获取学生聚类分析
+  fetchStudentClusters: async (classId) => {
+    try {
+      const { data } = await api.get(`/analytics/class/${classId}/student-clusters`);
+      set({ studentClusters: data });
+    } catch (error) {
+      console.error('获取学生聚类分析失败:', error);
+    }
+  },
+
+  // 获取学生表现散点图
+  fetchPerformanceScatter: async (classId) => {
+    try {
+      const { data } = await api.get(`/analytics/class/${classId}/performance-scatter`);
+      set({ scatterData: data });
+    } catch (error) {
+      console.error('获取学生表现散点图失败:', error);
+    }
+  },
+
+  // 获取综合成绩统计
+  fetchComprehensiveStats: async (classId) => {
+    try {
+      const { data } = await api.get(`/analytics/class/${classId}/comprehensive-stats`);
+      set({ comprehensiveStats: data });
+    } catch (error) {
+      console.error('获取综合成绩统计失败:', error);
     }
   },
 

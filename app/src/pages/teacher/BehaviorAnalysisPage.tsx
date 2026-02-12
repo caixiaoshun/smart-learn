@@ -126,8 +126,15 @@ export function BehaviorAnalysisPage() {
         <CardContent className="p-5 flex items-start gap-3">
           <div className="rounded-xl bg-blue-100 p-2"><Sparkles className="h-5 w-5 text-blue-600" /></div>
           <div className="flex-1">
-            <p className="font-semibold text-slate-900">AI 洞察：编程实验异常预警</p>
-            <p className="text-sm text-slate-600">检测到高风险学生近期编程学习时长显著下降，建议优先推送语法基础资源并发送学习提醒。</p>
+            <p className="font-semibold text-slate-900">AI 洞察：学情风险分析</p>
+            <p className="text-sm text-slate-600">
+              {overview ? (() => {
+                const { highRiskCount, mediumRiskCount, totalStudents, avgBehaviorScore } = overview.summary;
+                if (highRiskCount > 0) return `检测到 ${highRiskCount} 名高风险学生（占比 ${totalStudents > 0 ? Math.round((highRiskCount / totalStudents) * 100) : 0}%），平均行为分 ${avgBehaviorScore}，建议优先推送学习资源并发送学习提醒。`;
+                if (mediumRiskCount > 0) return `当前无高风险学生，但有 ${mediumRiskCount} 名中风险学生需要关注。整体行为分 ${avgBehaviorScore}，建议持续跟进学习进度。`;
+                return `当前班级学习状态良好，${totalStudents} 名学生均为低风险，平均行为分 ${avgBehaviorScore}。建议适当增加挑战任务。`;
+              })() : '正在分析学生行为数据...'}
+            </p>
             <p className="mt-1 text-xs text-slate-500">最近更新：{overview?.summary.updatedAt ? new Date(overview.summary.updatedAt).toLocaleString('zh-CN') : '--'}</p>
           </div>
         </CardContent>

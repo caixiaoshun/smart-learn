@@ -68,7 +68,7 @@ export function StudentDashboard() {
         <div className="flex flex-col gap-2">
           <h1 className="text-[#1e3a8a] text-3xl md:text-4xl font-black tracking-tight">学习全景仪表盘</h1>
           <p className="text-slate-500 text-base max-w-2xl">
-            欢迎回来，{user?.name ?? '同学'}。这是您的实时学习轨迹。您的随堂测验、编程实验与讨论互动数据已更新。
+            欢迎回来，{user?.name ?? '同学'}。这是您的实时学习轨迹。您的随堂测验、编程实验与课堂表现数据已更新。
           </p>
         </div>
         <div className="flex gap-3">

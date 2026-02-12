@@ -817,6 +817,7 @@ router.post('/:id/grade-group/:submissionId', authenticate, requireTeacher, asyn
       submission: {
         ...updatedSubmission,
         files: parseFiles(updatedSubmission.files),
+        laborDivision: updatedSubmission.laborDivision ? JSON.parse(updatedSubmission.laborDivision) : null,
       },
     });
   } catch (error) {

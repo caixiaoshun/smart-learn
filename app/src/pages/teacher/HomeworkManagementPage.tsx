@@ -511,14 +511,14 @@ export function HomeworkManagementPage() {
       const updatedSubmission = { ...selectedSubmission, score, feedback: gradeFeedback, gradedAt: new Date().toISOString() };
       setSelectedSubmission(updatedSubmission);
       
-      // 刷新教师作业列表以保持数据一致
-      fetchTeacherHomeworks();
-      
-      // 自动导航到下一个未批改的学生
+      // 自动导航到下一个未批改的学生（在刷新前用本地数据导航）
       const nextUngraded = submissions.findIndex((s, i) => i > currentSubmissionIndex && s.score === null);
       if (nextUngraded >= 0) {
         navigateToSubmission(nextUngraded, submissions);
       }
+
+      // 刷新教师作业列表以保持数据一致
+      await fetchTeacherHomeworks();
     } catch {
       // 错误已由全局拦截器处理并显示 Toast
     }
@@ -553,14 +553,15 @@ export function HomeworkManagementPage() {
     try {
       await gradeGroupSubmission(selectedHomework.id, selectedSubmission.id, memberScores);
       toast.success('小组批改成功');
-      fetchTeacherHomeworks();
 
-      // 自动导航到下一个未批改的提交
+      // 自动导航到下一个未批改的提交（在刷新前用本地数据导航）
       const submissions = selectedHomework.submissions || [];
       const nextUngraded = submissions.findIndex((s, i) => i > currentSubmissionIndex && s.score === null);
       if (nextUngraded >= 0) {
         navigateToSubmission(nextUngraded, submissions);
       }
+
+      await fetchTeacherHomeworks();
     } catch {
       // 错误已由全局拦截器处理
     }

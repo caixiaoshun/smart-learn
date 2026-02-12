@@ -557,11 +557,16 @@ router.post('/:id/grade/:submissionId', authenticate, requireTeacher, async (req
     // 获取旧分数
     const existingSubmission = await prisma.submission.findUnique({
       where: { id: submissionId },
-      select: { score: true, studentId: true },
+      select: { score: true, studentId: true, groupId: true },
     });
 
     if (!existingSubmission) {
       return res.status(404).json({ error: '提交不存在' });
+    }
+
+    // 小组作业必须使用单独评分接口
+    if (existingSubmission.groupId) {
+      return res.status(400).json({ error: '小组作业请使用成员单独评分功能' });
     }
 
     const existingScore = existingSubmission.score;

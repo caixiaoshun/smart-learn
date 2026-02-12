@@ -1,8 +1,7 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useHomeworkStore, type Homework, type Submission, type CreateHomeworkData, type GroupMember, type ScoreAdjustment } from '@/stores/homeworkStore';
 import { useClassStore } from '@/stores/classStore';
-import { useResourceStore } from '@/stores/resourceStore';
 import { useGroupStore } from '@/stores/groupStore';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -28,7 +27,6 @@ import {
   MessageSquare,
   Save,
   ArrowLeft,
-  Trophy,
   Loader2,
   WandSparkles,
   GripVertical,
@@ -86,7 +84,6 @@ function PDFPreview({ url }: { url: string }) {
 export function HomeworkManagementPage() {
   const { homeworks, isLoading, fetchTeacherHomeworks, createHomework, updateHomework, gradeSubmission, gradeGroupSubmission, exportGrades, previewFile, downloadFile } = useHomeworkStore();
   const { classes, fetchTeacherClasses } = useClassStore();
-  const { createResourceFromHomework } = useResourceStore();
   const { groups, unassignedStudents, groupConfig, fetchGroups, assignStudent, autoAssignStudents } = useGroupStore();
   
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -146,92 +143,12 @@ export function HomeworkManagementPage() {
   // 学生导航索引
   const [currentSubmissionIndex, setCurrentSubmissionIndex] = useState(0);
 
-  // 推荐到资源中心状态
-  const [isAddToResourceOpen, setIsAddToResourceOpen] = useState(false);
-  const [resourceTitle, setResourceTitle] = useState('');
-  const [resourceDescription, setResourceDescription] = useState('');
-  const [resourceTags, setResourceTags] = useState('');
-  const [resourceCategory, setResourceCategory] = useState('');
-  const [isAddingToResource, setIsAddingToResource] = useState(false);
-  const [selectedResourceFileKey, setSelectedResourceFileKey] = useState('');
   const [isGroupCenterOpen, setIsGroupCenterOpen] = useState(false);
   const [groupHomework, setGroupHomework] = useState<Homework | null>(null);
   const [dragStudentId, setDragStudentId] = useState<string | null>(null);
   const [isAutoAssigning, setIsAutoAssigning] = useState(false);
   const [isGeneratingAIReview, setIsGeneratingAIReview] = useState(false);
 
-  // 获取可推荐的文件列表（仅 .ipynb 和 .pdf）
-  const recommendableFiles = useMemo(() => {
-    const files = selectedSubmission?.files || [];
-    return files.filter((f: string) => {
-      const ext = f.split('.').pop()?.toLowerCase();
-      return ext === 'ipynb' || ext === 'pdf';
-    });
-  }, [selectedSubmission?.files]);
-
-  const handleAddToResource = async () => {
-    if (!selectedHomework || !selectedSubmission) return;
-    if (!resourceTitle.trim() || !resourceDescription.trim()) {
-      toast.error('请填写标题和描述');
-      return;
-    }
-    if (resourceDescription.trim().length < 5) {
-      toast.error('描述至少需要5个字');
-      return;
-    }
-
-    const fileKey = selectedResourceFileKey;
-    if (!fileKey) {
-      toast.error('请选择要推荐的文件');
-      return;
-    }
-
-    setIsAddingToResource(true);
-    try {
-      await createResourceFromHomework({
-        title: resourceTitle.trim(),
-        description: resourceDescription.trim(),
-        homeworkId: selectedHomework.id,
-        submissionId: selectedSubmission.id,
-        fileKey,
-        tags: resourceTags ? resourceTags.split(',').map(t => t.trim()).filter(Boolean) : [],
-        category: resourceCategory || undefined,
-      });
-      toast.success('已成功添加到资源中心');
-      setIsAddToResourceOpen(false);
-      setResourceTitle('');
-      setResourceDescription('');
-      setResourceTags('');
-      setResourceCategory('');
-      setSelectedResourceFileKey('');
-    } catch {
-      // 错误已由全局拦截器处理
-    } finally {
-      setIsAddingToResource(false);
-    }
-  };
-
-  const openAddToResourceDialog = () => {
-    if (recommendableFiles.length === 0) {
-      toast.error('该提交没有可推荐的文件（仅支持 .ipynb 和 .pdf 文件）');
-      return;
-    }
-    // 预填写标题和描述
-    const studentName = selectedSubmission?.student?.name || '学生';
-    const hwTitle = selectedHomework?.title || '作业';
-    setResourceTitle(`${hwTitle} - ${studentName}优秀作业`);
-    setResourceDescription(`来自 ${studentName} 提交的优秀作业"${hwTitle}"，可作为学习参考。`);
-    setResourceTags('');
-    setResourceCategory('');
-    // 默认选中当前预览的文件（如果是可推荐的），否则选第一个可推荐文件
-    const currentFile = selectedSubmission?.files?.[currentFileIndex] || '';
-    if (recommendableFiles.includes(currentFile)) {
-      setSelectedResourceFileKey(currentFile);
-    } else {
-      setSelectedResourceFileKey(recommendableFiles[0]);
-    }
-    setIsAddToResourceOpen(true);
-  };
   // Quick feedback templates
   const feedbackTemplates = [
     '代码逻辑清晰，运行结果正确，很好！',
@@ -1053,7 +970,7 @@ export function HomeworkManagementPage() {
                                     <Badge variant="secondary" className="text-[10px] px-1 py-0">{submission.group.members.length}人</Badge>
                                   </div>
                                   <p className="text-xs text-gray-500">
-                                    {submission.student?.name} 提交于 {new Date(submission.submittedAt).toLocaleString('zh-CN')}
+                                    提交于 {new Date(submission.submittedAt).toLocaleString('zh-CN')}
                                   </p>
                                 </div>
                               </>
@@ -1255,8 +1172,8 @@ export function HomeworkManagementPage() {
                   </TooltipTrigger>
                   <TooltipContent>Alt + ←</TooltipContent>
                 </Tooltip>
-                <span className="text-xs font-medium px-2 whitespace-nowrap truncate max-w-[120px]" title={selectedSubmission?.student?.name}>
-                  {selectedSubmission?.student?.name}（{currentSubmissionIndex + 1}/{selectedHomework?.submissions?.length || 0}）
+                <span className="text-xs font-medium px-2 whitespace-nowrap truncate max-w-[120px]" title={selectedSubmission?.groupId && selectedSubmission?.group ? selectedSubmission.group.name : selectedSubmission?.student?.name}>
+                  {selectedSubmission?.groupId && selectedSubmission?.group ? selectedSubmission.group.name : selectedSubmission?.student?.name}（{currentSubmissionIndex + 1}/{selectedHomework?.submissions?.length || 0}）
                 </span>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -1285,7 +1202,7 @@ export function HomeworkManagementPage() {
                         <span className="text-sm font-semibold text-blue-900">{selectedSubmission.group.name}</span>
                         <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{selectedSubmission.group.members.length} 人</Badge>
                       </div>
-                      <p className="text-xs text-blue-700">由 {selectedSubmission.student?.name} 提交</p>
+                      <p className="text-xs text-blue-700">小组提交</p>
                     </div>
                   ) : (
                     /* 个人提交信息 */
@@ -1500,16 +1417,6 @@ export function HomeworkManagementPage() {
                   </TooltipTrigger>
                   <TooltipContent>Ctrl + S</TooltipContent>
                 </Tooltip>
-                {recommendableFiles.length > 0 && (
-                  <Button
-                    variant="outline"
-                    className="w-full gap-2 text-amber-700 border-amber-200 hover:bg-amber-50"
-                    onClick={openAddToResourceDialog}
-                  >
-                    <Trophy className="w-4 h-4" />
-                    推荐到资源中心
-                  </Button>
-                )}
               </div>
             </div>
           </div>
@@ -1758,101 +1665,6 @@ export function HomeworkManagementPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 推荐到资源中心对话框 */}
-      <Dialog open={isAddToResourceOpen} onOpenChange={setIsAddToResourceOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>推荐到资源中心</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-4 max-h-[70vh] overflow-y-auto">
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
-              <p>将选中的文件作为优秀作业添加到资源中心，供其他学生参考学习。仅支持 Jupyter Notebook (.ipynb) 和 PDF (.pdf) 文件。</p>
-            </div>
-
-            {/* 文件选择 */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">选择文件</label>
-              {recommendableFiles.length === 1 ? (
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border text-sm">
-                  {getFileIcon(recommendableFiles[0])}
-                  <span>{getFileName(recommendableFiles[0])}</span>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {recommendableFiles.map((file: string) => (
-                    <button
-                      key={file}
-                      onClick={() => setSelectedResourceFileKey(file)}
-                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg border text-sm text-left transition-colors ${
-                        selectedResourceFileKey === file
-                          ? 'bg-amber-50 border-amber-300 text-amber-800'
-                          : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                      }`}
-                    >
-                      {getFileIcon(file)}
-                      <span>{getFileName(file)}</span>
-                      {selectedResourceFileKey === file && (
-                        <span className="ml-auto text-xs text-amber-600 font-medium">已选</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">资源标题</label>
-              <Input
-                placeholder="例如：优秀作业 - 数据预处理实验"
-                value={resourceTitle}
-                onChange={(e) => setResourceTitle(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">资源描述</label>
-              <Textarea
-                placeholder="描述这份作业的亮点..."
-                value={resourceDescription}
-                onChange={(e) => setResourceDescription(e.target.value)}
-                rows={3}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">标签</label>
-              <Input
-                placeholder="用逗号分隔，例如：优秀作业, Python, 数据分析"
-                value={resourceTags}
-                onChange={(e) => setResourceTags(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">分类</label>
-              <Input
-                placeholder="例如：数据预处理"
-                value={resourceCategory}
-                onChange={(e) => setResourceCategory(e.target.value)}
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 pt-2">
-              <Button variant="outline" onClick={() => setIsAddToResourceOpen(false)}>
-                取消
-              </Button>
-              <Button
-                className="bg-amber-600 hover:bg-amber-700 gap-2"
-                onClick={handleAddToResource}
-                disabled={isAddingToResource || !resourceTitle.trim() || !resourceDescription.trim() || !selectedResourceFileKey}
-              >
-                {isAddingToResource ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trophy className="w-4 h-4" />}
-                添加到资源中心
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

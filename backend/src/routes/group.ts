@@ -563,7 +563,10 @@ router.post('/:groupId/submit', authenticate, requireStudent, async (req, res) =
 
     const group = await prisma.assignmentGroup.findUnique({
       where: { id: groupId },
-      include: { homework: true },
+      include: {
+        homework: true,
+        members: true,
+      },
     });
 
     if (!group) {
@@ -576,6 +579,23 @@ router.post('/:groupId/submit', authenticate, requireStudent, async (req, res) =
 
     if (group.homeworkId !== homeworkId) {
       return res.status(400).json({ error: '小组与作业不匹配' });
+    }
+
+    // 验证最少组队人数
+    if (group.homework.groupConfig) {
+      try {
+        const config = typeof group.homework.groupConfig === 'string'
+          ? JSON.parse(group.homework.groupConfig)
+          : group.homework.groupConfig;
+        const minSize = config.minSize || config.minMembers;
+        if (minSize && group.members.length < minSize) {
+          return res.status(400).json({
+            error: `小组人数不足，最少需要 ${minSize} 人，当前仅 ${group.members.length} 人`,
+          });
+        }
+      } catch {
+        // groupConfig 解析失败时不阻止提交
+      }
     }
 
     // 创建或更新提交

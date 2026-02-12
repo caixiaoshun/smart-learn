@@ -388,91 +388,6 @@ router.get('/student/:studentId/trend', authenticate, requireTeacher, async (req
   }
 });
 
-// 学生聚类分析 (inspired by EduAnalytics studentCluster)
-router.get('/class/:classId/student-clusters', authenticate, requireTeacher, async (req, res) => {
-  try {
-    const { classId } = req.params;
-    const permission = await ensureClassOwner(classId, req.user!.userId);
-    if (!permission.ok) return rejectPermission(res, permission as { code: number; error: string });
-
-    const classData = await prisma.class.findUnique({
-      where: { id: classId },
-      include: {
-        students: { include: { student: { select: { id: true, name: true, email: true, avatar: true } } } },
-        homeworks: { include: { submissions: true } },
-      },
-    });
-
-    if (!classData) return res.status(404).json({ error: '班级不存在' });
-
-    const studentCount = classData.students.length;
-    const homeworkCount = classData.homeworks.length;
-
-    // Build per-student metrics
-    const studentMetrics = classData.students.map((cs) => {
-      let totalScore = 0;
-      let totalMaxScore = 0;
-      let submittedCount = 0;
-      let onTimeCount = 0;
-
-      for (const hw of classData.homeworks) {
-        const sub = hw.submissions.find((s) => s.studentId === cs.studentId);
-        if (sub) {
-          submittedCount++;
-          if (sub.score !== null) {
-            totalScore += sub.score;
-            totalMaxScore += hw.maxScore;
-          }
-          if (new Date(sub.submittedAt) <= new Date(hw.deadline)) {
-            onTimeCount++;
-          }
-        }
-      }
-
-      const avgScoreRate = totalMaxScore > 0 ? Math.round((totalScore / totalMaxScore) * 100) : 0;
-      const submissionRate = homeworkCount > 0 ? Math.round((submittedCount / homeworkCount) * 100) : 0;
-      const onTimeRate = submittedCount > 0 ? Math.round((onTimeCount / submittedCount) * 100) : 0;
-
-      // Simple clustering based on composite score
-      const composite = avgScoreRate * CLUSTER_SCORE_WEIGHT + submissionRate * CLUSTER_SUBMISSION_WEIGHT + onTimeRate * CLUSTER_ONTIME_WEIGHT;
-      let cluster: 'HIGH' | 'MEDIUM' | 'AT_RISK';
-      if (composite >= 80) cluster = 'HIGH';
-      else if (composite >= 50) cluster = 'MEDIUM';
-      else cluster = 'AT_RISK';
-
-      return {
-        student: cs.student,
-        avgScoreRate,
-        submissionRate,
-        onTimeRate,
-        composite: Math.round(composite),
-        cluster,
-      };
-    });
-
-    // Group by cluster
-    const clusters = {
-      HIGH: studentMetrics.filter((s) => s.cluster === 'HIGH'),
-      MEDIUM: studentMetrics.filter((s) => s.cluster === 'MEDIUM'),
-      AT_RISK: studentMetrics.filter((s) => s.cluster === 'AT_RISK'),
-    };
-
-    const clusterSummary = {
-      highCount: clusters.HIGH.length,
-      mediumCount: clusters.MEDIUM.length,
-      atRiskCount: clusters.AT_RISK.length,
-      highPercentage: studentCount > 0 ? Math.round((clusters.HIGH.length / studentCount) * 100) : 0,
-      mediumPercentage: studentCount > 0 ? Math.round((clusters.MEDIUM.length / studentCount) * 100) : 0,
-      atRiskPercentage: studentCount > 0 ? Math.round((clusters.AT_RISK.length / studentCount) * 100) : 0,
-    };
-
-    res.json({ clusters, summary: clusterSummary, totalStudents: studentCount });
-  } catch (error) {
-    console.error('获取学生聚类分析失败:', error);
-    res.status(500).json({ error: '获取学生聚类分析失败' });
-  }
-});
-
 // 学生表现二维散点图 (inspired by EduAnalytics studentPerformance2D)
 router.get('/class/:classId/performance-scatter', authenticate, requireTeacher, async (req, res) => {
   try {
@@ -618,6 +533,656 @@ router.get('/class/:classId/comprehensive-stats', authenticate, requireTeacher, 
   } catch (error) {
     console.error('获取综合成绩统计失败:', error);
     res.status(500).json({ error: '获取综合成绩统计失败' });
+  }
+});
+
+// ========== 子任务 1: 教师端深度数据分析 ==========
+
+// 1A: 成绩构成环形图
+router.get('/class/:classId/grade-composition', authenticate, requireTeacher, async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const permission = await ensureClassOwner(classId, req.user!.userId);
+    if (!permission.ok) return rejectPermission(res, permission as { code: number; error: string });
+
+    const classData = await prisma.class.findUnique({
+      where: { id: classId },
+      include: {
+        students: { select: { studentId: true } },
+        homeworks: { include: { submissions: true, selfAssessments: true, peerReviews: true } },
+        performanceRecords: true,
+      },
+    });
+    if (!classData) return res.status(404).json({ error: '班级不存在' });
+
+    const studentIds = classData.students.map(s => s.studentId);
+    const studentCount = studentIds.length;
+
+    // Homework average score
+    let totalHwScore = 0;
+    let hwScoredCount = 0;
+    for (const hw of classData.homeworks) {
+      for (const sub of hw.submissions) {
+        if (sub.score !== null && studentIds.includes(sub.studentId)) {
+          totalHwScore += (sub.score / hw.maxScore) * 100;
+          hwScoredCount++;
+        }
+      }
+    }
+    const hwAvg = hwScoredCount > 0 ? Math.round(totalHwScore / hwScoredCount) : 0;
+
+    // Class performance average
+    const perfRecords = classData.performanceRecords.filter(r => r.score != null && studentIds.includes(r.studentId));
+    const perfAvg = perfRecords.length > 0
+      ? Math.round((perfRecords.reduce((sum, r) => sum + (r.score as number), 0) / perfRecords.length) / 5 * 100)
+      : 0;
+
+    // Self-assessment average
+    const selfAssessments = classData.homeworks.flatMap(hw => hw.selfAssessments.filter(sa => studentIds.includes(sa.studentId)));
+    const selfAvg = selfAssessments.length > 0
+      ? Math.round(selfAssessments.reduce((sum, sa) => sum + sa.score, 0) / selfAssessments.length)
+      : 0;
+
+    // Peer review average
+    const peerReviews = classData.homeworks.flatMap(hw => hw.peerReviews.filter(pr => studentIds.includes(pr.reviewerId)));
+    const peerAvg = peerReviews.length > 0
+      ? Math.round(peerReviews.reduce((sum, pr) => sum + pr.score, 0) / peerReviews.length)
+      : 0;
+
+    res.json({
+      composition: [
+        { name: '作业平均分', value: hwAvg, color: '#3b82f6' },
+        { name: '平时表现', value: perfAvg, color: '#22c55e' },
+        { name: '自评平均分', value: selfAvg, color: '#f59e0b' },
+        { name: '互评平均分', value: peerAvg, color: '#8b5cf6' },
+      ],
+      studentCount,
+    });
+  } catch (error) {
+    console.error('获取成绩构成失败:', error);
+    res.status(500).json({ error: '获取成绩构成失败' });
+  }
+});
+
+// 1B: 6维指标雷达图
+router.get('/class/:classId/indicator-radar', authenticate, requireTeacher, async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const permission = await ensureClassOwner(classId, req.user!.userId);
+    if (!permission.ok) return rejectPermission(res, permission as { code: number; error: string });
+
+    const classData = await prisma.class.findUnique({
+      where: { id: classId },
+      include: {
+        students: { select: { studentId: true } },
+        homeworks: {
+          include: {
+            submissions: true,
+            selfAssessments: true,
+            peerReviews: true,
+            peerReviewAssignments: true,
+          },
+        },
+        performanceRecords: true,
+      },
+    });
+    if (!classData) return res.status(404).json({ error: '班级不存在' });
+
+    const studentIds = classData.students.map(s => s.studentId);
+    const studentCount = studentIds.length;
+    const hwCount = classData.homeworks.length;
+
+    // 1) Classroom QA average score (performance records of type CLASSROOM_QA, score 1-5 -> 0-100)
+    const qaRecords = classData.performanceRecords.filter(r => r.type === 'CLASSROOM_QA' && r.score != null);
+    const qaAvg = qaRecords.length > 0
+      ? Math.round((qaRecords.reduce((sum, r) => sum + (r.score as number), 0) / qaRecords.length) / 5 * 100)
+      : 0;
+
+    // 2) Knowledge sharing average
+    const shareRecords = classData.performanceRecords.filter(r => r.type === 'KNOWLEDGE_SHARE' && r.score != null);
+    const shareAvg = shareRecords.length > 0
+      ? Math.round((shareRecords.reduce((sum, r) => sum + (r.score as number), 0) / shareRecords.length) / 5 * 100)
+      : 0;
+
+    // 3) Homework score rate
+    let totalHwScore = 0;
+    let totalHwMaxScore = 0;
+    for (const hw of classData.homeworks) {
+      for (const sub of hw.submissions) {
+        if (sub.score !== null && studentIds.includes(sub.studentId)) {
+          totalHwScore += sub.score;
+          totalHwMaxScore += hw.maxScore;
+        }
+      }
+    }
+    const hwScoreRate = totalHwMaxScore > 0 ? Math.round((totalHwScore / totalHwMaxScore) * 100) : 0;
+
+    // 4) Submission rate
+    let totalSubs = 0;
+    const totalExpected = studentCount * hwCount;
+    for (const hw of classData.homeworks) {
+      totalSubs += hw.submissions.filter(s => studentIds.includes(s.studentId)).length;
+    }
+    const submissionRate = totalExpected > 0 ? Math.round((totalSubs / totalExpected) * 100) : 0;
+
+    // 5) Peer review completion rate
+    const totalPeerAssigned = classData.homeworks.reduce((sum, hw) => sum + hw.peerReviewAssignments.filter(a => studentIds.includes(a.reviewerId)).length, 0);
+    const totalPeerDone = classData.homeworks.reduce((sum, hw) => sum + hw.peerReviews.filter(pr => studentIds.includes(pr.reviewerId)).length, 0);
+    const peerCompletionRate = totalPeerAssigned > 0 ? Math.round((totalPeerDone / totalPeerAssigned) * 100) : 0;
+
+    // 6) Self-assessment completion rate
+    const groupHomeworks = classData.homeworks.filter(hw => hw.type === 'GROUP_PROJECT');
+    const totalSelfExpected = groupHomeworks.length * studentCount;
+    const totalSelfDone = classData.homeworks.reduce((sum, hw) => sum + hw.selfAssessments.filter(sa => studentIds.includes(sa.studentId)).length, 0);
+    const selfCompletionRate = totalSelfExpected > 0 ? Math.round((totalSelfDone / totalSelfExpected) * 100) : 0;
+
+    res.json({
+      indicators: [
+        { name: '课堂问答', value: qaAvg, fullMark: 100 },
+        { name: '知识分享', value: shareAvg, fullMark: 100 },
+        { name: '作业得分率', value: hwScoreRate, fullMark: 100 },
+        { name: '提交率', value: submissionRate, fullMark: 100 },
+        { name: '互评完成率', value: peerCompletionRate, fullMark: 100 },
+        { name: '自评完成率', value: selfCompletionRate, fullMark: 100 },
+      ],
+    });
+  } catch (error) {
+    console.error('获取指标雷达失败:', error);
+    res.status(500).json({ error: '获取指标雷达失败' });
+  }
+});
+
+// 1C: KMeans聚类增强 (添加 ?method=kmeans&k=3 参数支持)
+function kMeansCluster(data: number[][], k: number, maxIter = 100): { labels: number[]; centroids: number[][] } {
+  const n = data.length;
+  const dim = data[0]?.length ?? 0;
+  if (n === 0 || dim === 0 || k <= 0) return { labels: [], centroids: [] };
+  const clampK = Math.min(k, n);
+
+  // Initialize centroids using first k distinct points
+  const centroids: number[][] = [];
+  const used = new Set<number>();
+  for (let i = 0; i < n && centroids.length < clampK; i++) {
+    const key = data[i].join(',');
+    if (!used.has(i)) {
+      centroids.push([...data[i]]);
+      used.add(i);
+    }
+  }
+  while (centroids.length < clampK) centroids.push([...data[centroids.length % n]]);
+
+  let labels = new Array(n).fill(0);
+
+  for (let iter = 0; iter < maxIter; iter++) {
+    // Assign
+    const newLabels = data.map(point => {
+      let minDist = Infinity;
+      let bestC = 0;
+      for (let c = 0; c < clampK; c++) {
+        let dist = 0;
+        for (let d = 0; d < dim; d++) dist += (point[d] - centroids[c][d]) ** 2;
+        if (dist < minDist) { minDist = dist; bestC = c; }
+      }
+      return bestC;
+    });
+
+    // Check convergence
+    if (newLabels.every((l, i) => l === labels[i])) { labels = newLabels; break; }
+    labels = newLabels;
+
+    // Update centroids
+    for (let c = 0; c < clampK; c++) {
+      const members = data.filter((_, i) => labels[i] === c);
+      if (members.length === 0) continue;
+      for (let d = 0; d < dim; d++) {
+        centroids[c][d] = members.reduce((sum, p) => sum + p[d], 0) / members.length;
+      }
+    }
+  }
+  return { labels, centroids };
+}
+
+function silhouetteScore(data: number[][], labels: number[]): number {
+  const n = data.length;
+  if (n <= 1) return 0;
+  const uniqueLabels = [...new Set(labels)];
+  if (uniqueLabels.length <= 1) return 0;
+
+  const dist = (a: number[], b: number[]) => Math.sqrt(a.reduce((s, v, i) => s + (v - b[i]) ** 2, 0));
+
+  let totalS = 0;
+  for (let i = 0; i < n; i++) {
+    const myCluster = labels[i];
+    const sameCluster = data.filter((_, j) => j !== i && labels[j] === myCluster);
+    const a = sameCluster.length > 0 ? sameCluster.reduce((s, p) => s + dist(data[i], p), 0) / sameCluster.length : 0;
+
+    let minB = Infinity;
+    for (const cl of uniqueLabels) {
+      if (cl === myCluster) continue;
+      const otherCluster = data.filter((_, j) => labels[j] === cl);
+      if (otherCluster.length === 0) continue;
+      const avgDist = otherCluster.reduce((s, p) => s + dist(data[i], p), 0) / otherCluster.length;
+      if (avgDist < minB) minB = avgDist;
+    }
+    if (minB === Infinity) minB = 0;
+
+    const s = Math.max(a, minB) > 0 ? (minB - a) / Math.max(a, minB) : 0;
+    totalS += s;
+  }
+  return Math.round((totalS / n) * 1000) / 1000;
+}
+
+// Enhanced student-clusters endpoint: supports ?method=kmeans&k=3
+router.get('/class/:classId/student-clusters', authenticate, requireTeacher, async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const method = (req.query.method as string) || 'threshold';
+    const k = parseInt(req.query.k as string) || 3;
+    const permission = await ensureClassOwner(classId, req.user!.userId);
+    if (!permission.ok) return rejectPermission(res, permission as { code: number; error: string });
+
+    const classData = await prisma.class.findUnique({
+      where: { id: classId },
+      include: {
+        students: { include: { student: { select: { id: true, name: true, email: true, avatar: true } } } },
+        homeworks: { include: { submissions: true } },
+      },
+    });
+
+    if (!classData) return res.status(404).json({ error: '班级不存在' });
+
+    const studentCount = classData.students.length;
+    const homeworkCount = classData.homeworks.length;
+
+    const studentMetrics = classData.students.map((cs) => {
+      let totalScore = 0;
+      let totalMaxScore = 0;
+      let submittedCount = 0;
+      let onTimeCount = 0;
+
+      for (const hw of classData.homeworks) {
+        const sub = hw.submissions.find((s) => s.studentId === cs.studentId);
+        if (sub) {
+          submittedCount++;
+          if (sub.score !== null) {
+            totalScore += sub.score;
+            totalMaxScore += hw.maxScore;
+          }
+          if (new Date(sub.submittedAt) <= new Date(hw.deadline)) {
+            onTimeCount++;
+          }
+        }
+      }
+
+      const avgScoreRate = totalMaxScore > 0 ? Math.round((totalScore / totalMaxScore) * 100) : 0;
+      const submissionRate = homeworkCount > 0 ? Math.round((submittedCount / homeworkCount) * 100) : 0;
+      const onTimeRate = submittedCount > 0 ? Math.round((onTimeCount / submittedCount) * 100) : 0;
+
+      const composite = avgScoreRate * CLUSTER_SCORE_WEIGHT + submissionRate * CLUSTER_SUBMISSION_WEIGHT + onTimeRate * CLUSTER_ONTIME_WEIGHT;
+
+      return {
+        student: cs.student,
+        avgScoreRate,
+        submissionRate,
+        onTimeRate,
+        composite: Math.round(composite),
+      };
+    });
+
+    if (method === 'kmeans' && studentCount >= k) {
+      const dataPoints = studentMetrics.map(m => [m.avgScoreRate, m.submissionRate, m.onTimeRate]);
+      const { labels } = kMeansCluster(dataPoints, k);
+      const score = silhouetteScore(dataPoints, labels);
+
+      // Assign cluster labels based on centroid composite scores
+      const clusterComposites: Record<number, number[]> = {};
+      labels.forEach((l, i) => {
+        if (!clusterComposites[l]) clusterComposites[l] = [];
+        clusterComposites[l].push(studentMetrics[i].composite);
+      });
+      const clusterAvgs = Object.entries(clusterComposites).map(([cl, vals]) => ({
+        cluster: parseInt(cl),
+        avg: vals.reduce((a, b) => a + b, 0) / vals.length,
+      })).sort((a, b) => b.avg - a.avg);
+
+      const clusterLabelMap: Record<number, 'HIGH' | 'MEDIUM' | 'AT_RISK'> = {};
+      const labelNames: Array<'HIGH' | 'MEDIUM' | 'AT_RISK'> = ['HIGH', 'MEDIUM', 'AT_RISK'];
+      clusterAvgs.forEach((c, i) => {
+        clusterLabelMap[c.cluster] = labelNames[Math.min(i, labelNames.length - 1)];
+      });
+
+      const enriched = studentMetrics.map((m, i) => ({
+        ...m,
+        cluster: clusterLabelMap[labels[i]] || 'MEDIUM' as const,
+      }));
+
+      const clusters = {
+        HIGH: enriched.filter((s) => s.cluster === 'HIGH'),
+        MEDIUM: enriched.filter((s) => s.cluster === 'MEDIUM'),
+        AT_RISK: enriched.filter((s) => s.cluster === 'AT_RISK'),
+      };
+
+      res.json({
+        method: 'kmeans',
+        k,
+        silhouetteScore: score,
+        clusters,
+        summary: {
+          highCount: clusters.HIGH.length,
+          mediumCount: clusters.MEDIUM.length,
+          atRiskCount: clusters.AT_RISK.length,
+          highPercentage: studentCount > 0 ? Math.round((clusters.HIGH.length / studentCount) * 100) : 0,
+          mediumPercentage: studentCount > 0 ? Math.round((clusters.MEDIUM.length / studentCount) * 100) : 0,
+          atRiskPercentage: studentCount > 0 ? Math.round((clusters.AT_RISK.length / studentCount) * 100) : 0,
+        },
+        totalStudents: studentCount,
+      });
+    } else {
+      // Threshold-based (original)
+      const enriched = studentMetrics.map(m => {
+        let cluster: 'HIGH' | 'MEDIUM' | 'AT_RISK';
+        if (m.composite >= 80) cluster = 'HIGH';
+        else if (m.composite >= 50) cluster = 'MEDIUM';
+        else cluster = 'AT_RISK';
+        return { ...m, cluster };
+      });
+
+      const clusters = {
+        HIGH: enriched.filter((s) => s.cluster === 'HIGH'),
+        MEDIUM: enriched.filter((s) => s.cluster === 'MEDIUM'),
+        AT_RISK: enriched.filter((s) => s.cluster === 'AT_RISK'),
+      };
+
+      res.json({
+        method: 'threshold',
+        clusters,
+        summary: {
+          highCount: clusters.HIGH.length,
+          mediumCount: clusters.MEDIUM.length,
+          atRiskCount: clusters.AT_RISK.length,
+          highPercentage: studentCount > 0 ? Math.round((clusters.HIGH.length / studentCount) * 100) : 0,
+          mediumPercentage: studentCount > 0 ? Math.round((clusters.MEDIUM.length / studentCount) * 100) : 0,
+          atRiskPercentage: studentCount > 0 ? Math.round((clusters.AT_RISK.length / studentCount) * 100) : 0,
+        },
+        totalStudents: studentCount,
+      });
+    }
+  } catch (error) {
+    console.error('获取学生聚类分析失败:', error);
+    res.status(500).json({ error: '获取学生聚类分析失败' });
+  }
+});
+
+// 1D: 课堂表现热力图
+router.get('/class/:classId/performance-heatmap', authenticate, requireTeacher, async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const permission = await ensureClassOwner(classId, req.user!.userId);
+    if (!permission.ok) return rejectPermission(res, permission as { code: number; error: string });
+
+    const students = await prisma.classStudent.findMany({
+      where: { classId },
+      include: { student: { select: { id: true, name: true } } },
+    });
+
+    const records = await prisma.classPerformanceRecord.findMany({
+      where: { classId },
+      select: { studentId: true, score: true, occurredAt: true },
+      orderBy: { occurredAt: 'asc' },
+    });
+
+    if (records.length === 0) {
+      return res.json({
+        students: students.map(s => ({ id: s.student.id, name: s.student.name })),
+        timeBuckets: [],
+        matrix: students.map(() => []),
+      });
+    }
+
+    // Generate weekly time buckets
+    const firstDate = new Date(records[0].occurredAt);
+    const lastDate = new Date(records[records.length - 1].occurredAt);
+    const timeBuckets: string[] = [];
+    const bucketStart: Date[] = [];
+    const current = new Date(firstDate);
+    current.setDate(current.getDate() - current.getDay()); // Start of week
+    current.setHours(0, 0, 0, 0);
+
+    while (current <= lastDate) {
+      const weekEnd = new Date(current);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      const label = `${current.getMonth() + 1}/${current.getDate()}-${weekEnd.getMonth() + 1}/${weekEnd.getDate()}`;
+      timeBuckets.push(label);
+      bucketStart.push(new Date(current));
+      current.setDate(current.getDate() + 7);
+    }
+
+    // Build matrix[student_index][time_bucket_index]
+    const studentIdToIdx: Record<string, number> = {};
+    students.forEach((s, i) => { studentIdToIdx[s.student.id] = i; });
+
+    const matrix: number[][] = students.map(() => new Array(timeBuckets.length).fill(0));
+
+    for (const r of records) {
+      const sIdx = studentIdToIdx[r.studentId];
+      if (sIdx === undefined) continue;
+      const rDate = new Date(r.occurredAt);
+      for (let b = 0; b < bucketStart.length; b++) {
+        const bEnd = new Date(bucketStart[b]);
+        bEnd.setDate(bEnd.getDate() + 7);
+        if (rDate >= bucketStart[b] && rDate < bEnd) {
+          matrix[sIdx][b] += r.score ?? 0;
+          break;
+        }
+      }
+    }
+
+    res.json({
+      students: students.map(s => ({ id: s.student.id, name: s.student.name })),
+      timeBuckets,
+      matrix,
+    });
+  } catch (error) {
+    console.error('获取表现热力图失败:', error);
+    res.status(500).json({ error: '获取表现热力图失败' });
+  }
+});
+
+// 1E: 个体学生画像
+router.get('/class/:classId/student/:studentId/profile', authenticate, requireTeacher, async (req, res) => {
+  try {
+    const { classId, studentId } = req.params;
+    const permission = await ensureClassOwner(classId, req.user!.userId);
+    if (!permission.ok) return rejectPermission(res, permission as { code: number; error: string });
+
+    const student = await prisma.user.findUnique({
+      where: { id: studentId },
+      select: { id: true, name: true, email: true, avatar: true },
+    });
+    if (!student) return res.status(404).json({ error: '学生不存在' });
+
+    // Homework scores and trend
+    const homeworks = await prisma.homework.findMany({
+      where: { classId },
+      include: { submissions: { where: { studentId } } },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const homeworkScores = homeworks.map(hw => {
+      const sub = hw.submissions[0];
+      return {
+        homeworkId: hw.id,
+        title: hw.title,
+        maxScore: hw.maxScore,
+        score: sub?.score ?? null,
+        submitted: !!sub,
+        onTime: sub ? new Date(sub.submittedAt) <= new Date(hw.deadline) : false,
+      };
+    });
+
+    // Performance records
+    const perfRecords = await prisma.classPerformanceRecord.findMany({
+      where: { classId, studentId },
+      select: { type: true, topic: true, score: true, occurredAt: true },
+      orderBy: { occurredAt: 'desc' },
+    });
+    const qaRecords = perfRecords.filter(r => r.type === 'CLASSROOM_QA');
+    const shareRecords = perfRecords.filter(r => r.type === 'KNOWLEDGE_SHARE');
+
+    // Self-assessment data
+    const selfAssessments = await prisma.selfAssessment.findMany({
+      where: { studentId, homework: { classId } },
+      include: { homework: { select: { title: true } } },
+    });
+
+    // Peer reviews given and received
+    const peerReviewsGiven = await prisma.peerReview.findMany({
+      where: { reviewerId: studentId, homework: { classId } },
+      select: { score: true, comment: true, homework: { select: { title: true } } },
+    });
+    const peerReviewsReceived = await prisma.peerReview.findMany({
+      where: { submission: { studentId }, homework: { classId } },
+      select: { score: true, comment: true, homework: { select: { title: true } } },
+    });
+
+    // Cluster classification
+    const hwCount = homeworks.length;
+    let totalScore = 0;
+    let totalMaxScore = 0;
+    let submittedCount = 0;
+    let onTimeCount = 0;
+    for (const hs of homeworkScores) {
+      if (hs.submitted) {
+        submittedCount++;
+        if (hs.score !== null) {
+          totalScore += hs.score;
+          totalMaxScore += hs.maxScore;
+        }
+        if (hs.onTime) onTimeCount++;
+      }
+    }
+    const avgScoreRate = totalMaxScore > 0 ? Math.round((totalScore / totalMaxScore) * 100) : 0;
+    const submissionRate = hwCount > 0 ? Math.round((submittedCount / hwCount) * 100) : 0;
+    const onTimeRate = submittedCount > 0 ? Math.round((onTimeCount / submittedCount) * 100) : 0;
+    const composite = avgScoreRate * 0.5 + submissionRate * 0.3 + onTimeRate * 0.2;
+    let cluster: 'HIGH' | 'MEDIUM' | 'AT_RISK';
+    if (composite >= 80) cluster = 'HIGH';
+    else if (composite >= 50) cluster = 'MEDIUM';
+    else cluster = 'AT_RISK';
+
+    res.json({
+      student,
+      homeworkScores,
+      performance: {
+        qa: { count: qaRecords.length, records: qaRecords },
+        share: { count: shareRecords.length, records: shareRecords },
+      },
+      selfAssessments: selfAssessments.map(sa => ({
+        homeworkTitle: sa.homework.title,
+        score: sa.score,
+        description: sa.description,
+      })),
+      peerReviews: {
+        given: peerReviewsGiven.map(pr => ({ homeworkTitle: pr.homework.title, score: pr.score, comment: pr.comment })),
+        received: peerReviewsReceived.map(pr => ({ homeworkTitle: pr.homework.title, score: pr.score, comment: pr.comment })),
+      },
+      metrics: { avgScoreRate, submissionRate, onTimeRate, composite: Math.round(composite), cluster },
+    });
+  } catch (error) {
+    console.error('获取学生画像失败:', error);
+    res.status(500).json({ error: '获取学生画像失败' });
+  }
+});
+
+// 1F: 自评/互评数据统计
+router.get('/class/:classId/peer-review-stats', authenticate, requireTeacher, async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const permission = await ensureClassOwner(classId, req.user!.userId);
+    if (!permission.ok) return rejectPermission(res, permission as { code: number; error: string });
+
+    const studentIds = (await prisma.classStudent.findMany({
+      where: { classId }, select: { studentId: true },
+    })).map(s => s.studentId);
+
+    const homeworks = await prisma.homework.findMany({
+      where: { classId },
+      include: {
+        selfAssessments: { where: { studentId: { in: studentIds } } },
+        peerReviews: true,
+        submissions: { where: { studentId: { in: studentIds }, score: { not: null } } },
+      },
+    });
+
+    // Self-assessment distribution
+    const selfScores = homeworks.flatMap(hw => hw.selfAssessments.map(sa => sa.score));
+    const selfDistribution: Record<string, number> = {};
+    for (const s of selfScores) {
+      const bucket = `${Math.floor(s / 10) * 10}-${Math.floor(s / 10) * 10 + 9}`;
+      selfDistribution[bucket] = (selfDistribution[bucket] ?? 0) + 1;
+    }
+
+    // Peer review distribution
+    const peerScores = homeworks.flatMap(hw => hw.peerReviews.map(pr => pr.score));
+    const peerDistribution: Record<string, number> = {};
+    for (const s of peerScores) {
+      const bucket = `${Math.floor(s / 10) * 10}-${Math.floor(s / 10) * 10 + 9}`;
+      peerDistribution[bucket] = (peerDistribution[bucket] ?? 0) + 1;
+    }
+
+    // Self vs Teacher scatter data
+    const scatterData: Array<{ selfScore: number; teacherScore: number; studentId: string }> = [];
+    for (const hw of homeworks) {
+      for (const sa of hw.selfAssessments) {
+        const submission = hw.submissions.find(s => s.studentId === sa.studentId);
+        if (submission && submission.score !== null) {
+          scatterData.push({
+            selfScore: sa.score,
+            teacherScore: Math.round((submission.score / hw.maxScore) * 100),
+            studentId: sa.studentId,
+          });
+        }
+      }
+    }
+
+    // Peer review consistency (standard deviation of peer scores per submission)
+    const peerScoresBySubmission: Record<string, number[]> = {};
+    for (const hw of homeworks) {
+      for (const pr of hw.peerReviews) {
+        const key = pr.submissionId;
+        if (!peerScoresBySubmission[key]) peerScoresBySubmission[key] = [];
+        peerScoresBySubmission[key].push(pr.score);
+      }
+    }
+    const stdDevs = Object.values(peerScoresBySubmission)
+      .filter(arr => arr.length > 1)
+      .map(arr => {
+        const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
+        return Math.sqrt(arr.reduce((s, v) => s + (v - avg) ** 2, 0) / arr.length);
+      });
+    const avgStdDev = stdDevs.length > 0 ? Math.round((stdDevs.reduce((a, b) => a + b, 0) / stdDevs.length) * 10) / 10 : 0;
+
+    res.json({
+      selfAssessment: {
+        totalCount: selfScores.length,
+        distribution: Object.entries(selfDistribution)
+          .map(([range, count]) => ({ range, count }))
+          .sort((a, b) => a.range.localeCompare(b.range)),
+        average: selfScores.length > 0 ? Math.round(selfScores.reduce((a, b) => a + b, 0) / selfScores.length) : 0,
+      },
+      peerReview: {
+        totalCount: peerScores.length,
+        distribution: Object.entries(peerDistribution)
+          .map(([range, count]) => ({ range, count }))
+          .sort((a, b) => a.range.localeCompare(b.range)),
+        average: peerScores.length > 0 ? Math.round(peerScores.reduce((a, b) => a + b, 0) / peerScores.length) : 0,
+        consistencyStdDev: avgStdDev,
+      },
+      selfVsTeacher: scatterData,
+    });
+  } catch (error) {
+    console.error('获取评价分析数据失败:', error);
+    res.status(500).json({ error: '获取评价分析数据失败' });
   }
 });
 

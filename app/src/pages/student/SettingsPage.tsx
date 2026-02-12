@@ -67,7 +67,7 @@ export function SettingsPage() {
       if (data.preferences) {
         setPreferences(prev => ({ ...prev, ...data.preferences }));
       }
-    }).catch(() => {});
+    }).catch((err: unknown) => { console.error('加载偏好设置失败:', err); });
   }, []);
 
   // 防抖保存偏好设置

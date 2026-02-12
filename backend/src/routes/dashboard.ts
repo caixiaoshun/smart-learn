@@ -292,96 +292,121 @@ router.get('/student/trend', authenticate, requireStudent, async (req, res) => {
   }
 });
 
-// 获取学生能力雷达（基于不同维度评估）
+// ========== 五维能力雷达（重设计） ==========
+
+// 1) 知识掌握：已评分作业的平均得分率，无数据默认50
+async function calcKnowledgeMastery(userId: string): Promise<number> {
+  const submissions = await prisma.submission.findMany({
+    where: { studentId: userId, score: { not: null } },
+    include: { homework: { select: { maxScore: true } } },
+  });
+  if (submissions.length === 0) return 50;
+  return Math.round(
+    submissions.reduce((sum, s) => sum + ((s.score ?? 0) / s.homework.maxScore) * 100, 0) / submissions.length,
+  );
+}
+
+// 2) 学习投入：提交率×0.5 + 按时提交率×0.5，无数据默认50
+async function calcLearningEngagement(userId: string, classIds: string[]): Promise<number> {
+  const totalHomeworks = await prisma.homework.count({ where: { classId: { in: classIds } } });
+  if (totalHomeworks === 0) return 50;
+  const allSubs = await prisma.submission.findMany({
+    where: { studentId: userId },
+    include: { homework: { select: { deadline: true, classId: true } } },
+  });
+  const relevantSubs = allSubs.filter(s => classIds.includes(s.homework.classId));
+  const submissionRate = (relevantSubs.length / totalHomeworks) * 100;
+  const onTimeCount = relevantSubs.filter(s => new Date(s.submittedAt) <= new Date(s.homework.deadline)).length;
+  const onTimeRate = relevantSubs.length > 0 ? (onTimeCount / relevantSubs.length) * 100 : 0;
+  return Math.min(100, Math.round(submissionRate * 0.5 + onTimeRate * 0.5));
+}
+
+// 3) 课堂互动：教师打分标准化 + 参与频次加分，无数据默认50
+async function calcClassroomInteraction(userId: string, classIds: string[]): Promise<number> {
+  const records = await prisma.classPerformanceRecord.findMany({
+    where: { studentId: userId, classId: { in: classIds } },
+    select: { score: true },
+  });
+  if (records.length === 0) return 50;
+  const scoredRecords = records.filter(r => r.score != null);
+  const avgPart = scoredRecords.length > 0
+    ? (scoredRecords.reduce((sum, r) => sum + (r.score as number), 0) / scoredRecords.length) / 5 * 80
+    : 0;
+  const freqBonus = Math.min(20, records.length * 4);
+  return Math.min(100, Math.round(avgPart + freqBonus));
+}
+
+// 4) 协作贡献：小组参与度(40) + 互评完成率(30) + 自评完成率(30)，无数据默认50
+async function calcCollaborationContribution(userId: string, classIds: string[]): Promise<number> {
+  // Group homework count in classes
+  const groupHomeworks = await prisma.homework.count({
+    where: { classId: { in: classIds }, type: 'GROUP_PROJECT' },
+  });
+  const groupMembershipCount = await prisma.assignmentGroupMember.count({ where: { studentId: userId } });
+  const groupPart = groupHomeworks > 0
+    ? Math.min(40, (groupMembershipCount / groupHomeworks) * 40)
+    : 0;
+
+  // Peer review completion
+  const peerAssigned = await prisma.peerReviewAssignment.count({ where: { reviewerId: userId } });
+  const peerDone = await prisma.peerReview.count({ where: { reviewerId: userId } });
+  const peerRate = peerAssigned > 0 ? (peerDone / peerAssigned) * 30 : 0;
+
+  // Self-assessment completion
+  const selfExpected = await prisma.homework.count({
+    where: { classId: { in: classIds }, type: 'GROUP_PROJECT' },
+  });
+  const selfDone = await prisma.selfAssessment.count({ where: { studentId: userId } });
+  const selfRate = selfExpected > 0 ? Math.min(30, (selfDone / selfExpected) * 30) : 0;
+
+  const total = groupPart + peerRate + selfRate;
+  if (groupHomeworks === 0 && peerAssigned === 0 && selfExpected === 0) return 50;
+  return Math.min(100, Math.round(total));
+}
+
+// 5) 自主拓展：资源浏览(30) + AI助手活跃(30) + 案例探索(20) + 学习时长(20)，无数据默认50
+async function calcSelfDirectedExploration(userId: string): Promise<number> {
+  const [resourceViewCount, chatCount, caseBookmarkCount, behaviorLogs] = await Promise.all([
+    prisma.resourceView.count({ where: { userId } }),
+    prisma.chatMessage.count({ where: { userId, role: 'user' } }),
+    prisma.caseBookmark.count({ where: { userId } }),
+    prisma.behaviorLog.aggregate({ where: { studentId: userId }, _sum: { duration: true } }),
+  ]);
+
+  const resourceScore = Math.min(1, resourceViewCount / 10) * 30;
+  const aiScore = Math.min(30, Math.log2(chatCount + 1) * 15);
+  const caseScore = Math.min(20, caseBookmarkCount * 10);
+  const totalDuration = behaviorLogs._sum.duration ?? 0;
+  const durationScore = Math.min(20, (totalDuration / 3600) * 5);
+
+  const total = resourceScore + aiScore + caseScore + durationScore;
+  if (resourceViewCount === 0 && chatCount === 0 && caseBookmarkCount === 0 && totalDuration === 0) return 50;
+  return Math.min(100, Math.round(total));
+}
+
+// 获取学生能力雷达（重设计五维模型）
 router.get('/student/radar', authenticate, requireStudent, async (req, res) => {
   try {
     const userId = req.user!.userId;
 
-    // 获取学生班级
     const memberships = await prisma.classStudent.findMany({
       where: { studentId: userId },
       select: { classId: true },
     });
     const classIds = memberships.map(m => m.classId);
 
-    // 1) 知识掌握：作业得分率（已评分作业的平均得分百分比）
-    const submissions = await prisma.submission.findMany({
-      where: { studentId: userId, score: { not: null } },
-      include: { homework: { select: { maxScore: true } } },
-    });
-    const knowledgeScore = submissions.length > 0
-      ? Math.round(submissions.reduce((sum, s) => sum + ((s.score ?? 0) / s.homework.maxScore) * 100, 0) / submissions.length)
-      : 0;
+    const [knowledgeScore, engagementScore, interactionScore, collaborationScore, explorationScore] =
+      await Promise.all([
+        calcKnowledgeMastery(userId),
+        calcLearningEngagement(userId, classIds),
+        calcClassroomInteraction(userId, classIds),
+        calcCollaborationContribution(userId, classIds),
+        calcSelfDirectedExploration(userId),
+      ]);
 
-    // 2) 实践能力：综合提交率(60%) + 编程实验通过率(40%)
-    const totalHomeworks = await prisma.homework.count({ where: { classId: { in: classIds } } });
-    const submittedCount = await prisma.submission.count({ where: { studentId: userId } });
-    const submissionRate = totalHomeworks > 0 ? (submittedCount / totalHomeworks) * 100 : 0;
+    const labels = ['知识掌握', '学习投入', '课堂互动', '协作贡献', '自主拓展'];
+    const scores = [knowledgeScore, engagementScore, interactionScore, collaborationScore, explorationScore];
 
-    const allHomeworks = await prisma.homework.findMany({
-      where: { classId: { in: classIds } },
-      include: { submissions: { where: { studentId: userId } } },
-    });
-    const labHws = allHomeworks.filter(h => /实验|lab|编程|代码|coding/i.test(h.title));
-    const labPassed = labHws.filter(h => (h.submissions[0]?.score ?? 0) >= h.maxScore * 0.6).length;
-    const labPassRate = labHws.length > 0 ? (labPassed / labHws.length) * 100 : submissionRate;
-    const practiceScore = Math.round(submissionRate * 0.6 + labPassRate * 0.4);
-
-    // 3) 课堂表现：平时表现综合评分（基于教师给的ClassPerformanceRecord）
-    const performanceRecords = await prisma.classPerformanceRecord.findMany({
-      where: { studentId: userId, classId: { in: classIds } },
-      select: { type: true, score: true },
-    });
-    let classPerformanceScore = 0;
-    if (performanceRecords.length > 0) {
-      const scoredRecords = performanceRecords.filter(r => r.score != null);
-      if (scoredRecords.length > 0) {
-        const avgScore = scoredRecords.reduce((sum, r) => sum + (r.score as number), 0) / scoredRecords.length;
-        // Score is 1-5, normalize to 0-100
-        classPerformanceScore = Math.round((avgScore / 5) * 100);
-      }
-      // Bonus for participation (up to 20 points for having 10+ records)
-      const participationBonus = Math.min(20, performanceRecords.length * 2);
-      classPerformanceScore = Math.min(100, classPerformanceScore + participationBonus);
-    }
-
-    // 4) 协作能力：互评参与(50%) + 小组项目参与(50%)
-    const peerReviewCount = await prisma.peerReview.count({ where: { reviewerId: userId } });
-    const peerReviewAssignments = await prisma.peerReviewAssignment.count({ where: { reviewerId: userId } });
-    const peerReviewRate = peerReviewAssignments > 0
-      ? Math.min(100, Math.round((peerReviewCount / peerReviewAssignments) * 100))
-      : 0;
-
-    const groupMemberships = await prisma.assignmentGroupMember.count({ where: { studentId: userId } });
-    const groupScore = Math.min(100, groupMemberships * 25);
-    const collaborationScore = Math.round(peerReviewRate * 0.5 + groupScore * 0.5);
-
-    // 5) 创新思维：按时提交率(40%) + 自主实践作业完成(30%) + 代码质量(30%)
-    const onTimeSubs = await prisma.submission.findMany({
-      where: { studentId: userId },
-      include: { homework: { select: { deadline: true, type: true, maxScore: true } } },
-    });
-    const onTimeCount = onTimeSubs.filter(s => new Date(s.submittedAt) <= new Date(s.homework.deadline)).length;
-    const onTimeRate = onTimeSubs.length > 0 ? (onTimeCount / onTimeSubs.length) * 100 : 0;
-
-    const selfPracticeSubs = onTimeSubs.filter(s => s.homework.type === 'SELF_PRACTICE');
-    const selfPracticeScore = selfPracticeSubs.length > 0
-      ? Math.min(100, selfPracticeSubs.length * 20)
-      : 0;
-
-    // Code quality approximation: avg score percentage on lab homeworks
-    const labScored = labHws.filter(h => h.submissions[0]?.score != null);
-    const codeQualityScore = labScored.length > 0
-      ? Math.round(labScored.reduce((sum, h) => sum + ((h.submissions[0].score ?? 0) / h.maxScore) * 100, 0) / labScored.length)
-      : knowledgeScore;
-
-    const innovationScore = Math.round(onTimeRate * 0.4 + selfPracticeScore * 0.3 + codeQualityScore * 0.3);
-
-    // 组装结果
-    const labels = ['知识掌握', '实践能力', '课堂表现', '协作能力', '创新思维'];
-    const scores = [knowledgeScore, practiceScore, classPerformanceScore, collaborationScore, innovationScore];
-
-    // 找到最强和最弱维度
     const maxIdx = scores.indexOf(Math.max(...scores));
     const minIdx = scores.indexOf(Math.min(...scores));
     const strongLabel = labels[maxIdx];
@@ -392,10 +417,10 @@ router.get('/student/radar', authenticate, requireStudent, async (req, res) => {
 
     const suggestionMap: Record<string, string> = {
       '知识掌握': '建议多复习课程材料，认真完成每次作业以巩固知识点。',
-      '实践能力': '建议按时提交作业和编程实验，多动手实践积累经验。',
-      '课堂表现': '建议积极参与课堂问答和知识分享，提升课堂参与度。',
-      '协作能力': '建议积极参与同行互评和小组项目，加强团队协作。',
-      '创新思维': '建议尝试自主实践作业，按时完成任务并注重代码质量。',
+      '学习投入': '建议合理规划时间，按时提交每次作业以保持学习节奏。',
+      '课堂互动': '建议积极参与课堂问答和知识分享，提升课堂参与度。',
+      '协作贡献': '建议积极参与同行互评和小组项目，完成自评与互评任务。',
+      '自主拓展': '建议多浏览资源库和案例库，利用AI助手深入探索知识。',
     };
 
     const aiDiagnosis = {

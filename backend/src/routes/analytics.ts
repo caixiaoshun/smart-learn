@@ -701,12 +701,12 @@ function kMeansCluster(data: number[][], k: number, maxIter = 100): { labels: nu
 
   // Initialize centroids using first k distinct points
   const centroids: number[][] = [];
-  const used = new Set<number>();
+  const usedKeys = new Set<string>();
   for (let i = 0; i < n && centroids.length < clampK; i++) {
     const key = data[i].join(',');
-    if (!used.has(i)) {
+    if (!usedKeys.has(key)) {
       centroids.push([...data[i]]);
-      used.add(i);
+      usedKeys.add(key);
     }
   }
   while (centroids.length < clampK) centroids.push([...data[centroids.length % n]]);
@@ -1118,7 +1118,8 @@ router.get('/class/:classId/peer-review-stats', authenticate, requireTeacher, as
     const selfScores = homeworks.flatMap(hw => hw.selfAssessments.map(sa => sa.score));
     const selfDistribution: Record<string, number> = {};
     for (const s of selfScores) {
-      const bucket = `${Math.floor(s / 10) * 10}-${Math.floor(s / 10) * 10 + 9}`;
+      const base = Math.floor(s / 10) * 10;
+      const bucket = `${base}-${base + 9}`;
       selfDistribution[bucket] = (selfDistribution[bucket] ?? 0) + 1;
     }
 
@@ -1126,7 +1127,8 @@ router.get('/class/:classId/peer-review-stats', authenticate, requireTeacher, as
     const peerScores = homeworks.flatMap(hw => hw.peerReviews.map(pr => pr.score));
     const peerDistribution: Record<string, number> = {};
     for (const s of peerScores) {
-      const bucket = `${Math.floor(s / 10) * 10}-${Math.floor(s / 10) * 10 + 9}`;
+      const base = Math.floor(s / 10) * 10;
+      const bucket = `${base}-${base + 9}`;
       peerDistribution[bucket] = (peerDistribution[bucket] ?? 0) + 1;
     }
 

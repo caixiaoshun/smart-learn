@@ -97,6 +97,11 @@ export function AnalyticsPage() {
     if (selectedClassId) fetchStudentClusters(selectedClassId, method, clusterK);
   };
 
+  const handleClusterKChange = (newK: number) => {
+    setClusterK(newK);
+    if (selectedClassId) fetchStudentClusters(selectedClassId, 'kmeans', newK);
+  };
+
   const handleStudentClick = (studentId: string) => {
     if (selectedClassId) {
       fetchStudentProfile(selectedClassId, studentId);
@@ -205,7 +210,7 @@ export function AnalyticsPage() {
                   <select
                     className="rounded-md border px-2 py-1 text-sm"
                     value={clusterK}
-                    onChange={(e) => { const k = parseInt(e.target.value); setClusterK(k); if (selectedClassId) fetchStudentClusters(selectedClassId, 'kmeans', k); }}
+                    onChange={(e) => handleClusterKChange(parseInt(e.target.value))}
                   >
                     <option value="2">K=2</option>
                     <option value="3">K=3</option>

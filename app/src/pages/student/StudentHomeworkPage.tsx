@@ -375,7 +375,7 @@ export function StudentHomeworkPage() {
   function renderHomeworkCard(homework: StudentHomework) {
     const isExpanded = expandedHomeworkId === homework.id;
     const deadlineInfo = getDeadlineInfo(homework);
-    const isSubmitArea = (!homework.isSubmitted && !homework.isOverdue) || resubmittingHomeworkId === homework.id;
+    const isSubmitArea = homework.type !== 'GROUP_PROJECT' && ((!homework.isSubmitted && !homework.isOverdue) || resubmittingHomeworkId === homework.id);
 
     return (
       <Card key={homework.id} className="bg-white border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
@@ -532,8 +532,8 @@ export function StudentHomeworkPage() {
                   )}
                 </div>
               ) : (
-                /* 未批改：显示重新提交按钮 */
-                !homework.isOverdue && resubmittingHomeworkId !== homework.id && (
+                /* 未批改：显示重新提交按钮（非小组作业） */
+                !homework.isOverdue && homework.type !== 'GROUP_PROJECT' && resubmittingHomeworkId !== homework.id && (
                   <div className="mt-3 flex justify-end">
                     <Button
                       variant="ghost"

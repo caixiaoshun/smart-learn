@@ -435,6 +435,11 @@ router.post('/:id/submit', authenticate, requireStudent, upload.array('files', 5
       return res.status(404).json({ error: '作业不存在' });
     }
 
+    // 小组作业必须通过小组提交接口
+    if (homework.type === 'GROUP_PROJECT') {
+      return res.status(400).json({ error: '小组作业请通过组队中心提交' });
+    }
+
     // 验证学生是否在班级中
     const membership = await prisma.classStudent.findUnique({
       where: {

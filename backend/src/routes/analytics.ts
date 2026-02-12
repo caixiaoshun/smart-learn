@@ -621,4 +621,260 @@ router.get('/class/:classId/comprehensive-stats', authenticate, requireTeacher, 
   }
 });
 
+// 学生成绩热力图（每个学生在每次作业中的得分率）
+router.get('/class/:classId/score-heatmap', authenticate, requireTeacher, async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const permission = await ensureClassOwner(classId, req.user!.userId);
+    if (!permission.ok) return rejectPermission(res, permission as { code: number; error: string });
+
+    const classData = await prisma.class.findUnique({
+      where: { id: classId },
+      include: {
+        students: { include: { student: { select: { id: true, name: true } } } },
+        homeworks: {
+          include: { submissions: true },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+    if (!classData) return res.status(404).json({ error: '班级不存在' });
+
+    const homeworks = classData.homeworks.map(hw => ({ id: hw.id, title: hw.title }));
+    const students = classData.students.map(cs => {
+      const scores = classData.homeworks.map(hw => {
+        const sub = hw.submissions.find(s => s.studentId === cs.studentId);
+        if (!sub || sub.score === null) return null;
+        return hw.maxScore > 0 ? Math.round((sub.score / hw.maxScore) * 100) : 0;
+      });
+      return { id: cs.student.id, name: cs.student.name, scores };
+    });
+
+    res.json({ homeworks, students });
+  } catch (error) {
+    console.error('获取成绩热力图失败:', error);
+    res.status(500).json({ error: '获取成绩热力图失败' });
+  }
+});
+
+// 多维学习参与度（气泡图数据：提交率 vs 得分率 vs 行为活跃度）
+router.get('/class/:classId/engagement-bubble', authenticate, requireTeacher, async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const permission = await ensureClassOwner(classId, req.user!.userId);
+    if (!permission.ok) return rejectPermission(res, permission as { code: number; error: string });
+
+    const classData = await prisma.class.findUnique({
+      where: { id: classId },
+      include: {
+        students: { include: { student: { select: { id: true, name: true } } } },
+        homeworks: { include: { submissions: true } },
+      },
+    });
+    if (!classData) return res.status(404).json({ error: '班级不存在' });
+
+    const studentIds = classData.students.map(cs => cs.studentId);
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(now.getDate() - 30);
+
+    const behaviorLogs = await prisma.behaviorLog.findMany({
+      where: { studentId: { in: studentIds }, createdAt: { gte: thirtyDaysAgo } },
+      select: { studentId: true, duration: true },
+    });
+    const behaviorMap = new Map<string, number>();
+    for (const log of behaviorLogs) {
+      behaviorMap.set(log.studentId, (behaviorMap.get(log.studentId) || 0) + log.duration);
+    }
+    const maxBehavior = Math.max(...behaviorMap.values(), 1);
+
+    const homeworkCount = classData.homeworks.length;
+    const bubbles = classData.students.map(cs => {
+      let totalScore = 0;
+      let totalMaxScore = 0;
+      let submittedCount = 0;
+
+      for (const hw of classData.homeworks) {
+        const sub = hw.submissions.find(s => s.studentId === cs.studentId);
+        if (sub) {
+          submittedCount++;
+          if (sub.score !== null) {
+            totalScore += sub.score;
+            totalMaxScore += hw.maxScore;
+          }
+        }
+      }
+
+      const submissionRate = homeworkCount > 0 ? Math.round((submittedCount / homeworkCount) * 100) : 0;
+      const scoreRate = totalMaxScore > 0 ? Math.round((totalScore / totalMaxScore) * 100) : 0;
+      const activityDuration = behaviorMap.get(cs.studentId) || 0;
+      const activityScore = Math.round((activityDuration / maxBehavior) * 100);
+
+      return {
+        name: cs.student.name,
+        studentId: cs.student.id,
+        x: submissionRate,
+        y: scoreRate,
+        z: activityScore,
+      };
+    });
+
+    res.json({
+      bubbles,
+      xLabel: '提交率 (%)',
+      yLabel: '平均得分率 (%)',
+      zLabel: '学习活跃度',
+    });
+  } catch (error) {
+    console.error('获取学习参与度气泡图失败:', error);
+    res.status(500).json({ error: '获取学习参与度气泡图失败' });
+  }
+});
+
+// 多学生成绩趋势对比（叠加面积图）
+router.get('/class/:classId/student-trends', authenticate, requireTeacher, async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const permission = await ensureClassOwner(classId, req.user!.userId);
+    if (!permission.ok) return rejectPermission(res, permission as { code: number; error: string });
+
+    const classData = await prisma.class.findUnique({
+      where: { id: classId },
+      include: {
+        students: { include: { student: { select: { id: true, name: true } } } },
+        homeworks: {
+          include: { submissions: true },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+    if (!classData) return res.status(404).json({ error: '班级不存在' });
+
+    const homeworks = classData.homeworks.map(hw => ({ id: hw.id, title: hw.title }));
+
+    // Build data points for each homework, include each student's score
+    const trendData = classData.homeworks.map(hw => {
+      const point: Record<string, string | number> = { homework: hw.title };
+      for (const cs of classData.students) {
+        const sub = hw.submissions.find(s => s.studentId === cs.studentId);
+        if (sub && sub.score !== null) {
+          point[cs.student.name] = hw.maxScore > 0 ? Math.round((sub.score / hw.maxScore) * 100) : 0;
+        }
+      }
+      return point;
+    });
+
+    const studentNames = classData.students.map(cs => cs.student.name);
+
+    res.json({ homeworks, trendData, studentNames });
+  } catch (error) {
+    console.error('获取多学生成绩趋势失败:', error);
+    res.status(500).json({ error: '获取多学生成绩趋势失败' });
+  }
+});
+
+// 学习能力关键词分析（词云数据）
+router.get('/class/:classId/competency-keywords', authenticate, requireTeacher, async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const permission = await ensureClassOwner(classId, req.user!.userId);
+    if (!permission.ok) return rejectPermission(res, permission as { code: number; error: string });
+
+    const classData = await prisma.class.findUnique({
+      where: { id: classId },
+      include: {
+        students: { include: { student: { select: { id: true } } } },
+        homeworks: {
+          include: { submissions: true },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+    if (!classData) return res.status(404).json({ error: '班级不存在' });
+
+    const studentIds = classData.students.map(cs => cs.studentId);
+    const studentCount = studentIds.length;
+    const homeworkCount = classData.homeworks.length;
+
+    // Compute aggregate metrics
+    let totalSubmissions = 0;
+    let totalScored = 0;
+    let totalScore = 0;
+    let totalMaxScore = 0;
+    let onTimeCount = 0;
+    let lateCount = 0;
+
+    for (const hw of classData.homeworks) {
+      for (const sub of hw.submissions) {
+        if (!studentIds.includes(sub.studentId)) continue;
+        totalSubmissions++;
+        if (sub.score !== null) {
+          totalScored++;
+          totalScore += sub.score;
+          totalMaxScore += hw.maxScore;
+        }
+        if (new Date(sub.submittedAt) <= new Date(hw.deadline)) {
+          onTimeCount++;
+        } else {
+          lateCount++;
+        }
+      }
+    }
+
+    const avgScoreRate = totalMaxScore > 0 ? Math.round((totalScore / totalMaxScore) * 100) : 0;
+    const submissionRate = (studentCount * homeworkCount) > 0 ? Math.round((totalSubmissions / (studentCount * homeworkCount)) * 100) : 0;
+    const onTimeRate = totalSubmissions > 0 ? Math.round((onTimeCount / totalSubmissions) * 100) : 0;
+
+    // Peer review stats
+    const peerReviewCount = await prisma.peerReview.count({ where: { reviewerId: { in: studentIds } } });
+    const groupMemberCount = await prisma.assignmentGroupMember.count({ where: { studentId: { in: studentIds } } });
+
+    // Behavior logs
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(now.getDate() - 30);
+    const behaviorLogs = await prisma.behaviorLog.findMany({
+      where: { studentId: { in: studentIds }, createdAt: { gte: thirtyDaysAgo } },
+      select: { type: true, duration: true },
+    });
+
+    const resourceViews = behaviorLogs.filter(l => l.type === 'RESOURCE_VIEW').length;
+    const caseViews = behaviorLogs.filter(l => l.type === 'CASE_VIEW').length;
+    const aiChats = behaviorLogs.filter(l => l.type === 'AI_CHAT').length;
+    const totalActivity = behaviorLogs.reduce((sum, l) => sum + l.duration, 0);
+
+    // Performance records
+    const perfRecords = await prisma.classPerformanceRecord.findMany({
+      where: { studentId: { in: studentIds }, classId },
+      select: { type: true, score: true },
+    });
+    const qaCount = perfRecords.filter(r => r.type === 'CLASSROOM_QA').length;
+    const sharingCount = perfRecords.filter(r => r.type === 'KNOWLEDGE_SHARING').length;
+
+    // Build keyword weights based on actual data
+    const keywords: { name: string; value: number }[] = [
+      { name: '知识掌握', value: avgScoreRate },
+      { name: '作业完成', value: submissionRate },
+      { name: '按时提交', value: onTimeRate },
+      { name: '编程实践', value: Math.min(100, Math.round(totalActivity / Math.max(studentCount, 1) / 36)) },
+      { name: '互评参与', value: Math.min(100, Math.round(peerReviewCount / Math.max(studentCount, 1) * 20)) },
+      { name: '团队协作', value: Math.min(100, Math.round(groupMemberCount / Math.max(studentCount, 1) * 25)) },
+      { name: '课堂问答', value: Math.min(100, Math.round(qaCount / Math.max(studentCount, 1) * 15)) },
+      { name: '知识分享', value: Math.min(100, Math.round(sharingCount / Math.max(studentCount, 1) * 15)) },
+      { name: '资源浏览', value: Math.min(100, Math.round(resourceViews / Math.max(studentCount, 1) * 10)) },
+      { name: '案例学习', value: Math.min(100, Math.round(caseViews / Math.max(studentCount, 1) * 10)) },
+      { name: 'AI互动', value: Math.min(100, Math.round(aiChats / Math.max(studentCount, 1) * 10)) },
+      { name: '学习活跃度', value: Math.min(100, Math.round(totalActivity / Math.max(studentCount, 1) / 60)) },
+      { name: '成绩优秀率', value: totalScored > 0 ? Math.round((totalScore / totalMaxScore) * 100 >= 90 ? 100 : (totalScore / totalMaxScore) * 100) : 0 },
+      { name: '自主学习', value: Math.min(100, Math.round((resourceViews + caseViews + aiChats) / Math.max(studentCount, 1) * 8)) },
+      { name: '迟交管理', value: lateCount > 0 ? Math.max(10, 100 - Math.round(lateCount / Math.max(totalSubmissions, 1) * 100)) : submissionRate > 0 ? 90 : 0 },
+    ];
+
+    res.json({ keywords });
+  } catch (error) {
+    console.error('获取能力关键词失败:', error);
+    res.status(500).json({ error: '获取能力关键词失败' });
+  }
+});
+
 export default router;

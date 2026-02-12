@@ -6,8 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { BarChart as BaseBarChart } from '@/components/charts/BarChart';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, BarChart, Bar, ScatterChart, Scatter, ZAxis, Legend, LineChart, Line } from 'recharts';
-import { AlertTriangle, Award, Sparkles, Users, TrendingUp, Target } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, BarChart, Bar, ScatterChart, Scatter, ZAxis, Legend, LineChart, Line, Area, AreaChart, RadarChart as ReRadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
+import { AlertTriangle, Award, Sparkles, Users, TrendingUp, Target, Grid3X3, Flame, BarChart3, CloudCog } from 'lucide-react';
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
@@ -23,8 +23,10 @@ export function AnalyticsPage() {
   const { classes, fetchTeacherClasses } = useClassStore();
   const {
     homeworkStats, scoreDistribution, classOverview, studentClusters, scatterData, comprehensiveStats,
+    scoreHeatmap, engagementBubbles, studentTrends, competencyKeywords,
     isLoading, fetchClassHomeworkStats, fetchScoreDistribution, fetchClassOverview,
     fetchStudentClusters, fetchPerformanceScatter, fetchComprehensiveStats,
+    fetchScoreHeatmap, fetchEngagementBubbles, fetchStudentTrends, fetchCompetencyKeywords,
   } = useAnalyticsStore();
 
   const [selectedClassId, setSelectedClassId] = useState('');
@@ -49,6 +51,10 @@ export function AnalyticsPage() {
       fetchStudentClusters(selectedClassId),
       fetchPerformanceScatter(selectedClassId),
       fetchComprehensiveStats(selectedClassId),
+      fetchScoreHeatmap(selectedClassId),
+      fetchEngagementBubbles(selectedClassId),
+      fetchStudentTrends(selectedClassId),
+      fetchCompetencyKeywords(selectedClassId),
     ]);
   }, [selectedClassId]);
 
@@ -333,6 +339,145 @@ export function AnalyticsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* ===== 深度数据分析（EduAnalytics 参考） ===== */}
+      <div className="border-t pt-6 mt-2">
+        <h2 className="text-xl font-bold text-slate-900 mb-1">深度数据分析</h2>
+        <p className="text-sm text-muted-foreground mb-4">多维度可视化洞察，参考 EduAnalytics 数据分析模型，所有数据来自数据库实时聚合。</p>
+      </div>
+
+      {/* 学习参与度气泡图 + 能力关键词雷达 */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {engagementBubbles && (
+          <Card>
+            <CardHeader><CardTitle className="flex items-center gap-2"><Flame className="h-4 w-4 text-orange-500" />学习参与度气泡图</CardTitle></CardHeader>
+            <CardContent className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" dataKey="x" name={engagementBubbles.xLabel} domain={[0, 100]} unit="%" label={{ value: '提交率', position: 'insideBottom', offset: -5, fontSize: 12 }} />
+                  <YAxis type="number" dataKey="y" name={engagementBubbles.yLabel} domain={[0, 100]} unit="%" label={{ value: '得分率', angle: -90, position: 'insideLeft', fontSize: 12 }} />
+                  <ZAxis type="number" dataKey="z" range={[40, 400]} name={engagementBubbles.zLabel} />
+                  <Tooltip cursor={{ strokeDasharray: '3 3' }} content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload;
+                    return (
+                      <div className="rounded-lg bg-white p-3 shadow-lg border text-sm">
+                        <p className="font-medium">{d.name}</p>
+                        <p className="text-slate-600">提交率: {d.x}%</p>
+                        <p className="text-slate-600">得分率: {d.y}%</p>
+                        <p className="text-slate-600">活跃度: {d.z}</p>
+                      </div>
+                    );
+                  }} />
+                  <Scatter name="学生" data={engagementBubbles.bubbles} fill="#8b5cf6" fillOpacity={0.6} />
+                </ScatterChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+
+        {competencyKeywords && competencyKeywords.length > 0 && (
+          <Card>
+            <CardHeader><CardTitle className="flex items-center gap-2"><CloudCog className="h-4 w-4 text-blue-500" />班级能力关键词分析</CardTitle></CardHeader>
+            <CardContent className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <ReRadarChart cx="50%" cy="50%" outerRadius="65%" data={competencyKeywords.map(k => ({ subject: k.name, value: k.value, fullMark: 100 }))}>
+                  <PolarGrid stroke="#E5E7EB" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#6B7280', fontSize: 10 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                  <Radar name="班级能力" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} strokeWidth={2} />
+                  <Tooltip />
+                </ReRadarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* 成绩热力图 */}
+      {scoreHeatmap && scoreHeatmap.students.length > 0 && scoreHeatmap.homeworks.length > 0 && (
+        <Card>
+          <CardHeader><CardTitle className="flex items-center gap-2"><Grid3X3 className="h-4 w-4 text-emerald-500" />学生成绩热力图</CardTitle></CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[600px] text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="py-2 px-3 text-left font-medium text-slate-600 sticky left-0 bg-white">学生</th>
+                    {scoreHeatmap.homeworks.map(hw => (
+                      <th key={hw.id} className="py-2 px-2 text-center font-medium text-slate-600 max-w-[80px] truncate" title={hw.title}>{hw.title.slice(0, 6)}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {scoreHeatmap.students.map(student => (
+                    <tr key={student.id} className="border-b last:border-0">
+                      <td className="py-2 px-3 font-medium text-slate-800 sticky left-0 bg-white">{student.name}</td>
+                      {student.scores.map((score, i) => {
+                        let bgColor = 'bg-slate-50';
+                        let textColor = 'text-slate-400';
+                        if (score !== null) {
+                          if (score >= 90) { bgColor = 'bg-green-100'; textColor = 'text-green-800'; }
+                          else if (score >= 80) { bgColor = 'bg-green-50'; textColor = 'text-green-700'; }
+                          else if (score >= 70) { bgColor = 'bg-yellow-50'; textColor = 'text-yellow-700'; }
+                          else if (score >= 60) { bgColor = 'bg-orange-50'; textColor = 'text-orange-700'; }
+                          else { bgColor = 'bg-red-50'; textColor = 'text-red-700'; }
+                        }
+                        return (
+                          <td key={i} className={`py-2 px-2 text-center text-xs font-medium ${bgColor} ${textColor}`}>
+                            {score !== null ? `${score}%` : '-'}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-100" />≥90 优秀</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-50 border" />80-89 良好</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-yellow-50 border" />70-79 中等</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-orange-50 border" />60-69 及格</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-50 border" />{'<'}60 不及格</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 多学生成绩趋势对比 (叠加面积图) */}
+      {studentTrends && studentTrends.trendData.length > 0 && (
+        <Card>
+          <CardHeader><CardTitle className="flex items-center gap-2"><BarChart3 className="h-4 w-4 text-violet-500" />多学生成绩趋势对比</CardTitle></CardHeader>
+          <CardContent className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={studentTrends.trendData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="homework" tick={{ fontSize: 11 }} />
+                <YAxis domain={[0, 100]} />
+                <Tooltip />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                {studentTrends.studentNames.slice(0, 10).map((name, i) => {
+                  const areaColors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316', '#ec4899', '#14b8a6', '#6366f1'];
+                  return (
+                    <Area
+                      key={name}
+                      type="monotone"
+                      dataKey={name}
+                      stroke={areaColors[i % areaColors.length]}
+                      fill={areaColors[i % areaColors.length]}
+                      fillOpacity={0.1}
+                      strokeWidth={1.5}
+                      connectNulls
+                    />
+                  );
+                })}
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
 
       {isLoading && <p className="text-sm text-muted-foreground">加载中...</p>}
     </div>

@@ -567,7 +567,7 @@ router.post('/:groupId/submit', authenticate, requireStudent, upload.array('file
     try {
       laborDivision = JSON.parse(req.body.laborDivision || '[]');
     } catch {
-      return res.status(400).json({ error: '分工说明格式无效' });
+      return res.status(400).json({ error: '分工说明格式无效，请确保 JSON 格式正确' });
     }
 
     if (!Array.isArray(laborDivision) || laborDivision.length === 0) {
@@ -612,11 +612,9 @@ router.post('/:groupId/submit', authenticate, requireStudent, upload.array('file
     }
 
     // 上传文件到存储
-    const uploadedKeys: string[] = [];
-    for (const file of uploadedFiles) {
-      const key = await storageService.save(file, 'homework');
-      uploadedKeys.push(key);
-    }
+    const uploadedKeys = await Promise.all(
+      uploadedFiles.map((file) => storageService.save(file, 'homework'))
+    );
 
     // 创建或更新提交
     const submission = await prisma.submission.upsert({

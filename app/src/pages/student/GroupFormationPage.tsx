@@ -234,6 +234,7 @@ export function GroupFormationPage() {
   const openSubmitDialog = () => {
     if (!myGroupStatus?.myGroup) return;
     const members = myGroupStatus.myGroup.members;
+    // Evenly distribute contribution percentages, assign remainder to first member to ensure sum is exactly 100%
     const avgPercent = Math.floor(100 / members.length);
     const remainder = 100 - avgPercent * members.length;
     setLaborDivision(

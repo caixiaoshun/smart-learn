@@ -429,11 +429,17 @@ export function StudentHomeworkPage() {
 
         <CardContent className="pt-0">
           {/* 截止时间 & 满分 */}
-          <div className="flex items-center gap-4 mb-4 text-sm text-slate-500">
+          <div className="flex items-center gap-4 mb-4 text-sm text-slate-500 flex-wrap">
             <div className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5" />
               <span>截止：{new Date(homework.deadline).toLocaleString('zh-CN')}</span>
             </div>
+            {homework.allowLate && homework.lateDeadline && (
+              <div className="flex items-center gap-1.5 text-orange-600">
+                <Clock className="w-3.5 h-3.5" />
+                <span>迟交截止：{new Date(homework.lateDeadline).toLocaleString('zh-CN')}</span>
+              </div>
+            )}
             {homework.maxScore && (
               <span className="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded border border-slate-200">
                 满分：{homework.maxScore}分

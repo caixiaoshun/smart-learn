@@ -23,6 +23,7 @@ export interface Homework {
   deadline: string;
   maxScore: number;
   allowLate: boolean;
+  lateDeadline: string | null;
   reminderTime: string | null;
   reminderSent: boolean;
   groupConfig?: string | null;
@@ -135,6 +136,7 @@ export interface CreateHomeworkData {
   reminderHours?: number;
   maxScore?: number;
   allowLate?: boolean;
+  lateDeadline?: string;
   type?: 'STANDARD' | 'GROUP_PROJECT' | 'SELF_PRACTICE';
   groupConfig?: Record<string, unknown>;
   peerReviewConfig?: Record<string, unknown>;

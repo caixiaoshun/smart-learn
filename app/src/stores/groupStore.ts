@@ -10,9 +10,15 @@ interface MyGroupStatus {
     id: string;
     title: string;
     deadline: string;
+    allowLate?: boolean;
+    lateDeadline?: string | null;
     classId: string;
     className: string;
   };
+  submissionStatus: {
+    isGraded: boolean;
+    submittedAt: string | null;
+  } | null;
   stats: {
     totalStudents: number;
     assignedCount: number;

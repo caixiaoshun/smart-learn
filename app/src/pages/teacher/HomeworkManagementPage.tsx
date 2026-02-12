@@ -102,6 +102,7 @@ export function HomeworkManagementPage() {
   const [reminderHours, setReminderHours] = useState('24');
   const [maxScore, setMaxScore] = useState('100');
   const [allowLate, setAllowLate] = useState(false);
+  const [lateDeadline, setLateDeadline] = useState('');
   const [homeworkType, setHomeworkType] = useState<'STANDARD' | 'GROUP_PROJECT' | 'SELF_PRACTICE'>('STANDARD');
   const [groupMinSize, setGroupMinSize] = useState('2');
   const [groupMaxSize, setGroupMaxSize] = useState('6');
@@ -118,6 +119,7 @@ export function HomeworkManagementPage() {
   const [editDeadline, setEditDeadline] = useState('');
   const [editMaxScore, setEditMaxScore] = useState('100');
   const [editAllowLate, setEditAllowLate] = useState(false);
+  const [editLateDeadline, setEditLateDeadline] = useState('');
   // 编辑 - 小组作业配置
   const [editGroupMinSize, setEditGroupMinSize] = useState('2');
   const [editGroupMaxSize, setEditGroupMaxSize] = useState('6');
@@ -241,6 +243,14 @@ export function HomeworkManagementPage() {
       toast.error('请设置截止时间');
       return;
     }
+    if (allowLate && !lateDeadline) {
+      toast.error('允许迟交时，请设置迟交截止时间');
+      return;
+    }
+    if (allowLate && lateDeadline && deadline && new Date(lateDeadline) <= new Date(deadline)) {
+      toast.error('迟交截止时间必须晚于正常截止时间');
+      return;
+    }
     
     try {
       const data: CreateHomeworkData = {
@@ -252,6 +262,7 @@ export function HomeworkManagementPage() {
         reminderHours: parseInt(reminderHours) || undefined,
         maxScore: parseInt(maxScore) || 100,
         allowLate,
+        lateDeadline: allowLate && lateDeadline ? new Date(lateDeadline).toISOString() : undefined,
         type: homeworkType,
       };
 
@@ -328,6 +339,7 @@ export function HomeworkManagementPage() {
     setEditDeadline(toLocalDatetimeString(homework.deadline));
     setEditMaxScore(homework.maxScore.toString());
     setEditAllowLate(homework.allowLate);
+    setEditLateDeadline(homework.lateDeadline ? toLocalDatetimeString(homework.lateDeadline) : '');
 
     // 解析小组作业配置
     if (homework.type === 'GROUP_PROJECT' && homework.groupConfig) {
@@ -368,6 +380,15 @@ export function HomeworkManagementPage() {
       }
     }
 
+    if (editAllowLate && !editLateDeadline) {
+      toast.error('允许迟交时，请设置迟交截止时间');
+      return;
+    }
+    if (editAllowLate && editLateDeadline && editDeadline && new Date(editLateDeadline) <= new Date(editDeadline)) {
+      toast.error('迟交截止时间必须晚于正常截止时间');
+      return;
+    }
+
     try {
       const updateData: Partial<CreateHomeworkData> = {
         title: editTitle,
@@ -376,6 +397,7 @@ export function HomeworkManagementPage() {
         deadline: new Date(editDeadline).toISOString(),
         maxScore: parseInt(editMaxScore) || 100,
         allowLate: editAllowLate,
+        lateDeadline: editAllowLate && editLateDeadline ? new Date(editLateDeadline).toISOString() : undefined,
       };
 
       if (editingHomework.type === 'GROUP_PROJECT') {
@@ -852,6 +874,21 @@ export function HomeworkManagementPage() {
                       </div>
                     </div>
                   </div>
+                  {allowLate && (
+                    <div className="space-y-2 pl-6">
+                      <Label htmlFor="hw-late-deadline" className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-orange-400" />
+                        迟交截止时间 <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="hw-late-deadline"
+                        type="datetime-local"
+                        value={lateDeadline}
+                        onChange={(e) => setLateDeadline(e.target.value)}
+                      />
+                      <p className="text-xs text-gray-500">允许迟交时，必须设置迟交截止时间</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1525,6 +1562,21 @@ export function HomeworkManagementPage() {
                     </div>
                   </div>
                 </div>
+                {editAllowLate && (
+                  <div className="space-y-2 pl-6">
+                    <Label htmlFor="edit-late-deadline" className="flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-orange-400" />
+                      迟交截止时间
+                    </Label>
+                    <Input
+                      id="edit-late-deadline"
+                      type="datetime-local"
+                      value={editLateDeadline}
+                      onChange={(e) => setEditLateDeadline(e.target.value)}
+                    />
+                    <p className="text-xs text-gray-500">允许迟交时，必须设置迟交截止时间</p>
+                  </div>
+                )}
               </div>
             </div>
 

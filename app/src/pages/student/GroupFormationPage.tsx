@@ -296,11 +296,13 @@ export function GroupFormationPage() {
   const groupConfig = myGroupStatus?.groupConfig || {};
   const stats = myGroupStatus?.stats || { totalStudents: 0, assignedCount: 0 };
   const homeworkInfo = myGroupStatus?.homework;
+  const submissionStatus = myGroupStatus?.submissionStatus;
   const isLeader = myGroup?.leaderId === user?.id;
   const maxSize = groupConfig.maxSize || 6;
   const memberCount = myGroup?.members?.length || 0;
   const isGroupFull = memberCount >= maxSize;
   const progressPercent = stats.totalStudents > 0 ? Math.round((stats.assignedCount / stats.totalStudents) * 100) : 0;
+  const canResubmit = myGroup?.status === 'SUBMITTED' && submissionStatus && !submissionStatus.isGraded;
 
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col overflow-hidden">
@@ -332,7 +334,17 @@ export function GroupFormationPage() {
               已锁定
             </div>
           )}
-          {myGroup?.status === 'SUBMITTED' && (
+          {myGroup?.status === 'SUBMITTED' && submissionStatus && (
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+              submissionStatus.isGraded
+                ? 'bg-green-50 text-green-600'
+                : 'bg-blue-50 text-blue-600'
+            }`}>
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              {submissionStatus.isGraded ? '已批改' : '已提交（待批改）'}
+            </div>
+          )}
+          {myGroup?.status === 'SUBMITTED' && !submissionStatus && (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 text-green-600 text-sm font-medium">
               <CheckCircle2 className="w-3.5 h-3.5" />
               已提交
@@ -555,14 +567,14 @@ export function GroupFormationPage() {
 
                   {/* Footer Actions */}
                   <div className="mt-4 pt-4 border-t border-slate-100 space-y-3">
-                    {/* Submit button - only for leader when group is FORMING or LOCKED */}
-                    {isLeader && myGroup.status !== 'SUBMITTED' && (
+                    {/* Submit button - for leader when group is not submitted, or when submitted but not graded (resubmit) */}
+                    {isLeader && (myGroup.status !== 'SUBMITTED' || canResubmit) && (
                       <Button
                         className="w-full gap-2 bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-200"
                         onClick={openSubmitDialog}
                       >
                         <Upload className="w-4 h-4" />
-                        提交小组作业
+                        {canResubmit ? '重新提交小组作业' : '提交小组作业'}
                       </Button>
                     )}
                     {myGroup.status === 'FORMING' && (

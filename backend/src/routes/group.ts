@@ -587,14 +587,14 @@ router.post('/:groupId/submit', authenticate, requireStudent, async (req, res) =
         const config = typeof group.homework.groupConfig === 'string'
           ? JSON.parse(group.homework.groupConfig)
           : group.homework.groupConfig;
-        const minSize = config.minSize || config.minMembers;
+        const minSize = config.minSize;
         if (minSize && group.members.length < minSize) {
           return res.status(400).json({
             error: `小组人数不足，最少需要 ${minSize} 人，当前仅 ${group.members.length} 人`,
           });
         }
-      } catch {
-        // groupConfig 解析失败时不阻止提交
+      } catch (e) {
+        console.error('解析 groupConfig 失败:', e);
       }
     }
 

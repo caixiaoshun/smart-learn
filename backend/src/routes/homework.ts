@@ -154,6 +154,11 @@ router.get('/teacher', authenticate, requireTeacher, async (req, res) => {
           },
           orderBy: { submittedAt: 'desc' },
         },
+        selfAssessments: {
+          include: {
+            student: { select: { id: true, name: true, email: true, avatar: true } },
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -163,6 +168,7 @@ router.get('/teacher', authenticate, requireTeacher, async (req, res) => {
       submissions: hw.submissions.map(s => ({
         ...s,
         files: parseFiles(s.files),
+        laborDivision: s.laborDivision ? JSON.parse(s.laborDivision) : null,
       })),
     }));
 
@@ -258,8 +264,25 @@ router.get('/:id', authenticate, async (req, res) => {
             student: {
               select: { id: true, name: true, email: true, avatar: true },
             },
+            group: {
+              include: {
+                leader: { select: { id: true, name: true, email: true, avatar: true } },
+                members: {
+                  include: {
+                    student: { select: { id: true, name: true, email: true, avatar: true } },
+                  },
+                  orderBy: { joinedAt: 'asc' },
+                },
+              },
+            },
+            scoreAdjustments: true,
           },
           orderBy: { submittedAt: 'desc' },
+        },
+        selfAssessments: {
+          include: {
+            student: { select: { id: true, name: true, email: true, avatar: true } },
+          },
         },
       },
     });
@@ -293,6 +316,7 @@ router.get('/:id', authenticate, async (req, res) => {
       submissions: homework.submissions.map(s => ({
         ...s,
         files: parseFiles(s.files),
+        laborDivision: s.laborDivision ? JSON.parse(s.laborDivision) : null,
       })),
     };
 
@@ -793,6 +817,7 @@ router.post('/:id/grade-group/:submissionId', authenticate, requireTeacher, asyn
       submission: {
         ...updatedSubmission,
         files: parseFiles(updatedSubmission.files),
+        laborDivision: updatedSubmission.laborDivision ? JSON.parse(updatedSubmission.laborDivision) : null,
       },
     });
   } catch (error) {

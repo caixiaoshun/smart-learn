@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import axios from 'axios';
+import { spawn } from 'child_process';
 import { authenticate } from '../middleware/auth';
 import { strictLimiter } from '../middleware/rateLimit';
 import { prisma } from '../index';
@@ -27,10 +27,13 @@ const getAIConfig = () => {
   };
 };
 
-const buildHeaders = (apiKey?: string) => ({
-  'Content-Type': 'application/json',
-  ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
-});
+const buildCurlHeaders = (apiKey?: string): string[] => {
+  const headers = ['-H', 'Content-Type: application/json'];
+  if (apiKey) {
+    headers.push('-H', `Authorization: Bearer ${apiKey}`);
+  }
+  return headers;
+};
 
 const isEmbeddingModel = (modelId: string) => modelId.toLowerCase().includes('embedding');
 
@@ -39,20 +42,52 @@ router.get('/models', authenticate, async (_req, res) => {
   try {
     const { baseUrl, apiKey } = getAIConfig();
 
-    const response = await axios.get(`${baseUrl}/v1/models`, {
-      headers: buildHeaders(apiKey),
+    const curlArgs = [
+      '-s', '-S',
+      ...buildCurlHeaders(apiKey),
+      '-w', '\n%{http_code}',
+      `${baseUrl}/v1/models`,
+    ];
+
+    const { stdout, exitCode } = await new Promise<{ stdout: string; exitCode: number | null }>((resolve, reject) => {
+      const proc = spawn('curl', curlArgs);
+      let out = '';
+      proc.stdout.on('data', (chunk: Buffer) => { out += chunk.toString(); });
+      proc.stderr.on('data', (chunk: Buffer) => { console.error('curl stderr:', chunk.toString()); });
+      proc.on('close', (code) => resolve({ stdout: out, exitCode: code }));
+      proc.on('error', reject);
     });
 
-    const models = (response.data?.data || [])
+    const lastNewline = stdout.lastIndexOf('\n');
+    const body = lastNewline >= 0 ? stdout.substring(0, lastNewline) : stdout;
+    const httpStatus = lastNewline >= 0 ? parseInt(stdout.substring(lastNewline + 1), 10) : 0;
+
+    if (httpStatus >= 400 || exitCode !== 0) {
+      let errorMessage = '获取模型列表失败';
+      try {
+        const errData = JSON.parse(body);
+        errorMessage = errData?.error?.message || errorMessage;
+      } catch {
+        // body is not valid JSON
+      }
+      return res.status(httpStatus || 500).json({ error: errorMessage });
+    }
+
+    let data: any;
+    try {
+      data = JSON.parse(body);
+    } catch {
+      return res.status(500).json({ error: '获取模型列表失败' });
+    }
+
+    const models = (data?.data || [])
       .map((model: { id: string }) => model.id)
       .filter((id: string) => !isEmbeddingModel(id));
 
     res.json({ models });
   } catch (error: any) {
     console.error('获取模型列表失败:', error);
-    const status = error.response?.status || 500;
-    const message = error.response?.data?.error?.message || '获取模型列表失败';
-    res.status(status).json({ error: message });
+    res.status(500).json({ error: '获取模型列表失败' });
   }
 });
 
@@ -102,25 +137,26 @@ router.post('/chat', authenticate, strictLimiter, async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
-    const response = await axios.post(
-      `${baseUrl}/v1/chat/completions`,
-      {
+    const curlArgs = [
+      '-s', '-S', '-N',
+      '-X', 'POST',
+      ...buildCurlHeaders(apiKey),
+      '-d', JSON.stringify({
         model,
         messages: messagesWithSystem,
         temperature: 0.7,
         stream: true,
-      },
-      {
-        headers: buildHeaders(apiKey),
-        responseType: 'stream',
-      },
-    );
+      }),
+      `${baseUrl}/v1/chat/completions`,
+    ];
+
+    const curlProcess = spawn('curl', curlArgs);
 
     let fullContent = '';
     let buffer = '';
     let done = false;
 
-    response.data.on('data', (chunk: Buffer) => {
+    curlProcess.stdout.on('data', (chunk: Buffer) => {
       buffer += chunk.toString();
       const lines = buffer.split('\n');
       // Keep the last potentially incomplete line in the buffer
@@ -147,12 +183,20 @@ router.post('/chat', authenticate, strictLimiter, async (req, res) => {
       }
     });
 
-    response.data.on('end', async () => {
-      // 保存 AI 回复到数据库
-      if (userId && fullContent) {
-        await prisma.chatMessage.create({
-          data: { userId, role: 'assistant', content: fullContent },
-        });
+    curlProcess.on('close', async (code) => {
+      if (res.writableEnded) return;
+      try {
+        // 保存 AI 回复到数据库
+        if (userId && fullContent) {
+          await prisma.chatMessage.create({
+            data: { userId, role: 'assistant', content: fullContent },
+          });
+        }
+      } catch (dbErr) {
+        console.error('保存 AI 回复失败:', dbErr);
+      }
+      if (code !== 0 && !fullContent) {
+        res.write(`data: ${JSON.stringify({ error: '流式传输中断' })}\n\n`);
       }
       if (!done) {
         res.write('data: [DONE]\n\n');
@@ -160,15 +204,21 @@ router.post('/chat', authenticate, strictLimiter, async (req, res) => {
       res.end();
     });
 
-    response.data.on('error', (err: Error) => {
-      console.error('流式响应错误:', err);
-      res.write(`data: ${JSON.stringify({ error: '流式传输中断' })}\n\n`);
-      res.end();
+    curlProcess.stderr.on('data', (data: Buffer) => {
+      console.error('curl stderr:', data.toString());
+    });
+
+    curlProcess.on('error', (err: Error) => {
+      console.error('curl 进程错误:', err);
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ error: 'AI 对话失败' })}\n\n`);
+        res.end();
+      }
     });
 
     // 客户端断开时清理
     req.on('close', () => {
-      response.data.destroy();
+      curlProcess.kill();
     });
   } catch (error: any) {
     if (error instanceof z.ZodError) {

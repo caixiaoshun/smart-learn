@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useHomeworkStore, type Homework, type Submission, type CreateHomeworkData, type GroupMember, type ScoreAdjustment } from '@/stores/homeworkStore';
+import { useHomeworkStore, type Homework, type Submission, type CreateHomeworkData } from '@/stores/homeworkStore';
 import { useClassStore } from '@/stores/classStore';
 import { useGroupStore } from '@/stores/groupStore';
 import { toast } from 'sonner';
@@ -46,6 +46,24 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { NotebookPreview } from '@/components/NotebookPreview';
+
+interface LaborDivisionEntry {
+  memberId?: string;
+  memberName?: string;
+  task?: string;
+  contributionPercent?: number;
+  description?: string;
+}
+
+function parseLaborDivision(raw: string | null | undefined): LaborDivisionEntry[] {
+  if (!raw) return [];
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 function getFileName(filePath: string): string {
   return filePath.split('/').pop() || filePath;
@@ -1275,6 +1293,31 @@ export function HomeworkManagementPage() {
 
                   <hr className="border-gray-200" />
 
+                  {/* 小组分工说明（仅小组提交且存在分工数据时显示） */}
+                  {selectedSubmission?.groupId && selectedSubmission?.laborDivision && (() => {
+                    const divisionItems = parseLaborDivision(selectedSubmission.laborDivision);
+                    if (divisionItems.length === 0) return null;
+                    return (
+                      <div className="p-3 bg-blue-50/70 rounded-lg border border-blue-100 space-y-2">
+                        <div className="flex items-center gap-1.5 text-sm font-semibold text-blue-800">
+                          <Users className="w-4 h-4" />
+                          <span>小组分工说明</span>
+                        </div>
+                        {divisionItems.map((item, idx) => (
+                          <div key={idx} className="flex items-start gap-2 text-xs text-blue-700">
+                            <span className="font-medium shrink-0">{item.memberName || '未知成员'}:</span>
+                            <span className="flex-1">{item.task || '-'}{item.description ? ` — ${item.description}` : ''}</span>
+                            {item.contributionPercent != null && (
+                              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
+                                {item.contributionPercent}%
+                              </Badge>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+
                   {/* 小组成员单独评分 或 个人评分 */}
                   {selectedSubmission?.groupId && selectedSubmission?.group ? (
                     /* 小组成员逐个评分 */
@@ -1303,6 +1346,8 @@ export function HomeworkManagementPage() {
                       </div>
                       {selectedSubmission.group.members.map((member) => {
                         const isLeader = member.role === 'LEADER';
+                        const divisionItems = parseLaborDivision(selectedSubmission.laborDivision);
+                        const memberDivision = divisionItems.find(d => d.memberId === member.studentId);
                         return (
                           <div key={member.studentId} className={`p-3 rounded-lg border transition-colors ${isLeader ? 'bg-amber-50/60 border-amber-200' : 'bg-gray-50 border-gray-200'}`}>
                             <div className="flex items-center gap-2.5 mb-2">
@@ -1337,6 +1382,17 @@ export function HomeworkManagementPage() {
                                 className="w-20 h-8 text-sm text-center"
                               />
                             </div>
+                            {memberDivision && (
+                              <div className="text-xs text-slate-500 mb-1.5 pl-9">
+                                <span className="font-medium">分工:</span> {memberDivision.task || '-'}
+                                {memberDivision.contributionPercent != null && (
+                                  <span className="ml-1.5 text-blue-600 font-medium">({memberDivision.contributionPercent}%)</span>
+                                )}
+                                {memberDivision.description && (
+                                  <span className="ml-1 text-slate-400">— {memberDivision.description}</span>
+                                )}
+                              </div>
+                            )}
                             {/* 个人评语（可选，折叠展示） */}
                             <Input
                               value={groupMemberFeedbacks[member.studentId] || ''}

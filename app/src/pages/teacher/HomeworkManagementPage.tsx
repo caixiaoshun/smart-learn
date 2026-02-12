@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { useHomeworkStore, type Homework, type Submission, type CreateHomeworkData } from '@/stores/homeworkStore';
+import { useHomeworkStore, type Homework, type Submission, type CreateHomeworkData, type GroupMember, type ScoreAdjustment } from '@/stores/homeworkStore';
 import { useClassStore } from '@/stores/classStore';
 import { useResourceStore } from '@/stores/resourceStore';
 import { useGroupStore } from '@/stores/groupStore';
@@ -39,6 +39,8 @@ import {
   Settings2,
   UserCheck,
   Target,
+  Crown,
+  User,
 } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Label } from '@/components/ui/label';
@@ -82,7 +84,7 @@ function PDFPreview({ url }: { url: string }) {
 }
 
 export function HomeworkManagementPage() {
-  const { homeworks, isLoading, fetchTeacherHomeworks, createHomework, updateHomework, gradeSubmission, exportGrades, previewFile, downloadFile } = useHomeworkStore();
+  const { homeworks, isLoading, fetchTeacherHomeworks, createHomework, updateHomework, gradeSubmission, gradeGroupSubmission, exportGrades, previewFile, downloadFile } = useHomeworkStore();
   const { classes, fetchTeacherClasses } = useClassStore();
   const { createResourceFromHomework } = useResourceStore();
   const { groups, unassignedStudents, groupConfig, fetchGroups, assignStudent, autoAssignStudents } = useGroupStore();
@@ -133,6 +135,9 @@ export function HomeworkManagementPage() {
   const [gradeScore, setGradeScore] = useState('');
   const [gradeFeedback, setGradeFeedback] = useState('');
   
+  // 小组成员单独打分状态
+  const [groupMemberScores, setGroupMemberScores] = useState<Record<string, string>>({});
+  const [groupMemberFeedbacks, setGroupMemberFeedbacks] = useState<Record<string, string>>({});
   // 文件预览状态
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [previewContent, setPreviewContent] = useState<{ type: string; url?: string; content?: any } | null>(null);
@@ -521,6 +526,23 @@ export function HomeworkManagementPage() {
     setGradeFeedback(sub.feedback || '');
     setCurrentFileIndex(0);
     setPreviewContent(null);
+
+    // 初始化小组成员分数
+    if (sub.groupId && sub.group?.members) {
+      const scores: Record<string, string> = {};
+      const feedbacks: Record<string, string> = {};
+      for (const member of sub.group.members) {
+        const existing = sub.scoreAdjustments?.find(sa => sa.studentId === member.studentId);
+        scores[member.studentId] = existing ? existing.finalScore.toString() : '';
+        feedbacks[member.studentId] = existing?.reason || '';
+      }
+      setGroupMemberScores(scores);
+      setGroupMemberFeedbacks(feedbacks);
+    } else {
+      setGroupMemberScores({});
+      setGroupMemberFeedbacks({});
+    }
+
     // 自动加载第一个文件预览
     if (selectedHomework && sub.files && sub.files.length > 0) {
       loadFilePreview(selectedHomework.id, sub.files[0]);
@@ -562,6 +584,48 @@ export function HomeworkManagementPage() {
     }
   }, [selectedHomework, selectedSubmission, gradeScore, gradeFeedback, gradeSubmission, fetchTeacherHomeworks, currentSubmissionIndex, navigateToSubmission]);
 
+  // 小组批改 - 给每个成员单独打分
+  const handleGroupGrade = useCallback(async () => {
+    if (!selectedHomework || !selectedSubmission) return;
+    const members = selectedSubmission.group?.members || [];
+    if (members.length === 0) return;
+
+    // 验证所有成员都已填分
+    const memberScores: { studentId: string; score: number; feedback?: string }[] = [];
+    for (const member of members) {
+      const scoreStr = groupMemberScores[member.studentId];
+      if (!scoreStr || scoreStr.trim() === '') {
+        toast.error(`请为 ${member.student.name} 输入分数`);
+        return;
+      }
+      const score = parseInt(scoreStr);
+      if (isNaN(score) || score < 0 || score > selectedHomework.maxScore) {
+        toast.error(`${member.student.name} 的分数必须在 0-${selectedHomework.maxScore} 之间`);
+        return;
+      }
+      memberScores.push({
+        studentId: member.studentId,
+        score,
+        feedback: groupMemberFeedbacks[member.studentId] || undefined,
+      });
+    }
+
+    try {
+      await gradeGroupSubmission(selectedHomework.id, selectedSubmission.id, memberScores);
+      toast.success('小组批改成功');
+      fetchTeacherHomeworks();
+
+      // 自动导航到下一个未批改的提交
+      const submissions = selectedHomework.submissions || [];
+      const nextUngraded = submissions.findIndex((s, i) => i > currentSubmissionIndex && s.score === null);
+      if (nextUngraded >= 0) {
+        navigateToSubmission(nextUngraded, submissions);
+      }
+    } catch {
+      // 错误已由全局拦截器处理
+    }
+  }, [selectedHomework, selectedSubmission, groupMemberScores, groupMemberFeedbacks, gradeGroupSubmission, fetchTeacherHomeworks, currentSubmissionIndex, navigateToSubmission]);
+
   // Keyboard shortcuts
   useEffect(() => {
     if (!isGradingMode) return;
@@ -569,7 +633,11 @@ export function HomeworkManagementPage() {
       // Ctrl+S or Cmd+S: Save grade
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        handleGrade();
+        if (selectedSubmission?.groupId && selectedSubmission?.group) {
+          handleGroupGrade();
+        } else {
+          handleGrade();
+        }
       }
       // Alt+Left: Previous student
       if (e.altKey && e.key === 'ArrowLeft') {
@@ -589,7 +657,7 @@ export function HomeworkManagementPage() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [isGradingMode, currentSubmissionIndex, selectedHomework, navigateToSubmission, handleGrade]);
+  }, [isGradingMode, currentSubmissionIndex, selectedHomework, selectedSubmission, navigateToSubmission, handleGrade, handleGroupGrade]);
 
   const openGradeDialog = (homework: Homework, submission: Submission) => {
     const submissions = homework.submissions || [];
@@ -602,6 +670,23 @@ export function HomeworkManagementPage() {
     setCurrentFileIndex(0);
     setPreviewContent(null);
     setIsGradingMode(true);
+
+    // 初始化小组成员分数（如果是小组作业提交）
+    if (submission.groupId && submission.group?.members) {
+      const scores: Record<string, string> = {};
+      const feedbacks: Record<string, string> = {};
+      for (const member of submission.group.members) {
+        const existing = submission.scoreAdjustments?.find(sa => sa.studentId === member.studentId);
+        scores[member.studentId] = existing ? existing.finalScore.toString() : '';
+        feedbacks[member.studentId] = existing?.reason || '';
+      }
+      setGroupMemberScores(scores);
+      setGroupMemberFeedbacks(feedbacks);
+    } else {
+      setGroupMemberScores({});
+      setGroupMemberFeedbacks({});
+    }
+
     // 加载第一个文件
     if (submission.files && submission.files.length > 0) {
       loadFilePreview(homework.id, submission.files[0]);
@@ -954,24 +1039,43 @@ export function HomeworkManagementPage() {
                       {homework.submissions.map((submission) => (
                         <div
                           key={submission.id}
-                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                          className={`flex items-center justify-between p-3 rounded-lg ${submission.groupId && submission.group ? 'bg-blue-50/50 border border-blue-100' : 'bg-gray-50'}`}
                         >
                           <div className="flex items-center gap-3">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={submission.student?.avatar || undefined} />
-                              <AvatarFallback>{submission.student?.name?.[0]}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="text-sm font-medium">{submission.student?.name}</p>
-                              <p className="text-xs text-gray-500">
-                                提交于 {new Date(submission.submittedAt).toLocaleString('zh-CN')}
-                              </p>
-                            </div>
+                            {submission.groupId && submission.group ? (
+                              <>
+                                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100">
+                                  <Users className="w-4 h-4 text-blue-600" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <p className="text-sm font-medium">{submission.group.name}</p>
+                                    <Badge variant="secondary" className="text-[10px] px-1 py-0">{submission.group.members.length}人</Badge>
+                                  </div>
+                                  <p className="text-xs text-gray-500">
+                                    {submission.student?.name} 提交于 {new Date(submission.submittedAt).toLocaleString('zh-CN')}
+                                  </p>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <Avatar className="w-8 h-8">
+                                  <AvatarImage src={submission.student?.avatar || undefined} />
+                                  <AvatarFallback>{submission.student?.name?.[0]}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="text-sm font-medium">{submission.student?.name}</p>
+                                  <p className="text-xs text-gray-500">
+                                    提交于 {new Date(submission.submittedAt).toLocaleString('zh-CN')}
+                                  </p>
+                                </div>
+                              </>
+                            )}
                           </div>
                           <div className="flex items-center gap-2">
                             {submission.score !== null ? (
                               <Badge className="bg-green-100 text-green-700">
-                                {submission.score}分
+                                {submission.groupId && submission.scoreAdjustments?.length ? `平均 ${submission.score}分` : `${submission.score}分`}
                               </Badge>
                             ) : (
                               <Badge variant="secondary">待批改</Badge>
@@ -1172,17 +1276,30 @@ export function HomeworkManagementPage() {
 
               <div className="flex-1 overflow-y-auto">
                 <div className="p-4 space-y-4">
-                  {/* 学生信息 */}
-                  <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
-                    <Avatar className="w-9 h-9">
-                      <AvatarImage src={selectedSubmission?.student?.avatar ?? undefined} />
-                      <AvatarFallback>{selectedSubmission?.student?.name?.[0]}</AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium truncate">{selectedSubmission?.student?.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{selectedSubmission?.student?.email}</p>
+                  {/* 学生/小组信息 */}
+                  {selectedSubmission?.groupId && selectedSubmission?.group ? (
+                    /* 小组提交信息 */
+                    <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Users className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm font-semibold text-blue-900">{selectedSubmission.group.name}</span>
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{selectedSubmission.group.members.length} 人</Badge>
+                      </div>
+                      <p className="text-xs text-blue-700">由 {selectedSubmission.student?.name} 提交</p>
                     </div>
-                  </div>
+                  ) : (
+                    /* 个人提交信息 */
+                    <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
+                      <Avatar className="w-9 h-9">
+                        <AvatarImage src={selectedSubmission?.student?.avatar ?? undefined} />
+                        <AvatarFallback>{selectedSubmission?.student?.name?.[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium truncate">{selectedSubmission?.student?.name}</p>
+                        <p className="text-xs text-gray-500 truncate">{selectedSubmission?.student?.email}</p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* 提交信息 */}
                   <div className="text-xs text-gray-500 space-y-1">
@@ -1204,79 +1321,156 @@ export function HomeworkManagementPage() {
 
                   <hr className="border-gray-200" />
 
-                  {/* 分数 */}
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium">分数 (0-{selectedHomework?.maxScore})</label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="number"
-                        value={gradeScore}
-                        onChange={(e) => setGradeScore(e.target.value)}
-                        placeholder="输入分数"
-                        min={0}
-                        max={selectedHomework?.maxScore}
-                        className="flex-1"
-                      />
-                      {/* Quick score buttons */}
-                      <div className="flex gap-1">
-                        {[100, 90, 80, 60].map((score) => (
-                          selectedHomework?.maxScore && score <= selectedHomework.maxScore && (
+                  {/* 小组成员单独评分 或 个人评分 */}
+                  {selectedSubmission?.groupId && selectedSubmission?.group ? (
+                    /* 小组成员逐个评分 */
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-semibold text-gray-800">成员评分 (0-{selectedHomework?.maxScore})</label>
+                        {/* 一键统一分数 */}
+                        <div className="flex gap-1">
+                          {[100, 90, 80, 60].filter(s => selectedHomework?.maxScore && s <= selectedHomework.maxScore).map((score) => (
                             <button
                               key={score}
-                              onClick={() => setGradeScore(score.toString())}
-                              className={`px-2 py-1 text-xs rounded border transition-colors ${
-                                gradeScore === score.toString()
-                                  ? 'bg-blue-100 border-blue-300 text-blue-700'
-                                  : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                              }`}
+                              onClick={() => {
+                                const newScores: Record<string, string> = {};
+                                for (const member of selectedSubmission.group!.members) {
+                                  newScores[member.studentId] = score.toString();
+                                }
+                                setGroupMemberScores(newScores);
+                              }}
+                              className="px-2 py-0.5 text-[10px] rounded border border-gray-200 text-gray-500 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors"
+                              title={`统一设为 ${score} 分`}
                             >
-                              {score}
+                              全{score}
                             </button>
-                          )
-                        ))}
+                          ))}
+                        </div>
                       </div>
+                      {selectedSubmission.group.members.map((member) => {
+                        const isLeader = member.role === 'LEADER';
+                        return (
+                          <div key={member.studentId} className={`p-3 rounded-lg border transition-colors ${isLeader ? 'bg-amber-50/60 border-amber-200' : 'bg-gray-50 border-gray-200'}`}>
+                            <div className="flex items-center gap-2.5 mb-2">
+                              <Avatar className="w-7 h-7">
+                                <AvatarImage src={member.student.avatar ?? undefined} />
+                                <AvatarFallback className="text-xs">{member.student.name?.[0]}</AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-sm font-medium truncate">{member.student.name}</span>
+                                  {isLeader ? (
+                                    <Badge className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0 gap-0.5">
+                                      <Crown className="w-3 h-3" />
+                                      组长
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 gap-0.5">
+                                      <User className="w-3 h-3" />
+                                      组员
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                              {/* 分数输入 */}
+                              <Input
+                                type="number"
+                                value={groupMemberScores[member.studentId] || ''}
+                                onChange={(e) => setGroupMemberScores(prev => ({ ...prev, [member.studentId]: e.target.value }))}
+                                placeholder="分数"
+                                min={0}
+                                max={selectedHomework?.maxScore}
+                                className="w-20 h-8 text-sm text-center"
+                              />
+                            </div>
+                            {/* 个人评语（可选，折叠展示） */}
+                            <Input
+                              value={groupMemberFeedbacks[member.studentId] || ''}
+                              onChange={(e) => setGroupMemberFeedbacks(prev => ({ ...prev, [member.studentId]: e.target.value }))}
+                              placeholder="个人评语（可选）"
+                              className="h-7 text-xs mt-1"
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
-                  </div>
-
-                  {/* 评语 */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium">评语</label>
-                        <span className="text-xs text-gray-400">可选</span>
+                  ) : (
+                    /* 个人评分（保持原有逻辑） */
+                    <>
+                      <div className="space-y-1.5">
+                        <label className="text-sm font-medium">分数 (0-{selectedHomework?.maxScore})</label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="number"
+                            value={gradeScore}
+                            onChange={(e) => setGradeScore(e.target.value)}
+                            placeholder="输入分数"
+                            min={0}
+                            max={selectedHomework?.maxScore}
+                            className="flex-1"
+                          />
+                          {/* Quick score buttons */}
+                          <div className="flex gap-1">
+                            {[100, 90, 80, 60].map((score) => (
+                              selectedHomework?.maxScore && score <= selectedHomework.maxScore && (
+                                <button
+                                  key={score}
+                                  onClick={() => setGradeScore(score.toString())}
+                                  className={`px-2 py-1 text-xs rounded border transition-colors ${
+                                    gradeScore === score.toString()
+                                      ? 'bg-blue-100 border-blue-300 text-blue-700'
+                                      : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                                  }`}
+                                >
+                                  {score}
+                                </button>
+                              )
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                      <Button type="button" variant="outline" size="sm" className="gap-1" onClick={handleGenerateAIReview} disabled={isGeneratingAIReview}>
-                        {isGeneratingAIReview ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <WandSparkles className="w-3.5 h-3.5" />}
-                        AI自动批改
-                      </Button>
-                    </div>
-                    <Textarea
-                      value={gradeFeedback}
-                      onChange={(e) => setGradeFeedback(e.target.value)}
-                      placeholder="输入详细的评语和反馈建议..."
-                      rows={5}
-                      className="resize-y min-h-[80px] text-sm"
-                    />
-                  </div>
 
-                  {/* 快捷评语 */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                      <MessageSquare className="w-3 h-3" />
-                      <span>快捷评语</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {feedbackTemplates.map((tpl, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setGradeFeedback(prev => prev ? `${prev}\n${tpl}` : tpl)}
-                          className="text-[11px] px-2 py-1 rounded-full border border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors text-left"
-                        >
-                          {tpl.length > 20 ? tpl.slice(0, 20) + '...' : tpl}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                      {/* 评语 */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium">评语</label>
+                            <span className="text-xs text-gray-400">可选</span>
+                          </div>
+                          <Button type="button" variant="outline" size="sm" className="gap-1" onClick={handleGenerateAIReview} disabled={isGeneratingAIReview}>
+                            {isGeneratingAIReview ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <WandSparkles className="w-3.5 h-3.5" />}
+                            AI自动批改
+                          </Button>
+                        </div>
+                        <Textarea
+                          value={gradeFeedback}
+                          onChange={(e) => setGradeFeedback(e.target.value)}
+                          placeholder="输入详细的评语和反馈建议..."
+                          rows={5}
+                          className="resize-y min-h-[80px] text-sm"
+                        />
+                      </div>
+
+                      {/* 快捷评语 */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                          <MessageSquare className="w-3 h-3" />
+                          <span>快捷评语</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {feedbackTemplates.map((tpl, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setGradeFeedback(prev => prev ? `${prev}\n${tpl}` : tpl)}
+                              className="text-[11px] px-2 py-1 rounded-full border border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors text-left"
+                            >
+                              {tpl.length > 20 ? tpl.slice(0, 20) + '...' : tpl}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -1284,14 +1478,25 @@ export function HomeworkManagementPage() {
               <div className="p-3 border-t bg-white shrink-0 space-y-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      className="w-full bg-blue-600 hover:bg-blue-700 gap-2"
-                      onClick={handleGrade}
-                      disabled={!gradeScore}
-                    >
-                      <Save className="w-4 h-4" />
-                      保存批改
-                    </Button>
+                    {selectedSubmission?.groupId && selectedSubmission?.group ? (
+                      <Button
+                        className="w-full bg-blue-600 hover:bg-blue-700 gap-2"
+                        onClick={handleGroupGrade}
+                        disabled={!selectedSubmission?.group?.members?.every(m => groupMemberScores[m.studentId])}
+                      >
+                        <Save className="w-4 h-4" />
+                        保存小组评分
+                      </Button>
+                    ) : (
+                      <Button
+                        className="w-full bg-blue-600 hover:bg-blue-700 gap-2"
+                        onClick={handleGrade}
+                        disabled={!gradeScore}
+                      >
+                        <Save className="w-4 h-4" />
+                        保存批改
+                      </Button>
+                    )}
                   </TooltipTrigger>
                   <TooltipContent>Ctrl + S</TooltipContent>
                 </Tooltip>

@@ -334,14 +334,20 @@ export function GroupFormationPage() {
               已锁定
             </div>
           )}
-          {myGroup?.status === 'SUBMITTED' && (
+          {myGroup?.status === 'SUBMITTED' && submissionStatus && (
             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
-              submissionStatus?.isGraded
+              submissionStatus.isGraded
                 ? 'bg-green-50 text-green-600'
                 : 'bg-blue-50 text-blue-600'
             }`}>
               <CheckCircle2 className="w-3.5 h-3.5" />
-              {submissionStatus?.isGraded ? '已批改' : '已提交（待批改）'}
+              {submissionStatus.isGraded ? '已批改' : '已提交（待批改）'}
+            </div>
+          )}
+          {myGroup?.status === 'SUBMITTED' && !submissionStatus && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 text-green-600 text-sm font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              已提交
             </div>
           )}
         </div>

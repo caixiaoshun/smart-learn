@@ -380,6 +380,15 @@ export function HomeworkManagementPage() {
       }
     }
 
+    if (editAllowLate && !editLateDeadline) {
+      toast.error('允许迟交时，请设置迟交截止时间');
+      return;
+    }
+    if (editAllowLate && editLateDeadline && editDeadline && new Date(editLateDeadline) <= new Date(editDeadline)) {
+      toast.error('迟交截止时间必须晚于正常截止时间');
+      return;
+    }
+
     try {
       const updateData: Partial<CreateHomeworkData> = {
         title: editTitle,

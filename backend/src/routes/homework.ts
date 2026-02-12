@@ -72,7 +72,10 @@ router.post('/', authenticate, requireTeacher, async (req, res) => {
 
     // 验证迟交截止时间
     let lateEnd: Date | null = null;
-    if (allowLate && lateDeadline) {
+    if (allowLate) {
+      if (!lateDeadline) {
+        return res.status(400).json({ error: '允许迟交时，必须设置迟交截止时间' });
+      }
       lateEnd = new Date(lateDeadline);
       if (lateEnd <= end) {
         return res.status(400).json({ error: '迟交截止时间必须晚于正常截止时间' });
@@ -360,6 +363,15 @@ router.put('/:id', authenticate, requireTeacher, async (req, res) => {
     }
     if (data.lateDeadline !== undefined) {
       updateData.lateDeadline = data.lateDeadline ? new Date(data.lateDeadline) : null;
+    }
+
+    // 验证：allowLate 为 true 时，确保有 lateDeadline
+    const finalAllowLate = data.allowLate !== undefined ? data.allowLate : homework.allowLate;
+    const finalLateDeadline = data.lateDeadline !== undefined
+      ? (data.lateDeadline ? new Date(data.lateDeadline) : null)
+      : homework.lateDeadline;
+    if (finalAllowLate && !finalLateDeadline) {
+      return res.status(400).json({ error: '允许迟交时，必须设置迟交截止时间' });
     }
 
     const updatedHomework = await prisma.homework.update({

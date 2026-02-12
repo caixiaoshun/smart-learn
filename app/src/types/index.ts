@@ -232,11 +232,13 @@ export interface ModulesData {
     total: number;
     codeQuality: string;
   };
-  discussion: {
-    points: number;
+  classPerformance: {
+    totalScore: number;
+    totalRecords: number;
     weeklyData: number[];
-    thisWeekPosts: number;
-    totalPosts: number;
+    qaCount: number;
+    shareCount: number;
+    avgScore: number;
   };
   groupProject: {
     members: { name: string; avatar: string }[];

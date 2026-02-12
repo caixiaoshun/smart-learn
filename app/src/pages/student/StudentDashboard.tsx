@@ -269,22 +269,22 @@ export function StudentDashboard() {
               </div>
             </div>
 
-            {/* 在线讨论 */}
+            {/* 课堂表现 */}
             <div className="rounded-xl bg-white p-5 border border-blue-100 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-cyan-50 text-cyan-600">
                     <MessageSquare className="w-5 h-5" />
                   </div>
-                  <h4 className="font-bold text-[#1e3a8a]">在线讨论</h4>
+                  <h4 className="font-bold text-[#1e3a8a]">课堂表现</h4>
                 </div>
                 <span className="text-xs font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-100">
-                  +{modules?.discussion.points ?? 0} 分
+                  {modules?.classPerformance.avgScore ?? 0} 分
                 </span>
               </div>
               <div className="flex gap-4 items-end h-16 pb-1 border-b border-blue-50">
-                {(modules?.discussion.weeklyData ?? []).map((count, i) => {
-                  const maxCount = Math.max(1, ...(modules?.discussion.weeklyData ?? [1]));
+                {(modules?.classPerformance.weeklyData ?? []).map((count, i) => {
+                  const maxCount = Math.max(1, ...(modules?.classPerformance.weeklyData ?? [1]));
                   const pct = maxCount > 0 ? Math.max(10, Math.round((count / maxCount) * 100)) : 10;
                   const shades = ['bg-cyan-200', 'bg-cyan-400', 'bg-cyan-600', 'bg-cyan-300'];
                   return (
@@ -296,7 +296,7 @@ export function StudentDashboard() {
                   );
                 })}
               </div>
-              <p className="text-sm text-slate-500">本周发帖 {modules?.discussion.thisWeekPosts ?? 0} 次，总互动 {modules?.discussion.totalPosts ?? 0} 次</p>
+              <p className="text-sm text-slate-500">课堂问答 {modules?.classPerformance.qaCount ?? 0} 次，知识分享 {modules?.classPerformance.shareCount ?? 0} 次</p>
             </div>
 
             {/* 小组项目 */}

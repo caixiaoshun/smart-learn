@@ -156,6 +156,7 @@ model Homework {
   // 评分设置
   maxScore      Int          @default(100) // 满分
   allowLate     Boolean      @default(false) // 是否允许迟交
+  lateDeadline  DateTime?    // 迟交截止时间（allowLate=true 时生效）
   
   // === 项目小组作业配置 (type=GROUP_PROJECT 时使用) ===
   // JSON: { groupRequired, minSize, maxSize, groupDeadline, allowSwitch, allowTeacherAssign, lockTime, ungroupedPolicy, scoringModel }

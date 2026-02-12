@@ -594,6 +594,28 @@ router.post('/:groupId/submit', authenticate, requireStudent, upload.array('file
       return res.status(400).json({ error: '小组与作业不匹配' });
     }
 
+    // 验证截止时间
+    const now = new Date();
+    if (now > group.homework.deadline && !group.homework.allowLate) {
+      return res.status(400).json({ error: '作业已截止，不允许迟交' });
+    }
+    if (now > group.homework.deadline && group.homework.allowLate && group.homework.lateDeadline && now > group.homework.lateDeadline) {
+      return res.status(400).json({ error: '已超过迟交截止时间，无法提交' });
+    }
+
+    // 检查是否已提交且已批改（已批改不允许重新提交）
+    const existingSubmission = await prisma.submission.findUnique({
+      where: {
+        studentId_homeworkId: {
+          studentId: req.user!.userId,
+          homeworkId,
+        },
+      },
+    });
+    if (existingSubmission && existingSubmission.score !== null) {
+      return res.status(400).json({ error: '作业已被批改，无法重新提交' });
+    }
+
     // 验证最少组队人数
     if (group.homework.groupConfig) {
       try {
@@ -608,6 +630,25 @@ router.post('/:groupId/submit', authenticate, requireStudent, upload.array('file
         }
       } catch (e) {
         console.error('解析 groupConfig 失败:', e);
+      }
+    }
+
+    // 删除旧文件（如果是重新提交）
+    if (existingSubmission) {
+      try {
+        const parsed = JSON.parse(existingSubmission.files);
+        const oldFiles = Array.isArray(parsed) ? parsed : [];
+        for (const f of oldFiles) {
+          if (typeof f === 'string') {
+            try {
+              await storageService.delete(f);
+            } catch {
+              console.error('删除旧 S3 文件失败:', f);
+            }
+          }
+        }
+      } catch {
+        console.error('解析旧文件列表失败:', existingSubmission.files);
       }
     }
 
@@ -874,6 +915,24 @@ router.get('/homework/:homeworkId/my-group', authenticate, requireStudent, async
       where: { group: { homeworkId } },
     });
 
+    // 查询小组的提交状态（用于判断是否可重新提交）
+    let submissionStatus: { isGraded: boolean; submittedAt: string | null } | null = null;
+    if (myMembership?.group) {
+      const submission = await prisma.submission.findFirst({
+        where: {
+          homeworkId,
+          groupId: myMembership.group.id,
+        },
+        select: { score: true, submittedAt: true },
+      });
+      if (submission) {
+        submissionStatus = {
+          isGraded: submission.score !== null,
+          submittedAt: submission.submittedAt.toISOString(),
+        };
+      }
+    }
+
     res.json({
       myGroup: myMembership?.group || null,
       groupConfig,
@@ -881,9 +940,12 @@ router.get('/homework/:homeworkId/my-group', authenticate, requireStudent, async
         id: homework.id,
         title: homework.title,
         deadline: homework.deadline,
+        allowLate: homework.allowLate,
+        lateDeadline: homework.lateDeadline,
         classId: homework.classId,
         className: homework.class.name,
       },
+      submissionStatus,
       stats: {
         totalStudents,
         assignedCount,

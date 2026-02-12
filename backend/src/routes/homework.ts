@@ -31,13 +31,14 @@ router.post('/', authenticate, requireTeacher, async (req, res) => {
       reminderHours: z.number().int().min(1).max(168).optional(), // 提前提醒小时数 (1-168小时 = 1周)
       maxScore: z.number().int().min(1).max(1000).default(100),
       allowLate: z.boolean().default(false),
+      lateDeadline: z.string().datetime('迟交截止时间格式不正确').optional(),
       type: z.enum(['STANDARD', 'GROUP_PROJECT', 'SELF_PRACTICE']).default('STANDARD'),
       groupConfig: z.any().optional(),
       peerReviewConfig: z.any().optional(),
       selfPracticeConfig: z.any().optional(),
     });
 
-    const { title, description, classId, startTime, deadline, reminderHours, maxScore, allowLate, type, groupConfig, peerReviewConfig, selfPracticeConfig } = schema.parse(req.body);
+    const { title, description, classId, startTime, deadline, reminderHours, maxScore, allowLate, lateDeadline, type, groupConfig, peerReviewConfig, selfPracticeConfig } = schema.parse(req.body);
 
     // 验证班级归属
     const classData = await prisma.class.findUnique({
@@ -69,6 +70,15 @@ router.post('/', authenticate, requireTeacher, async (req, res) => {
       reminderTime = new Date(end.getTime() - reminderHours * 60 * 60 * 1000);
     }
 
+    // 验证迟交截止时间
+    let lateEnd: Date | null = null;
+    if (allowLate && lateDeadline) {
+      lateEnd = new Date(lateDeadline);
+      if (lateEnd <= end) {
+        return res.status(400).json({ error: '迟交截止时间必须晚于正常截止时间' });
+      }
+    }
+
     const homework = await prisma.homework.create({
       data: {
         title,
@@ -79,6 +89,7 @@ router.post('/', authenticate, requireTeacher, async (req, res) => {
         reminderTime,
         maxScore,
         allowLate,
+        lateDeadline: lateEnd,
         type,
         groupConfig: groupConfig ? JSON.stringify(groupConfig) : null,
         peerReviewConfig: peerReviewConfig ? JSON.stringify(peerReviewConfig) : null,
@@ -211,7 +222,9 @@ router.get('/student', authenticate, requireStudent, async (req, res) => {
         ...hw,
         isSubmitted: hw.submissions.length > 0,
         mySubmission: sub ? { ...sub, files: parseFiles(sub.files) } : null,
-        isOverdue: new Date() > hw.deadline && !hw.allowLate,
+        isOverdue: hw.allowLate
+          ? (hw.lateDeadline ? new Date() > hw.lateDeadline : false)
+          : new Date() > hw.deadline,
       };
     });
 
@@ -298,6 +311,7 @@ router.put('/:id', authenticate, requireTeacher, async (req, res) => {
       deadline: z.string().datetime().optional(),
       maxScore: z.number().int().min(1).max(1000).optional(),
       allowLate: z.boolean().optional(),
+      lateDeadline: z.string().datetime().optional().nullable(),
       type: z.enum(['STANDARD', 'GROUP_PROJECT', 'SELF_PRACTICE']).optional(),
       groupConfig: z.any().optional(),
       peerReviewConfig: z.any().optional(),
@@ -343,6 +357,9 @@ router.put('/:id', authenticate, requireTeacher, async (req, res) => {
     }
     if (data.selfPracticeConfig !== undefined) {
       updateData.selfPracticeConfig = data.selfPracticeConfig ? JSON.stringify(data.selfPracticeConfig) : null;
+    }
+    if (data.lateDeadline !== undefined) {
+      updateData.lateDeadline = data.lateDeadline ? new Date(data.lateDeadline) : null;
     }
 
     const updatedHomework = await prisma.homework.update({
@@ -458,6 +475,9 @@ router.post('/:id/submit', authenticate, requireStudent, upload.array('files', 5
     const now = new Date();
     if (now > homework.deadline && !homework.allowLate) {
       return res.status(400).json({ error: '作业已截止，不允许迟交' });
+    }
+    if (now > homework.deadline && homework.allowLate && homework.lateDeadline && now > homework.lateDeadline) {
+      return res.status(400).json({ error: '已超过迟交截止时间，无法提交' });
     }
 
     // 检查是否已提交

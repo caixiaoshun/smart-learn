@@ -2,12 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import api from '@/lib/api';
 import { useClassStore } from '@/stores/classStore';
 import { useAnalyticsStore } from '@/stores/analyticsStore';
+import type { StudentProfile } from '@/stores/analyticsStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { BarChart as BaseBarChart } from '@/components/charts/BarChart';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, BarChart, Bar, ScatterChart, Scatter, ZAxis, Legend, LineChart, Line } from 'recharts';
-import { AlertTriangle, Award, Sparkles, Users, TrendingUp, Target } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, BarChart, Bar, ScatterChart, Scatter, ZAxis, Legend, LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
+import { AlertTriangle, Award, Sparkles, Users, TrendingUp, Target, BarChart3, User } from 'lucide-react';
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
@@ -23,8 +25,11 @@ export function AnalyticsPage() {
   const { classes, fetchTeacherClasses } = useClassStore();
   const {
     homeworkStats, scoreDistribution, classOverview, studentClusters, scatterData, comprehensiveStats,
+    gradeComposition, indicatorRadar, heatmapData, studentProfile, peerReviewStats,
     isLoading, fetchClassHomeworkStats, fetchScoreDistribution, fetchClassOverview,
     fetchStudentClusters, fetchPerformanceScatter, fetchComprehensiveStats,
+    fetchGradeComposition, fetchIndicatorRadar, fetchPerformanceHeatmap,
+    fetchStudentProfile, fetchPeerReviewStats,
   } = useAnalyticsStore();
 
   const [selectedClassId, setSelectedClassId] = useState('');
@@ -32,6 +37,9 @@ export function AnalyticsPage() {
   const [aiReport, setAiReport] = useState<AIReport | null>(null);
   const [trendCompare, setTrendCompare] = useState<Array<{ homeworkTitle: string; averagePercentage: number }>>([]);
   const [groupCompare, setGroupCompare] = useState<Array<{ groupName: string; averagePercentage: number }>>([]);
+  const [clusterMethod, setClusterMethod] = useState<'threshold' | 'kmeans'>('threshold');
+  const [clusterK, setClusterK] = useState(3);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchTeacherClasses();
@@ -46,9 +54,13 @@ export function AnalyticsPage() {
     Promise.all([
       fetchClassHomeworkStats(selectedClassId),
       fetchClassOverview(selectedClassId),
-      fetchStudentClusters(selectedClassId),
+      fetchStudentClusters(selectedClassId, clusterMethod, clusterK),
       fetchPerformanceScatter(selectedClassId),
       fetchComprehensiveStats(selectedClassId),
+      fetchGradeComposition(selectedClassId),
+      fetchIndicatorRadar(selectedClassId),
+      fetchPerformanceHeatmap(selectedClassId),
+      fetchPeerReviewStats(selectedClassId),
     ]);
   }, [selectedClassId]);
 
@@ -79,6 +91,23 @@ export function AnalyticsPage() {
   useEffect(() => {
     if (selectedClassId) loadAdvanced();
   }, [selectedClassId, selectedHomeworkId]);
+
+  const handleClusterMethodChange = (method: 'threshold' | 'kmeans') => {
+    setClusterMethod(method);
+    if (selectedClassId) fetchStudentClusters(selectedClassId, method, clusterK);
+  };
+
+  const handleClusterKChange = (newK: number) => {
+    setClusterK(newK);
+    if (selectedClassId) fetchStudentClusters(selectedClassId, 'kmeans', newK);
+  };
+
+  const handleStudentClick = (studentId: string) => {
+    if (selectedClassId) {
+      fetchStudentProfile(selectedClassId, studentId);
+      setProfileDialogOpen(true);
+    }
+  };
 
   const homeworkOptions = useMemo(() => homeworkStats.map((h) => ({ id: h.id, title: h.title })), [homeworkStats]);
 
@@ -116,11 +145,84 @@ export function AnalyticsPage() {
         </div>
       )}
 
+      {/* 成绩构成环形图 + 指标体系雷达图 */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {gradeComposition && (
+          <Card>
+            <CardHeader><CardTitle className="flex items-center gap-2"><BarChart3 className="h-4 w-4" />成绩构成分析</CardTitle></CardHeader>
+            <CardContent className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={gradeComposition.composition}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={50}
+                    outerRadius={100}
+                    label={({ name, value }) => `${name}: ${value}`}
+                  >
+                    {gradeComposition.composition.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+
+        {indicatorRadar && (
+          <Card>
+            <CardHeader><CardTitle className="flex items-center gap-2"><Target className="h-4 w-4" />班级指标体系雷达</CardTitle></CardHeader>
+            <CardContent className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart data={indicatorRadar}>
+                  <PolarGrid />
+                  <PolarAngleAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                  <Radar name="班级指标" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
+                  <Tooltip />
+                </RadarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
       {/* 学生聚类分析 */}
       {studentClusters && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Users className="h-4 w-4" />学生聚类分析</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2"><Users className="h-4 w-4" />学生聚类分析</CardTitle>
+              <div className="flex items-center gap-2">
+                <select
+                  className="rounded-md border px-2 py-1 text-sm"
+                  value={clusterMethod}
+                  onChange={(e) => handleClusterMethodChange(e.target.value as 'threshold' | 'kmeans')}
+                >
+                  <option value="threshold">简单阈值</option>
+                  <option value="kmeans">KMeans 聚类</option>
+                </select>
+                {clusterMethod === 'kmeans' && (
+                  <select
+                    className="rounded-md border px-2 py-1 text-sm"
+                    value={clusterK}
+                    onChange={(e) => handleClusterKChange(parseInt(e.target.value))}
+                  >
+                    <option value="2">K=2</option>
+                    <option value="3">K=3</option>
+                    <option value="4">K=4</option>
+                    <option value="5">K=5</option>
+                  </select>
+                )}
+                {studentClusters.silhouetteScore !== undefined && (
+                  <Badge variant="outline" className="text-xs">轮廓系数: {studentClusters.silhouetteScore}</Badge>
+                )}
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-3 mb-4">
@@ -170,8 +272,12 @@ export function AnalyticsPage() {
                   .sort((a, b) => a.composite - b.composite)
                   .slice(0, 10)
                   .map((s) => (
-                    <div key={s.student.id} className="flex items-center justify-between rounded border p-2 text-sm">
-                      <span className="font-medium">{s.student.name}</span>
+                    <div
+                      key={s.student.id}
+                      className="flex items-center justify-between rounded border p-2 text-sm cursor-pointer hover:bg-slate-50"
+                      onClick={() => handleStudentClick(s.student.id)}
+                    >
+                      <span className="font-medium flex items-center gap-1"><User className="h-3 w-3" />{s.student.name}</span>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-slate-500">得分率{s.avgScoreRate}% · 提交率{s.submissionRate}%</span>
                         {clusterBadge(s.cluster)}
@@ -229,6 +335,98 @@ export function AnalyticsPage() {
           </Card>
         )}
       </div>
+
+      {/* 课堂表现热力图 */}
+      {heatmapData && heatmapData.timeBuckets.length > 0 && (
+        <Card>
+          <CardHeader><CardTitle>课堂表现热力图</CardTitle></CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <div className="min-w-[600px]">
+                <div className="flex">
+                  <div className="w-24 shrink-0" />
+                  {heatmapData.timeBuckets.map((t, i) => (
+                    <div key={i} className="flex-1 text-center text-xs text-muted-foreground truncate px-1">{t}</div>
+                  ))}
+                </div>
+                {heatmapData.students.map((student, si) => (
+                  <div key={student.id} className="flex items-center">
+                    <div className="w-24 shrink-0 text-xs font-medium truncate pr-2">{student.name}</div>
+                    {heatmapData.matrix[si]?.map((val, ti) => {
+                      const maxVal = Math.max(1, ...heatmapData.matrix.flat());
+                      const intensity = val / maxVal;
+                      const bg = val === 0
+                        ? 'bg-slate-100'
+                        : intensity > 0.7 ? 'bg-green-500' : intensity > 0.4 ? 'bg-green-300' : 'bg-green-100';
+                      return (
+                        <div key={ti} className={`flex-1 h-8 m-0.5 rounded text-xs flex items-center justify-center ${bg}`} title={`${student.name} · ${heatmapData.timeBuckets[ti]}: ${val}分`}>
+                          {val > 0 ? val : ''}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 评价分析 */}
+      {peerReviewStats && (
+        <Card>
+          <CardHeader><CardTitle className="flex items-center gap-2"><BarChart3 className="h-4 w-4" />评价分析（自评/互评）</CardTitle></CardHeader>
+          <CardContent>
+            <div className="grid gap-6 lg:grid-cols-3">
+              {/* Self-assessment distribution */}
+              <div>
+                <p className="text-sm font-medium mb-2">自评分数分布 (平均: {peerReviewStats.selfAssessment.average})</p>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={peerReviewStats.selfAssessment.distribution}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="range" tick={{ fontSize: 10 }} />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="count" fill="#f59e0b" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              {/* Peer review distribution */}
+              <div>
+                <p className="text-sm font-medium mb-2">互评分数分布 (平均: {peerReviewStats.peerReview.average}, 一致性σ: {peerReviewStats.peerReview.consistencyStdDev})</p>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={peerReviewStats.peerReview.distribution}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="range" tick={{ fontSize: 10 }} />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="count" fill="#8b5cf6" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              {/* Self vs Teacher scatter */}
+              <div>
+                <p className="text-sm font-medium mb-2">自评 vs 教师评分偏差</p>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ScatterChart>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" dataKey="selfScore" name="自评分" domain={[0, 100]} />
+                      <YAxis type="number" dataKey="teacherScore" name="教师评分" domain={[0, 100]} />
+                      <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+                      <Scatter name="偏差分析" data={peerReviewStats.selfVsTeacher} fill="#3b82f6" />
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* 作业提交率 + 单次作业成绩分布 */}
       <div className="grid gap-6 lg:grid-cols-3">
@@ -333,6 +531,91 @@ export function AnalyticsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 学生画像 Dialog */}
+      <Dialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><User className="h-4 w-4" />学生画像 — {studentProfile?.student.name}</DialogTitle>
+          </DialogHeader>
+          {studentProfile && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div>
+                  <p className="font-medium">{studentProfile.student.name}</p>
+                  <p className="text-sm text-muted-foreground">{studentProfile.student.email}</p>
+                </div>
+                {clusterBadge(studentProfile.metrics.cluster)}
+              </div>
+              <div className="grid grid-cols-4 gap-2 text-center text-sm">
+                <div className="rounded border p-2"><p className="text-xs text-muted-foreground">得分率</p><p className="font-bold">{studentProfile.metrics.avgScoreRate}%</p></div>
+                <div className="rounded border p-2"><p className="text-xs text-muted-foreground">提交率</p><p className="font-bold">{studentProfile.metrics.submissionRate}%</p></div>
+                <div className="rounded border p-2"><p className="text-xs text-muted-foreground">按时率</p><p className="font-bold">{studentProfile.metrics.onTimeRate}%</p></div>
+                <div className="rounded border p-2"><p className="text-xs text-muted-foreground">综合分</p><p className="font-bold">{studentProfile.metrics.composite}</p></div>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-1">作业成绩</p>
+                <div className="space-y-1 max-h-40 overflow-y-auto">
+                  {studentProfile.homeworkScores.map(hw => (
+                    <div key={hw.homeworkId} className="flex items-center justify-between text-xs rounded border p-1.5">
+                      <span className="truncate max-w-[200px]">{hw.title}</span>
+                      <span>{hw.submitted ? (hw.score !== null ? `${hw.score}/${hw.maxScore}` : '待批改') : '未提交'} {hw.onTime && <Badge variant="outline" className="ml-1 text-[10px]">按时</Badge>}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium mb-1">课堂问答 ({studentProfile.performance.qa.count}次)</p>
+                  <div className="space-y-1 max-h-24 overflow-y-auto text-xs">
+                    {studentProfile.performance.qa.records.slice(0, 5).map((r, i) => (
+                      <div key={i} className="rounded border p-1">{r.topic || '课堂问答'} · {r.score ?? '-'}分</div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-1">知识分享 ({studentProfile.performance.share.count}次)</p>
+                  <div className="space-y-1 max-h-24 overflow-y-auto text-xs">
+                    {studentProfile.performance.share.records.slice(0, 5).map((r, i) => (
+                      <div key={i} className="rounded border p-1">{r.topic || '知识分享'} · {r.score ?? '-'}分</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {studentProfile.selfAssessments.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium mb-1">自评记录</p>
+                  <div className="space-y-1 text-xs">
+                    {studentProfile.selfAssessments.map((sa, i) => (
+                      <div key={i} className="rounded border p-1">{sa.homeworkTitle} · 自评{sa.score}分</div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {(studentProfile.peerReviews.given.length > 0 || studentProfile.peerReviews.received.length > 0) && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium mb-1">给出的互评 ({studentProfile.peerReviews.given.length})</p>
+                    <div className="space-y-1 max-h-24 overflow-y-auto text-xs">
+                      {studentProfile.peerReviews.given.map((pr, i) => (
+                        <div key={i} className="rounded border p-1">{pr.homeworkTitle} · {pr.score}分</div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium mb-1">收到的互评 ({studentProfile.peerReviews.received.length})</p>
+                    <div className="space-y-1 max-h-24 overflow-y-auto text-xs">
+                      {studentProfile.peerReviews.received.map((pr, i) => (
+                        <div key={i} className="rounded border p-1">{pr.homeworkTitle} · {pr.score}分</div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {isLoading && <p className="text-sm text-muted-foreground">加载中...</p>}
     </div>

@@ -28,7 +28,7 @@
 
 | 功能 | 说明 |
 |------|------|
-| **仪表盘** | 总积分/排名/课程进度/AI互动指数、近7天学习趋势、五维能力雷达（知识掌握/实践能力/课堂表现/协作能力/创新思维）、课堂表现模块、最近活动；支持导出学习报告、AI 诊断跳转 |
+| **仪表盘** | 总积分/排名/课程进度/AI互动指数、近7天学习趋势、五维能力雷达（知识掌握/学习投入/课堂互动/协作贡献/自主拓展）、课堂表现模块、最近活动；支持导出学习报告、AI 诊断跳转 |
 | **AI 智能助手** | 基于 OpenAI 兼容 API 的 SSE 流式对话、多模型选择、聊天历史持久化、Socratic 引导式教学 |
 | **资源库** | 按类型/分类/标签搜索过滤教学资源，支持收藏、浏览量统计、评论 |
 | **作业提交** | 查看/提交作业（PDF/Notebook），文件预览（PDF 内联、IPYNB JSON），截止时间提醒 |
@@ -49,7 +49,7 @@
 | **学生行为分析** | 学生行为数据分析、导出报表、生成关注清单 |
 | **精准干预控制台** | 预警学生管理、行为评分筛选（全部/预警/高分）、AI 推荐方案、干预资源推送 |
 | **平时表现管理** | 课堂表现记录、知识点评估、成绩追踪 |
-| **数据分析** | 班级作业分析（提交率/分数分布）、学生聚类分析、学生表现散点图、综合成绩统计（均分/中位数/标准差/及格率/优秀率）、作业成绩趋势（均分/最高/最低）、成绩趋势对比、分组对比、AI 学情报告 |
+| **数据分析** | 班级作业分析（提交率/分数分布）、学生聚类分析（简单阈值/KMeans+轮廓系数）、学生表现散点图、综合成绩统计（均分/中位数/标准差/及格率/优秀率）、成绩构成环形图、班级指标体系雷达（6维）、课堂表现热力图、学生画像详情、评价分析（自评/互评分布+偏差散点）、作业成绩趋势、成绩趋势对比、分组对比、AI 学情报告 |
 
 ### 🔐 通用功能
 
@@ -296,7 +296,7 @@ S3_BUCKET_NAME="smart-learn"
 | `/api/cases` | 案例库（浏览/收藏/评分/评论） | 列表公开，CRUD 需教师 |
 | `/api/courses` | 课程信息 | 需要 |
 | `/api/ai` | AI 助手（聊天/历史/删除） | 需要 |
-| `/api/analytics` | 数据分析 | 需要 |
+| `/api/analytics` | 数据分析（作业统计/成绩分布/班级概览/学生聚类[阈值\|KMeans]/表现散点/综合统计/成绩构成/指标雷达/表现热力图/学生画像/评价分析/趋势对比/分组对比/AI学情报告） | 需要（教师：班级级，学生：个人级） |
 | `/api/dashboard` | 仪表盘聚合 | 需要 |
 | `/api/behavior` | 学生行为数据 | 需要 |
 | `/api/groups` | 作业分组管理 | 需要 |
@@ -334,20 +334,25 @@ S3_BUCKET_NAME="smart-learn"
 
 | 维度 | 数据来源 | 计算方式 |
 |------|----------|----------|
-| **知识掌握** | `Submission`, `Homework` | 所有已评分作业的平均得分率：`Σ(score/maxScore×100) / 作业数` |
-| **实践能力** | `Submission`, `Homework` | 提交率×0.6 + 编程实验通过率×0.4 |
-| **课堂表现** | `ClassPerformanceRecord` | 教师打分（1-5分）标准化到0-100 + 参与度加分（每条记录+2分，上限20分） |
-| **协作能力** | `PeerReview`, `AssignmentGroupMember` | 互评完成率×0.5 + 小组参与度(每组25分上限100)×0.5 |
-| **创新思维** | `Submission`, `Homework` | 按时提交率×0.4 + 自主实践完成数×0.3 + 编程实验得分率×0.3 |
+| **知识掌握** | `Submission`, `Homework` | `Σ(score/maxScore×100) / N`，N 为已评分作业数；若无数据则为 50（中位默认值） |
+| **学习投入** | `Submission`, `Homework`, `ClassStudent` | `提交率×0.5 + 按时提交率×0.5`。提交率 = 已提交数/应提交数，按时提交率 = 按时提交数/已提交数；若无数据则为 50 |
+| **课堂互动** | `ClassPerformanceRecord` | 教师打分标准化（平均分/5×80）+ 参与频次加分（每条记录+4分，上限20分），总分上限100；若无数据则为 50 |
+| **协作贡献** | `AssignmentGroupMember`, `PeerReview`, `SelfAssessment` | 小组参与度(参与小组数/小组作业数×40) + 互评完成率(完成的互评/分配的互评×30) + 自评完成率(完成的自评/应完成的自评×30)；若无数据则为 50 |
+| **自主拓展** | `ResourceView`, `ChatMessage`, `CaseBookmark`, `BehaviorLog` | 资源浏览深度(min(浏览资源数/10, 1)×30) + AI助手活跃度(min(log₂(聊天数+1)×15, 30)) + 案例探索(min(收藏案例数×10, 20)) + 学习时长(min(总停留秒数/3600×5, 20))；若无数据则为 50 |
 
-> API: `/api/dashboard/student/radar` — AI 诊断文本基于最强/最弱维度动态生成。
+> API: `GET /api/dashboard/student/radar` — AI 诊断文本基于最强/最弱维度动态生成。每个维度在无数据时默认为 50 分，避免雷达图严重坍塌。
 
 ### 教师端数据分析
 
 | 图表 | 数据来源 | 计算方式 | API |
 |------|----------|----------|-----|
 | **综合统计卡片** | `Submission`, `Homework`, `ClassStudent` | 平均分、中位数、标准差、及格率（≥60%）、优秀率（≥90%） | `/api/analytics/class/:id/comprehensive-stats` |
-| **学生聚类分析** | `Submission`, `Homework` | 综合分 = 得分率×0.5 + 提交率×0.3 + 按时率×0.2；≥80为优秀，50-79为中等，<50为待关注 | `/api/analytics/class/:id/student-clusters` |
+| **成绩构成环形图** | `Submission`, `ClassPerformanceRecord`, `SelfAssessment`, `PeerReview` | 班级维度四项成绩构成：作业平均分(score/maxScore×100)、平时表现(教师评分/5×100)、自评平均分、互评平均分 | `/api/analytics/class/:id/grade-composition` |
+| **班级指标体系雷达** | `ClassPerformanceRecord`, `Submission`, `PeerReviewAssignment`, `SelfAssessment` | 6维指标：课堂问答均分、知识分享均分、作业得分率、提交率、互评完成率、自评完成率，均标准化到 0-100 | `/api/analytics/class/:id/indicator-radar` |
+| **学生聚类分析** | `Submission`, `Homework` | 简单阈值：综合分 = 得分率×0.5 + 提交率×0.3 + 按时率×0.2；≥80为优秀，50-79为中等，<50为待关注。可选 KMeans：对 [avgScoreRate, submissionRate, onTimeRate] 三维数据做 K-Means 聚类，返回轮廓系数评估聚类质量 | `/api/analytics/class/:id/student-clusters?method=threshold\|kmeans&k=3` |
+| **课堂表现热力图** | `ClassPerformanceRecord` | 按学生 × 时间（按周分桶）生成热力图矩阵，matrix[i][j] 为学生 i 在第 j 周的表现得分总和 | `/api/analytics/class/:id/performance-heatmap` |
+| **学生画像** | `Submission`, `ClassPerformanceRecord`, `SelfAssessment`, `PeerReview` | 包含：各次作业得分及趋势、课堂问答/知识分享明细、自评数据、互评数据（给出和收到）、综合评级 | `/api/analytics/class/:id/student/:studentId/profile` |
+| **评价分析（自评/互评）** | `SelfAssessment`, `PeerReview`, `Submission` | 自评分数分布（直方图）、互评分数分布、自评 vs 教师评分偏差散点（x=自评分, y=教师评分%）、互评一致性指标（各提交互评分标准差的均值） | `/api/analytics/class/:id/peer-review-stats` |
 | **学生表现散点图** | `Submission`, `Homework` | X轴=提交率(%)，Y轴=平均得分率(%) | `/api/analytics/class/:id/performance-scatter` |
 | **综合成绩分布** | `Submission`, `Homework` | 按分数段(90-100/80-89/70-79/60-69/<60)统计环形图 | `/api/analytics/class/:id/comprehensive-stats` |
 | **作业成绩趋势** | `Submission`, `Homework` | 每次作业的平均分/最高分/最低分折线图 | `/api/analytics/class/:id/comprehensive-stats` |

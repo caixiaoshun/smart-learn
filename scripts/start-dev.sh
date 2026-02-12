@@ -2,15 +2,17 @@
 
 # 智慧教育AI平台 - 开发环境一键启动脚本
 # 功能：一键启动前端和后端开发服务
-# 用法：./start-dev.sh [--keep-db] [--reset-db]
+# 用法：./start-dev.sh [--keep-db] [--reset-db] [--seed]
 #   --keep-db: 保留开发数据库文件，不进行删除
 #   --reset-db: 强制重置数据库（清空所有数据）
+#   --seed: 插入测试账号（2个学生 + 1个教师）
 
 set -e
 
 # 解析命令行参数
 KEEP_DB=false
 RESET_DB=false
+SEED_DB=false
 for arg in "$@"; do
     case $arg in
         --keep-db)
@@ -18,6 +20,9 @@ for arg in "$@"; do
             ;;
         --reset-db)
             RESET_DB=true
+            ;;
+        --seed)
+            SEED_DB=true
             ;;
     esac
 done
@@ -94,6 +99,12 @@ npx prisma generate
 # 初始化数据库
 echo "🗄️ [后端] 初始化数据库..."
 npx prisma db push
+
+# 插入测试账号
+if [ "$SEED_DB" = true ]; then
+    echo "🌱 [后端] 插入测试账号..."
+    npx prisma db seed
+fi
 
 # ========== 前端设置 ==========
 echo ""

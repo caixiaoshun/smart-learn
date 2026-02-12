@@ -3,6 +3,10 @@ import { z } from 'zod';
 import crypto from 'crypto';
 import { prisma } from '../index';
 import { authenticate, requireTeacher, requireStudent } from '../middleware/auth';
+import { upload } from '../middleware/upload';
+import { MinioStorageService } from '../services/storage/MinioStorageService';
+
+const storageService = new MinioStorageService();
 
 const router = Router();
 
@@ -544,22 +548,31 @@ router.post('/:groupId/assign', authenticate, requireTeacher, async (req, res) =
   }
 });
 
-// 提交项目小组作业（组长提交，含分工说明）
-router.post('/:groupId/submit', authenticate, requireStudent, async (req, res) => {
+// 提交项目小组作业（组长提交，含分工说明，支持文件上传）
+router.post('/:groupId/submit', authenticate, requireStudent, upload.array('files', 5), async (req, res) => {
   try {
     const { groupId } = req.params;
-    const schema = z.object({
-      homeworkId: z.string().min(1),
-      files: z.array(z.string()).min(1, '请上传至少一个文件'),
-      laborDivision: z.array(z.object({
-        memberId: z.string(),
-        memberName: z.string(),
-        task: z.string(),
-        contributionPercent: z.number().min(0).max(100),
-        description: z.string().optional(),
-      })).min(1, '请填写分工说明'),
-    });
-    const { homeworkId, files, laborDivision } = schema.parse(req.body);
+    const uploadedFiles = req.files as Express.Multer.File[];
+
+    if (!uploadedFiles || uploadedFiles.length === 0) {
+      return res.status(400).json({ error: '请上传至少一个文件' });
+    }
+
+    const homeworkId = req.body.homeworkId;
+    if (!homeworkId) {
+      return res.status(400).json({ error: '缺少作业ID' });
+    }
+
+    let laborDivision: unknown[] = [];
+    try {
+      laborDivision = JSON.parse(req.body.laborDivision || '[]');
+    } catch {
+      return res.status(400).json({ error: '分工说明格式无效，请确保 JSON 格式正确' });
+    }
+
+    if (!Array.isArray(laborDivision) || laborDivision.length === 0) {
+      return res.status(400).json({ error: '请填写分工说明' });
+    }
 
     const group = await prisma.assignmentGroup.findUnique({
       where: { id: groupId },
@@ -598,6 +611,11 @@ router.post('/:groupId/submit', authenticate, requireStudent, async (req, res) =
       }
     }
 
+    // 上传文件到存储
+    const uploadedKeys = await Promise.all(
+      uploadedFiles.map((file) => storageService.save(file, 'homework'))
+    );
+
     // 创建或更新提交
     const submission = await prisma.submission.upsert({
       where: {
@@ -607,7 +625,7 @@ router.post('/:groupId/submit', authenticate, requireStudent, async (req, res) =
         },
       },
       update: {
-        files: JSON.stringify(files),
+        files: JSON.stringify(uploadedKeys),
         groupId,
         laborDivision: JSON.stringify(laborDivision),
         submittedAt: new Date(),
@@ -616,7 +634,7 @@ router.post('/:groupId/submit', authenticate, requireStudent, async (req, res) =
         studentId: req.user!.userId,
         homeworkId,
         groupId,
-        files: JSON.stringify(files),
+        files: JSON.stringify(uploadedKeys),
         laborDivision: JSON.stringify(laborDivision),
       },
     });
@@ -1006,6 +1024,42 @@ router.post('/:groupId/transfer-leader', authenticate, requireStudent, async (re
     }
     console.error('转让组长失败:', error);
     res.status(500).json({ error: '转让组长失败' });
+  }
+});
+
+// 组长解散队伍
+router.post('/:groupId/dissolve', authenticate, requireStudent, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    const group = await prisma.assignmentGroup.findUnique({
+      where: { id: groupId },
+      include: { homework: true, members: true },
+    });
+
+    if (!group) {
+      return res.status(404).json({ error: '小组不存在' });
+    }
+
+    if (group.leaderId !== req.user!.userId) {
+      return res.status(403).json({ error: '仅组长可解散队伍' });
+    }
+
+    if (group.status !== 'FORMING') {
+      return res.status(400).json({ error: '小组已锁定或已提交，无法解散' });
+    }
+
+    // 删除所有成员、消息，然后删除小组
+    await prisma.$transaction([
+      prisma.groupMessage.deleteMany({ where: { groupId } }),
+      prisma.assignmentGroupMember.deleteMany({ where: { groupId } }),
+      prisma.assignmentGroup.delete({ where: { id: groupId } }),
+    ]);
+
+    res.json({ message: '队伍已解散' });
+  } catch (error) {
+    console.error('解散队伍失败:', error);
+    res.status(500).json({ error: '解散队伍失败' });
   }
 });
 

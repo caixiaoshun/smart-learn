@@ -24,7 +24,12 @@ import {
   Clock,
   CheckCircle2,
   Lock,
+  Upload,
+  FileText,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
+import type { LaborDivisionItem } from '@/types';
 
 export function GroupFormationPage() {
   const { homeworkId } = useParams<{ homeworkId: string }>();
@@ -41,6 +46,8 @@ export function GroupFormationPage() {
     leaveGroup,
     removeMember,
     transferLeader,
+    dissolveGroup,
+    submitGroupWork,
     fetchMessages,
     sendMessage,
   } = useGroupStore();
@@ -54,6 +61,15 @@ export function GroupFormationPage() {
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0 });
   const chatEndRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Submission state
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [laborDivision, setLaborDivision] = useState<LaborDivisionItem[]>([]);
+  const [submitLoading, setSubmitLoading] = useState(false);
+
+  // Dissolve state
+  const [dissolveLoading, setDissolveLoading] = useState(false);
 
   useEffect(() => {
     if (homeworkId) {
@@ -182,6 +198,88 @@ export function GroupFormationPage() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  const handleDissolveGroup = async () => {
+    if (!myGroupStatus?.myGroup) return;
+    if (!confirm('确定要解散队伍吗？所有成员将被移出，此操作不可撤销。')) return;
+    setDissolveLoading(true);
+    try {
+      await dissolveGroup(myGroupStatus.myGroup.id);
+      if (homeworkId) await fetchMyGroup(homeworkId);
+    } catch {
+      // error handled by interceptor
+    } finally {
+      setDissolveLoading(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter(file => {
+      const ext = file.name.split('.').pop()?.toLowerCase();
+      return ext === 'pdf' || ext === 'ipynb';
+    });
+    if (validFiles.length !== files.length) {
+      toast.error('只允许上传 PDF 或 Jupyter Notebook (.ipynb) 文件');
+    }
+    setSelectedFiles(prev => [...prev, ...validFiles].slice(0, 5));
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const openSubmitDialog = () => {
+    if (!myGroupStatus?.myGroup) return;
+    const members = myGroupStatus.myGroup.members;
+    const avgPercent = Math.floor(100 / members.length);
+    const remainder = 100 - avgPercent * members.length;
+    setLaborDivision(
+      members.map((m, i) => ({
+        memberId: m.studentId,
+        memberName: m.student.name,
+        task: '',
+        contributionPercent: avgPercent + (i === 0 ? remainder : 0),
+      }))
+    );
+    setSelectedFiles([]);
+    setShowSubmitDialog(true);
+  };
+
+  const updateLaborItem = (index: number, field: keyof LaborDivisionItem, value: string | number) => {
+    setLaborDivision(prev =>
+      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
+    );
+  };
+
+  const handleSubmitGroupWork = async () => {
+    if (!myGroupStatus?.myGroup || !homeworkId) return;
+    if (selectedFiles.length === 0) {
+      toast.error('请上传至少一个文件');
+      return;
+    }
+    const emptyTasks = laborDivision.filter(d => !d.task.trim());
+    if (emptyTasks.length > 0) {
+      toast.error('请为每位成员填写任务分工');
+      return;
+    }
+    const totalPercent = laborDivision.reduce((sum, d) => sum + d.contributionPercent, 0);
+    if (totalPercent !== 100) {
+      toast.error(`贡献比例合计应为 100%，当前为 ${totalPercent}%`);
+      return;
+    }
+    setSubmitLoading(true);
+    try {
+      await submitGroupWork(myGroupStatus.myGroup.id, homeworkId, selectedFiles, laborDivision);
+      setShowSubmitDialog(false);
+      setSelectedFiles([]);
+      if (homeworkId) await fetchMyGroup(homeworkId);
+    } catch {
+      // error handled by interceptor
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
@@ -455,18 +553,41 @@ export function GroupFormationPage() {
                   </div>
 
                   {/* Footer Actions */}
-                  {myGroup.status === 'FORMING' && (
-                    <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 gap-3">
+                  <div className="mt-4 pt-4 border-t border-slate-100 space-y-3">
+                    {/* Submit button - only for leader when group is FORMING or LOCKED */}
+                    {isLeader && myGroup.status !== 'SUBMITTED' && (
                       <Button
-                        variant="outline"
-                        className="text-red-600 border-red-200 hover:bg-red-50 gap-2"
-                        onClick={handleLeaveGroup}
+                        className="w-full gap-2 bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-200"
+                        onClick={openSubmitDialog}
                       >
-                        <LogOut className="w-4 h-4" />
-                        退出小组
+                        <Upload className="w-4 h-4" />
+                        提交小组作业
                       </Button>
-                    </div>
-                  )}
+                    )}
+                    {myGroup.status === 'FORMING' && (
+                      <div className="grid grid-cols-1 gap-3">
+                        <Button
+                          variant="outline"
+                          className="text-red-600 border-red-200 hover:bg-red-50 gap-2"
+                          onClick={handleLeaveGroup}
+                        >
+                          <LogOut className="w-4 h-4" />
+                          退出小组
+                        </Button>
+                        {isLeader && (
+                          <Button
+                            variant="outline"
+                            className="text-red-600 border-red-200 hover:bg-red-50 gap-2"
+                            onClick={handleDissolveGroup}
+                            disabled={dissolveLoading}
+                          >
+                            <AlertTriangle className="w-4 h-4" />
+                            {dissolveLoading ? '解散中...' : '解散队伍'}
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -618,6 +739,108 @@ export function GroupFormationPage() {
               disabled={!newGroupName.trim() || createLoading}
             >
               {createLoading ? '创建中...' : '创建小组'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Submit Group Work Dialog */}
+      <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl">提交小组作业</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 pt-2">
+            {/* File Upload */}
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-slate-700">上传文件</label>
+              <div className="border-2 border-dashed border-blue-200 rounded-xl p-6 text-center hover:border-blue-400 hover:bg-blue-50/30 transition-all cursor-pointer group bg-slate-50/50">
+                <input
+                  type="file"
+                  id="group-submit-files"
+                  multiple
+                  accept=".pdf,.ipynb"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <label htmlFor="group-submit-files" className="cursor-pointer flex flex-col items-center">
+                  <Upload className="w-10 h-10 text-blue-400 mb-3 group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-medium text-blue-600">点击上传</span>
+                  <span className="text-xs text-slate-400 mt-1">支持 PDF、Jupyter Notebook (.ipynb)，最多5个文件</span>
+                </label>
+              </div>
+              {selectedFiles.length > 0 && (
+                <div className="space-y-2">
+                  {selectedFiles.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+                      <div className="flex items-center gap-2.5 overflow-hidden">
+                        <FileText className="w-4 h-4 text-red-500 flex-shrink-0" />
+                        <div className="truncate">
+                          <span className="text-sm font-medium text-slate-700">{file.name}</span>
+                          <span className="text-xs text-slate-400 ml-2">({(file.size / 1024).toFixed(1)} KB)</span>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => removeFile(index)} className="flex-shrink-0 hover:text-red-500">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Labor Division */}
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-slate-700">分工说明</label>
+              <p className="text-xs text-slate-500">请为每位成员填写任务分工和贡献百分比（合计 100%）</p>
+              <div className="space-y-3">
+                {laborDivision.map((item, index) => (
+                  <div key={item.memberId} className="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="w-7 h-7">
+                        <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">
+                          {item.memberName.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-semibold text-slate-700">{item.memberName}</span>
+                    </div>
+                    <div className="grid grid-cols-[1fr_100px] gap-3">
+                      <Input
+                        placeholder="负责的任务（如：前端开发、数据分析）"
+                        value={item.task}
+                        onChange={(e) => updateLaborItem(index, 'task', e.target.value)}
+                        className="text-sm"
+                      />
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={item.contributionPercent}
+                          onChange={(e) => updateLaborItem(index, 'contributionPercent', Math.min(100, Math.max(0, Number(e.target.value) || 0)))}
+                          className="text-sm pr-7"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">%</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="text-right text-sm">
+                贡献比例合计：
+                <span className={`font-bold ${laborDivision.reduce((s, d) => s + d.contributionPercent, 0) === 100 ? 'text-green-600' : 'text-red-600'}`}>
+                  {laborDivision.reduce((s, d) => s + d.contributionPercent, 0)}%
+                </span>
+              </div>
+            </div>
+
+            <Button
+              className="w-full bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30 gap-2"
+              onClick={handleSubmitGroupWork}
+              disabled={submitLoading || selectedFiles.length === 0}
+            >
+              <Send className="w-4 h-4" />
+              {submitLoading ? '提交中...' : '提交作业'}
             </Button>
           </div>
         </DialogContent>

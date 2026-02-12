@@ -38,13 +38,14 @@ interface GroupState {
   lockGroup: (groupId: string) => Promise<void>;
   assignStudent: (groupId: string, studentId: string) => Promise<void>;
   autoAssignStudents: (homeworkId: string, preferredSize?: number) => Promise<void>;
-  submitGroupWork: (groupId: string, homeworkId: string, files: string[], laborDivision: LaborDivisionItem[]) => Promise<void>;
+  submitGroupWork: (groupId: string, homeworkId: string, files: File[], laborDivision: LaborDivisionItem[]) => Promise<void>;
   adjustScores: (submissionId: string, adjustments: Omit<ScoreAdjustment, 'id' | 'submissionId'>[]) => Promise<void>;
   
   // Student group formation methods
   fetchMyGroup: (homeworkId: string) => Promise<void>;
   removeMember: (groupId: string, studentId: string) => Promise<void>;
   transferLeader: (groupId: string, newLeaderId: string) => Promise<void>;
+  dissolveGroup: (groupId: string) => Promise<void>;
   fetchMessages: (groupId: string) => Promise<void>;
   sendMessage: (groupId: string, content: string) => Promise<void>;
 }
@@ -107,7 +108,14 @@ export const useGroupStore = create<GroupState>((set, get) => ({
   },
 
   submitGroupWork: async (groupId, homeworkId, files, laborDivision) => {
-    await api.post(`/groups/${groupId}/submit`, { homeworkId, files, laborDivision });
+    const formData = new FormData();
+    formData.append('homeworkId', homeworkId);
+    formData.append('laborDivision', JSON.stringify(laborDivision));
+    files.forEach((file) => formData.append('files', file));
+
+    await api.post(`/groups/${groupId}/submit`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     toast.success('项目作业提交成功');
   },
 
@@ -134,6 +142,11 @@ export const useGroupStore = create<GroupState>((set, get) => ({
   transferLeader: async (groupId, newLeaderId) => {
     await api.post(`/groups/${groupId}/transfer-leader`, { newLeaderId });
     toast.success('组长已转让');
+  },
+
+  dissolveGroup: async (groupId) => {
+    await api.post(`/groups/${groupId}/dissolve`);
+    toast.success('队伍已解散');
   },
 
   fetchMessages: async (groupId) => {

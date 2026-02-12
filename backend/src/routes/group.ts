@@ -588,7 +588,7 @@ router.post('/:groupId/submit', authenticate, requireStudent, async (req, res) =
           ? JSON.parse(group.homework.groupConfig)
           : group.homework.groupConfig;
         const minSize = Number(config.minSize);
-        if (minSize > 0 && group.members.length < minSize) {
+        if (!isNaN(minSize) && minSize > 0 && group.members.length < minSize) {
           return res.status(400).json({
             error: `小组人数不足，最少需要 ${minSize} 人，当前仅 ${group.members.length} 人`,
           });

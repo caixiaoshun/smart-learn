@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useHomeworkStore, type Homework, type Submission, type CreateHomeworkData, type GroupMember, type ScoreAdjustment, type LaborDivisionItem, type HomeworkSelfAssessment } from '@/stores/homeworkStore';
+import { useHomeworkStore, type Homework, type Submission, type CreateHomeworkData, type GroupMember, type ScoreAdjustment } from '@/stores/homeworkStore';
 import { useClassStore } from '@/stores/classStore';
 import { useGroupStore } from '@/stores/groupStore';
 import { toast } from 'sonner';
@@ -1306,7 +1306,7 @@ export function HomeworkManagementPage() {
                       {selectedSubmission.group.members.map((member) => {
                         const isLeader = member.role === 'LEADER';
                         const laborItem = Array.isArray(selectedSubmission.laborDivision)
-                          ? selectedSubmission.laborDivision.find((d: LaborDivisionItem) => d.memberId === member.studentId)
+                          ? selectedSubmission.laborDivision.find(d => d.memberId === member.studentId)
                           : null;
                         const selfAssessment = selectedHomework?.selfAssessments?.find(sa => sa.studentId === member.studentId);
                         return (
@@ -1345,7 +1345,7 @@ export function HomeworkManagementPage() {
                             </div>
                             {/* 成员贡献信息 */}
                             {(laborItem || selfAssessment) && (
-                              <div className="bg-white/80 dark:bg-slate-800/50 p-2.5 rounded-md mb-1.5 space-y-1.5 border border-gray-100">
+                              <div className="bg-white/80 dark:bg-slate-800/50 p-2.5 rounded-md mb-1.5 space-y-1.5 border border-gray-100 dark:border-slate-700">
                                 {laborItem && (
                                   <div>
                                     <div className="flex items-center gap-1 mb-1">

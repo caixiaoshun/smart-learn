@@ -137,7 +137,7 @@ export function AnalyticsPage() {
               <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center">
                 <p className="text-sm text-red-700 font-medium">待关注学生</p>
                 <p className="text-3xl font-bold text-red-800">{studentClusters.summary.atRiskCount}</p>
-                <p className="text-xs text-red-600">{studentClusters.summary.atRiskPercentage}% · 综合得分 &lt;50</p>
+                <p className="text-xs text-red-600">{studentClusters.summary.atRiskPercentage}% · 综合得分 {'<'}50</p>
               </div>
             </div>
             {/* Cluster ring chart */}

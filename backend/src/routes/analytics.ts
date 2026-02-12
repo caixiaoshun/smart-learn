@@ -4,6 +4,20 @@ import { authenticate, requireTeacher, requireStudent } from '../middleware/auth
 
 const router = Router();
 
+// Clustering composite score weights
+const CLUSTER_SCORE_WEIGHT = 0.5;
+const CLUSTER_SUBMISSION_WEIGHT = 0.3;
+const CLUSTER_ONTIME_WEIGHT = 0.2;
+
+// Score range boundaries for comprehensive stats
+const SCORE_RANGES = [
+  { label: '优秀 (90-100)', min: 90, max: 100, color: '#22c55e' },
+  { label: '良好 (80-89)', min: 80, max: 89, color: '#3b82f6' },
+  { label: '中等 (70-79)', min: 70, max: 79, color: '#f59e0b' },
+  { label: '及格 (60-69)', min: 60, max: 69, color: '#f97316' },
+  { label: '不及格 (<60)', min: 0, max: 59, color: '#ef4444' },
+] as const;
+
 async function ensureClassOwner(classId: string, teacherId: string) {
   const classData = await prisma.class.findUnique({ where: { id: classId } });
   if (!classData) return { ok: false, code: 404, error: '班级不存在' };
@@ -420,7 +434,7 @@ router.get('/class/:classId/student-clusters', authenticate, requireTeacher, asy
       const onTimeRate = submittedCount > 0 ? Math.round((onTimeCount / submittedCount) * 100) : 0;
 
       // Simple clustering based on composite score
-      const composite = avgScoreRate * 0.5 + submissionRate * 0.3 + onTimeRate * 0.2;
+      const composite = avgScoreRate * CLUSTER_SCORE_WEIGHT + submissionRate * CLUSTER_SUBMISSION_WEIGHT + onTimeRate * CLUSTER_ONTIME_WEIGHT;
       let cluster: 'HIGH' | 'MEDIUM' | 'AT_RISK';
       if (composite >= 80) cluster = 'HIGH';
       else if (composite >= 50) cluster = 'MEDIUM';
@@ -549,16 +563,10 @@ router.get('/class/:classId/comprehensive-stats', authenticate, requireTeacher, 
       }
     }
 
-    const scoreRanges = [
-      { label: '优秀 (90-100)', min: 90, max: 100, count: 0, color: '#22c55e' },
-      { label: '良好 (80-89)', min: 80, max: 89, count: 0, color: '#3b82f6' },
-      { label: '中等 (70-79)', min: 70, max: 79, count: 0, color: '#f59e0b' },
-      { label: '及格 (60-69)', min: 60, max: 69, count: 0, color: '#f97316' },
-      { label: '不及格 (<60)', min: 0, max: 59, count: 0, color: '#ef4444' },
-    ];
+    const scoreRangeCounts = SCORE_RANGES.map(r => ({ ...r, count: 0 }));
 
     for (const score of allScores) {
-      const range = scoreRanges.find((r) => score >= r.min && score <= r.max);
+      const range = scoreRangeCounts.find((r) => score >= r.min && score <= r.max);
       if (range) range.count++;
     }
 
@@ -599,7 +607,7 @@ router.get('/class/:classId/comprehensive-stats', authenticate, requireTeacher, 
         passRate,
         excellentRate,
       },
-      scoreDistribution: scoreRanges.map((r) => ({
+      scoreDistribution: scoreRangeCounts.map((r) => ({
         label: r.label,
         count: r.count,
         percentage: totalScored > 0 ? Math.round((r.count / totalScored) * 100) : 0,

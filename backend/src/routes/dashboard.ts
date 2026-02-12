@@ -180,11 +180,13 @@ router.get('/student/modules', authenticate, requireStudent, async (req, res) =>
     const avgPerfScore = allScoresPerf.length > 0
       ? Math.round((allScoresPerf.reduce((s, v) => s + v, 0) / allScoresPerf.length) * 10) / 10
       : 0;
-    const qaAvg = qaRecords.filter(r => r.score != null).length > 0
-      ? qaRecords.filter(r => r.score != null).reduce((s, r) => s + (r.score as number), 0) / qaRecords.filter(r => r.score != null).length
+    const qaScoredRecords = qaRecords.filter(r => r.score != null);
+    const qaAvg = qaScoredRecords.length > 0
+      ? qaScoredRecords.reduce((s, r) => s + (r.score as number), 0) / qaScoredRecords.length
       : 0;
-    const shareAvg = shareRecords.filter(r => r.score != null).length > 0
-      ? shareRecords.filter(r => r.score != null).reduce((s, r) => s + (r.score as number), 0) / shareRecords.filter(r => r.score != null).length
+    const shareScoredRecords = shareRecords.filter(r => r.score != null);
+    const shareAvg = shareScoredRecords.length > 0
+      ? shareScoredRecords.reduce((s, r) => s + (r.score as number), 0) / shareScoredRecords.length
       : 0;
     const compositeScore = Math.round((qaAvg * 0.5 + shareAvg * 0.5) * 10) / 10;
 
